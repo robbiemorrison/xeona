@@ -1,0 +1,6 @@
+*.txt
+*.tgz
+*.org
+*.pdf
+
+notrack/
