@@ -4,3 +4,15 @@
 *.pdf
 
 notrack/
+
+machcountfile
+lastbuild
+xeona.mach
+xeona.make
+
+todo.txt
+todo2.txt
+
+*~
+
+.emacs-backups/
