@@ -1,0 +1,698 @@
+#! /bin/bash
+
+#  file-purpose     : run data tests (as opposed to unit tests)
+#  file-initiator   : Robbie Morrison <robbie@actrix.co.nz>
+#  file-create-date : Tue 12-Aug-2008 20:10 UTC
+#  file-status      : working
+#  file-keywords    : xeona
+
+#  $Revision: 7079 $
+#  $Date: 2011-09-08 13:58:47 +0200 (Thu, 08 Sep 2011) $
+#  $Author: robbie $
+#  $URL: file:///home/robbie/svn-root/xeona/futz/trunk/scripts/xmok $
+
+#  note: XEM means "xeona model"
+#
+#  parameter substitution
+#
+#   :- means use default value if parameter unset or empty
+#   := means assign default value if parameter unset or empty and use that too
+
+#  'parallel' utility (not currently used), also part of the 'moreutils' package
+#
+#    http://en.wikipedia.org/wiki/Parallel_%28software%29
+#    http://www.youtube.com/watch?v=OpaiGYxkSuQ
+
+# ---------------------------------
+#  settings
+# ---------------------------------
+
+XMOK_AGGREG_FILE="xeona-xmoks/xaggreg"  # contains 'AGGREG' the desired aggregate result
+DEFAULT_BINARY="xeona.mach"             # binary name only, command-line options not accepted here
+
+# ---------------------------------
+#  preamble
+# ---------------------------------
+
+XEM="xem"                               # XEM extension
+GUARD="guard"                           # XEM guard tag
+MANDATORY_OPTIONS="--guard"
+
+SDIR="xeona-xmoks"                      # subdirectory for XEM files
+MAINCC="main.cc"                        # name of main file, used to confirm base directory
+
+FILTER="2> /dev/null"
+VALEEC=100
+VALGRIND="valgrind --tool=memcheck --error-exitcode=$VALEEC --leak-check=full --show-reachable=yes"
+
+SCRIPT=$(basename "$0")                 # this script
+
+E_SUCCESS=0
+E_FAILURE=1
+E_USAGE=2
+E_CONTEXT_FAILURE=64                    # errors or 64 or greater provoke a "FATAL" exit
+
+# ---------------------------------
+#  display_help()
+# ---------------------------------
+
+function display_help
+{
+    local str1="else use './$DEFAULT_BINARY'"
+    local str2="space-separated list"
+
+    echo
+    cat <<EOM
+        usage: $SCRIPT <option>                                       test all with appropriate defaults
+               $SCRIPT <option> <models>                              test $str2 with appropriate defaults
+               $SCRIPT <option> <binary> [--binopt [val]] [models]    test using given binary and binopt list
+               $SCRIPT --aggret                          display sought aggregate return and exit
+               $SCRIPT --help                            display this message and exit
+       option:      --                run tests using all defaults
+      (single)      -b  --bucket      redirect 'stderr' to '/dev/null' (the bit bucket)
+                    -0  --exittrip=0  use exit trip {1 2 3 4 5 6} on all files (ignore xem file setting), implies -b
+                    -8  --mode8       use mode 8 for forced horizon hours run (typically one year), also reduces reporting *
+                    -9  --mode9       use mode 9 for forced horizon hours and interval run (typically 1800s), also reduces reporting *
+                    -x  --expunge     remove output files (default is to keep)
+                    -j  --jumpy       add option --jumpy to default list
+                    -r  --release     use highest 'xeona.r0000' binary in current *branch* ($str1)
+                    -G  --gnuplot     add --tout to enable gnuplot
+                    -v  --valgrind    apply valgrind more (a memory error exits $VALEEC)
+                    -y  --dry         print commands but no further action (dry run)
+      purpose: run data tests using "guard" xems in hardcoded subdirectory '$SDIR'
+       filter: any generated filenames which contain the regex "_" are automatically excluded
+     requires: file '$MAINCC' be present in the current directory
+     ordering: all       : process oldest to newest based on last-modified timestamp
+               nominated : in order given, also the '.guard' qualifier may be omitted and '$SDIR/' can be prepended
+  model names: the extension '.$XEM' must be present
+               the '.guard' qualifier may be omitted
+               the path '$SDIR/' can be prepended
+     xoptions: the 'xoptions' are based on information in the 'program.run-script-settings' stanza
+     examples: default run      : $ $SCRIPT --
+               added monitoring : $ $SCRIPT -x xeona.r100 --report 1 --watch b/
+               custom           : $ $SCRIPT -- xeona.make one.xem two.xem
+  bugs/issues: only one script option [-bkrvy] can be used at one time
+               no script-level checks on "--binopt val" correctness
+               valgrind memory leaks are NOT completion reported (although memory errors are)
+   xem fields: the following "run-script-settings" fields are supported
+               script-run-me            : 0 = skip, anything else = run
+               script-option-exittrip   : set --exittrip to given integer
+               script-option-nodata     : set --nodata given non-zero argument
+               script-option-jumpy      : set --jumpy given non-zero argument
+    hardcodes: xem subdirectory         : $SDIR
+               guard file pattern       : $SDIR/*.$GUARD.$XEM
+               default binary           : ./$DEFAULT_BINARY
+               mandatory binary options : $MANDATORY_OPTIONS
+               valgrind call            : $VALGRIND
+        notes: * = depends on how 'xeona' has been configured, the 8760 may be disabled
+EOM
+    echo
+
+return 0
+}
+
+# ---------------------------------
+#  highest_release_binary()
+# ---------------------------------
+
+# for 'find', both work, the second removes the "./"
+# %p  file's name
+# %P  file's name with the name of the command line argument under which it was found removed
+
+function highest_release_binary
+{
+    # CAUTION: note the outer "()" on the 'glob' line
+    local glob
+    local bin
+    glob=($(find -P . -maxdepth 2 -name "xeona.r[0-9][0-9][0-9][0-9]" -type f -printf "%p\n" | sort --reverse))
+    bin=${glob[0]}                      # grab highest release number
+    bin=${bin#./}                       # strip any leading "./"
+    test -n "$bin" && DEFAULT_BINARY="$bin"
+}
+
+# ---------------------------------
+#  screen command-line
+# ---------------------------------
+
+commandline="$*"
+
+filter=""
+option=""
+valgrind=""
+
+case "$1" in
+    --help|--hel|--he|--h|-help|-hel|-he|-h|"-?")
+        display_help
+        exit $E_SUCCESS
+        ;;
+
+    --aggret|-a)
+        source "$XMOK_AGGREG_FILE" ||
+        {
+            echo "$SCRIPT: WARNING: xmok aggregate file not sourced: $XMOK_AGGREG_FILE"
+            exit $E_CONTEXT_FAILURE
+        }
+        echo "$SCRIPT: sought aggregate return: $AGGRET"
+        exit $E_SUCCESS
+        ;;
+
+    --dry|-y)
+        shift
+        mode="dry"
+        output="keep"                   # no files should be generated either
+        ;;
+    --expunge|-x)
+        shift
+        mode="run"
+        output="remove"
+        ;;
+    --jumpy|-j)
+        shift
+        mode="run"
+        option="jumpy"
+        output="keep"
+        ;;
+    --mode8|-8)
+        shift
+        mode="run"
+        option="mode8"
+        output="keep"
+        ;;
+    --mode9|-9)
+        shift
+        mode="run"
+        option="mode9"
+        output="keep"
+        ;;
+    --release|-r)
+        highest_release_binary          # overwrites DEFAULT_BINARY
+        shift
+        mode="run"
+        output="keep"
+        ;;
+    --bucket|-b)
+        shift
+        mode="filter"
+        output="keep"
+        ;;
+    --gnuplot|-G)
+        shift
+        mode="run"
+        option="tout"
+        output="keep"
+        ;;
+    --valgrind|-v)
+        shift
+        mode="valgrind"
+        output="keep"
+        ;;
+    --exittrip=[1-6]|-[1-6])
+        opt="$1"                        # option as above
+        shift
+        mode="filter"
+        output="keep"
+        len=${#opt}                    # length of 'opt'
+        let "len--"
+        overtrip="${opt:$len}"         # obtain the last char
+        echo "$SCRIPT: overtrip: $overtrip"
+        ;;
+    --exittrip0|-0)
+        echo "$SCRIPT: this option requires {1 2 3 4 5 6}"
+        exit $E_USAGE
+        ;;
+    "--")
+        shift
+        mode="run"
+        output="keep"
+        ;;
+    -d)
+        echo "$SCRIPT: unsupported option (you might want -y for dryrun)"
+        exit $E_USAGE
+        ;;
+    "")
+        echo "$SCRIPT: incorrect usage (try --help or perhaps --)"
+        exit $E_USAGE
+        ;;
+    *)
+        echo "$SCRIPT: unsupported option (try --help): $1"
+        exit $E_USAGE
+        ;;
+esac
+
+#  uncomment following two lines during development
+#  echo "$SCRIPT: STRONG WARNING: returning mode to 'dry' for development purposes"
+#  mode="dry"
+
+# ---------------------------------
+#  process command-line arguments
+# ---------------------------------
+
+# note zero-based indexing for strings
+
+BINARY=""
+OPTIONS=""
+OTHER=""
+
+loops=0
+opt="false"
+bin="notfound"
+for arg in "$@"                         # CAUTION: use double quotes to retain command-line quoting
+do
+  let "++loops"
+  if   [ $(basename -- "$arg") != $(basename -- "$arg" ".$XEM") ]     # CAUTION: note the "--" protection
+      then
+      stem=$(basename "$arg" ".$XEM")
+      stem=$(basename "$stem" ".$GUARD")     # strip if required
+      model="$SDIR/$stem.$GUARD.$XEM"        # reassemble
+      MODELS="$MODELS $model"
+  elif [ ${arg:0:2} == "--" ]           # a leading -- indicates an option name
+      then
+      OPTIONS="$OPTIONS $arg"           # concatenate
+      opt="true"
+  elif [ "$opt" == "true" ]             # an option value
+      then
+      test $(expr index "$arg" " ") -ne 0 && arg="\"$arg\"" # contains space, therefore add back quotes
+      OPTIONS="$OPTIONS $arg"           # concatenate
+      opt="false"                       # toggle flag
+  elif [ "$bin" == "notfound" ]
+      then
+      BINARY="$arg"                     # overwrite
+      bin="found"                       # toggle flag
+  else
+      OTHER="$OTHER $arg"
+  fi
+done
+
+case "$option" in
+    jumpy) OPTIONS="$OPTIONS --jumpy"             ;;
+    tout)  OPTIONS="$OPTIONS --tout --report 2"   ;;
+    mode8) OPTIONS="$OPTIONS --mode 8 --report 1" ;;   # report 2 and 3 are considerably slower
+    mode9) OPTIONS="$OPTIONS --mode 9 --report 1" ;;   # report 2 and 3 are considerably slower
+esac
+
+OPTIONS=${OPTIONS#" "}                  # strip any leading space
+MODELS=${MODELS#" "}                    # strip any leading space
+OTHER=${OTHER#" "}                      # strip any leading space
+
+supplied_binary="${BINARY:-(none)}"
+supplied_options="${OPTIONS:-(none)}"
+supplied_models="${MODELS:-(none)}"
+supplied_other="${OTHER:-(none)}"
+
+echo
+echo "$SCRIPT: supplied binary                      : $supplied_binary"
+echo "$SCRIPT: supplied options                     : $supplied_options"
+echo "$SCRIPT: supplied models (.guard optional)    : $supplied_models"
+echo "$SCRIPT: supplied other (ignored)             : $supplied_other"
+echo "$SCRIPT: processing loops                     : $loops"
+
+test -z "$BINARY" && BINARY="$DEFAULT_BINARY"
+OPTIONS="$OPTIONS $MANDATORY_OPTIONS"
+OPTIONS=${OPTIONS#" "}                  # strip any leading space
+
+# ---------------------------------
+#  define separator line
+# ---------------------------------
+
+# create line
+char=":"                                # line character
+len=$(stty size | gawk '{ print $2 }')  # dynamic setting
+let "len = len - 2"
+for i in $(seq $len); do line="$line$char"; done
+
+# colorize line
+case "$TERM" in
+    dumb) line="$line"                                ;;
+    *)    line=$(echo -e "\033[01;35m$line\033[00m")  ;;    # 31=red 35=magenta
+esac
+
+# ---------------------------------
+#  controlled_exit()
+# ---------------------------------
+
+function controlled_exit
+{
+    local exitcode="$1"
+    local message="$2"
+
+    local elapsed="$SECONDS seconds"
+    test $(which hms) && elapsed=$(hms $SECONDS)   # 'hms' is a my (user-local) utility
+
+    if [ $exitcode -ge 64 ]
+        then
+        echo "$SCRIPT: $message"
+        echo "$SCRIPT: FATAL: exiting with status: $exitcode"
+        echo
+    else
+        echo
+        echo "$SCRIPT: command line           : $SCRIPT $commandline"
+        echo "$SCRIPT: elapsed time           : $elapsed"
+        echo "$SCRIPT: run status             : $message"
+        echo
+    fi
+
+    exit $exitcode
+}
+
+# ---------------------------------
+#  confirm context
+# ---------------------------------
+
+fail_count=0                            # failure counter
+
+if [ ! -f "$MAINCC" ]                   # file exists (not)
+    then
+    echo "$SCRIPT: context failure: file not found (as proxy for base directory): $MAINCC "
+    let "fail_count++"
+fi
+
+if [ ! -d "$SDIR" ]                     #  file exists and is a directory (not)
+    then
+    echo "$SCRIPT: context failure: subdirectory not found: $SDIR"
+    let "fail_count++"
+fi
+
+if [ ! -f "$BINARY" ]                   # file exists (not)
+    then
+    echo "$SCRIPT: context failure: nominated xeona binary not found: $BINARY (a model requires the extension .$XEM)"
+    let "fail_count++"
+elif [ ! -x "$BINARY" ]                 # file exists and has execute permission granted (not)
+    then
+    echo "$SCRIPT: context failure: nominated xeona binary not executable: $BINARY"
+    let "fail_count++"
+fi
+
+ls $SDIR/*.$GUARD.$XEM &> /dev/null     # redirection equivalent to "> /dev/null 2>&1"
+ret=$?                                  # 0 = files found, 2 = "No such file or directory"
+if [ $ret -ne 0 ]
+    then
+    echo "$SCRIPT: context failure: no XEM guard files found in subdirectory: $SDIR"
+    let "fail_count++"
+fi
+
+test $fail_count -eq 0 || controlled_exit $E_CONTEXT_FAILURE "errors occurred: $fail_count"
+
+# ---------------------------------
+#  initial report
+# ---------------------------------
+
+echo
+echo "$SCRIPT: mode     : $mode"
+echo "$SCRIPT: binary   : $BINARY"
+echo "$SCRIPT: options  : $OPTIONS"
+
+# ---------------------------------
+#  push_call()
+# ---------------------------------
+
+# used to store call-by-call results
+
+declare -a rets
+declare -a xems
+
+aggret=0
+
+function push_call
+{
+    local ret="$1"
+    local xem="$2"
+    local xop="$3"
+    local size=${#rets[*]}
+    let "++size"
+    rets[$size]="$ret"
+    xems[$size]="$xem"
+    xops[$size]="$xop"
+    let "aggret += ret"
+}
+
+# ---------------------------------
+#  runsetting()
+# ---------------------------------
+
+# based on information in the 'program.run-script-settings' stanza
+
+XOPTIONS=""
+RUNME="no"
+
+function runsetting
+{
+    local file="$1.$GUARD.$XEM"
+
+    XOPTIONS=""
+    RUNME="no"
+
+    test -f "$file" || echo "$SCRIPT: PROBLEM: file not found: $xem" # added protection
+
+    local       run_me=$(gawk 'BEGIN { FS = ">[[:blank:]]*" } /script-run-me/          { print $2 }' "$file")
+    local arg_exittrip=$(gawk 'BEGIN { FS = ">[[:blank:]]*" } /script-option-exittrip/ { print $2 }' "$file")
+    local   arg_nodata=$(gawk 'BEGIN { FS = ">[[:blank:]]*" } /script-option-nodata/   { print $2 }' "$file")
+    local    arg_jumpy=$(gawk 'BEGIN { FS = ">[[:blank:]]*" } /script-option-jumpy/    { print $2 }' "$file")
+
+    test -n "$overtrip" && arg_exittrip="$overtrip"
+
+    local exittrip="--exittrip"
+    local   nodata="--nodata"
+    local    jumpy="--jumpy"
+
+    local option_exittrip=${exittrip//[[:print:]]/' '}           # blank string of equivalent length
+    local   option_nodata=${nodata//[[:print:]]/' '}             # blank string of equivalent length
+    local    option_jumpy=${jumpy//[[:print:]]/' '}              # blank string of equivalent length
+
+    option_exittrip="$option_exittrip  "                         # plus room for trailing argument
+
+    test $arg_exittrip && option_exittrip="$exittrip $arg_exittrip"
+    test   $arg_nodata && test $arg_nodata -ne 0 && option_nodata="$nodata"
+    test    $arg_jumpy && test  $arg_jumpy -ne 0 &&  option_jumpy="$jumpy"
+
+    XOPTIONS="$option_exittrip $option_nodata $option_jumpy"     # concatenate
+    XOPTIONS=$(echo $XOPTIONS)                                   # experimental
+
+    printf "$SCRIPT: runsetting: run-me = %s\n" "$run_me"
+    printf "$SCRIPT: xoptions = %s --file %s\n" "$XOPTIONS" "$file"
+
+    test "$run_me" != "0" && RUNME="yes"     # string comparison
+}
+
+# ---------------------------------
+#  main code
+# ---------------------------------
+
+echo
+
+# finalize list of 'files'
+
+files=""
+noshows=""
+
+if [ -n "$MODELS" ]                     # use given list
+    then
+    for file in $MODELS
+      do
+      if [ -f "$file" ]
+          then
+          files="$files $file"
+      else
+          noshow="$SCRIPT: input file not found: $file"
+          printf -v noshows "%s\n%s" "$noshows" "$noshow"  # "leading" newline is correct
+      fi
+    done
+    files=${files#" "}                  # strip any leading space
+else                                    # generate list
+    files=$(ls -rt $SDIR/*.$GUARD.$XEM) # CAUTION: no double quotes
+
+    ## can exclude any generated filenames containing the regex "_" here
+    ## files=$(echo "$files" | grep --invert-match "_")
+fi
+
+case "$mode" in
+    dry)
+        echo "$files"
+        echo
+        ;;
+esac
+
+# process list of 'files'
+
+for xem in $files
+do
+  xem=${xem%.$GUARD.$XEM}               # strip trailing ".guard.xem"
+
+  runsetting "$xem"                     # uses 'program.run-script-settings' stanza information
+  case "$RUNME" in
+      no)
+          echo
+          echo "$line"
+          echo
+          continue
+          ;;
+  esac
+
+  LOPTIONS=""
+  test -n "$XOPTIONS" && LOPTIONS="$OPTIONS $XOPTIONS"
+
+  case "$mode" in
+      run)
+          call="./$BINARY $LOPTIONS --file $xem"
+          echo "$SCRIPT: call = $call"
+          eval "$call"
+          ret=$?
+          test $ret -eq 11 && echo
+          echo "$line"
+          echo
+          ;;
+      valgrind)
+          valgrind="$VALGRIND"
+          call="$VALGRIND ./$BINARY $LOPTIONS --file $xem"
+          echo "$SCRIPT: call = $call"
+          echo
+          eval "$call"
+          ret=$?
+          echo
+          echo "$line"
+          echo
+          ;;
+      filter)
+          filter="$FILTER"
+          call="./$BINARY $LOPTIONS --file $xem $filter"
+          echo "$SCRIPT: call = $call"
+          eval "$call"
+          ret=$?
+          echo "$line"
+          echo
+          ;;
+      dry)
+          echo "$SCRIPT: dry call : ./$BINARY $LOPTIONS --file $xem"
+          ret=0
+          ;;
+      *)                                # should not be here
+          echo "$SCRIPT: coding error: call loop"
+          ;;
+  esac
+  push_call "$ret" "$xem" "${XOPTIONS#--}"   # may need to modify this last call
+done
+
+# ---------------------------------
+#  report aggregate results
+# ---------------------------------
+
+test "$mode" == "dry" && echo
+
+echo "$SCRIPT: final reporting"
+echo
+
+test "$mode" != "dry" &&
+{
+    echo "$SCRIPT: supplied binary                      : $supplied_binary"
+    echo "$SCRIPT: supplied options                     : $supplied_options"
+    echo "$SCRIPT: supplied models (.guard optional)    : $supplied_models"
+    echo "$SCRIPT: supplied other (ignored)             : $supplied_other"
+    echo "$SCRIPT: processing loops                     : $loops"
+    echo
+}
+
+size=${#rets[*]}                        # number of XEM files processed
+
+test $size -ge 1 &&
+{
+  # echo "$SCRIPT: mode     : $mode"
+    echo "$SCRIPT: binary   : $BINARY"
+    echo "$SCRIPT: options  : $OPTIONS"
+    echo "$SCRIPT: filter   : ${filter:-(not set)}"
+    echo "$SCRIPT: valgrind : ${valgrind:-(not set)}"
+    echo
+}
+
+host=$(hostname --short)
+case "$host" in
+    hinau) WRAP=83  ;;                  # used to truncate 'exit_describe'
+    sojus) WRAP=59  ;;
+    *)     WRAP=59  ;;
+esac
+
+TAB=26                                  # alignment for XEM filenames (was 30)
+printf "$SCRIPT: subdirectory : %s\n" "$SDIR/"
+for i in $(seq $size)
+  do
+  # process xeona exit status
+  exit_status=${rets[$i]}
+  exit_describe=$( ./$BINARY --output $exit_status 2>/dev/null )
+  test $exit_status -eq 0 && exit_describe="success"   # to simplify the message
+  test -z "$exit_describe" && exit_describe="(exit status $exit_status problem)"
+  exit_describe="${exit_describe:0:90}" # truncate if necessary (a length check may be necessary)
+  # output
+  file="${xems[$i]}"
+  file="${file#$SDIR/}"
+  exitsay="${exit_describe:0:$WRAP}"    # to prevent wrapping
+  printf "$SCRIPT:   call %02d    %-*s   %12s  %3d = %s\n"  "$i" "$TAB" "$file" "${xops[$i]}" "${rets[$i]}" "$exitsay"
+done
+
+if [ $size -gt 1 ]
+then
+    echo
+#      let "tab = TAB + 19 + 30"           # somewhat adaptive
+#      printf "%-*s  %3d\n" $tab "$SCRIPT: aggregated returns :" $aggret
+    echo "$SCRIPT: aggregated returns     : $aggret"
+fi
+
+# ---------------------------------
+#  explain noshows
+# ---------------------------------
+
+test -n "$noshows" && echo "$noshows"
+
+# ---------------------------------
+#  removed generated files
+# ---------------------------------
+
+case "$output" in
+    remove)
+        echo
+        count_output=0
+        count_backup=0
+        for xem in $files
+          do
+          xem=${xem%.$GUARD.$XEM}       # strip trailing ".guard.xem"
+          test -f "$xem.$XEM"  && rm --force "$xem.$XEM"  && let "++count_output"
+          test -f "$xem.$XEM~" && rm --force "$xem.$XEM~" && let "++count_backup"
+        done
+        echo "$SCRIPT: backup files removed   : $count_backup"
+        echo "$SCRIPT: output files removed   : $count_output"
+        ;;
+    keep)
+        echo
+        count_backup=0
+        for xem in $files
+          do
+          xem=${xem%.$GUARD.$XEM}       # strip trailing ".guard.xem"
+          test -f "$xem.$XEM~" && rm --force "$xem.$XEM~" && let "++count_backup"
+        done
+        echo "$SCRIPT: backup files removed   : $count_backup"
+        echo "$SCRIPT: output files kept"
+        ;;
+    *)                                  # should not be here
+        echo "$SCRIPT: coding error: remove loop"
+        ;;
+esac
+
+# ---------------------------------
+#  process aggregate return
+# ---------------------------------
+
+AGGRET=-1                               # nonsensical and clearly incorrect default value
+
+source "$XMOK_AGGREG_FILE" || echo "$SCRIPT: WARNING: xmok aggregate file not sourced: $XMOK_AGGREG_FILE"
+
+case $aggret in
+    $AGGRET) controlled_exit $E_SUCCESS "successful completion"               ;;
+    *)       controlled_exit $E_FAILURE "expected aggregate $AGGRET not met"  ;;
+esac
+
+# ---------------------------------
+#  housekeeping
+# ---------------------------------
+
+exit 255                                # should not be here
+
+#  $Id: xmok 7079 2011-09-08 11:58:47Z robbie $
+#  end of file
+

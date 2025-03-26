@@ -1,0 +1,25 @@
+
+# role   = transmission
+# study  = trial-008
+# scens  = +a
+# cut    = :
+# lines  = T
+# tall   = T
+# ymax   = 0
+# zero   = T
+
+  entity.teas-hv-transmission-a01.directions                "HV transmission : a01 : direction"
+# entity.teas-hv-transmission-a01.injections                "HV transmission : a01 : injection"
+  entity.teas-hv-transmission-a01.exits                     "HV transmission : a01 : exit"
+  entity.teas-hv-transmission-a01.relative-dutys            "HV transmission : a01 : relative duty"
+  entity.teas-hv-transmission-a01.relative-losss            "HV transmission : a01 : relative loss"
+
+##  emacs text editor settings
+##  local variables:
+##    mode: text
+##    make-backup-files: nil
+##    truncate-lines: t
+##    comment-start: "#"
+##    tab-stop-list: (02 12 60)
+##  end:
+

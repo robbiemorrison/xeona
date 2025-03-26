@@ -1,0 +1,579 @@
+
+entity.node-2-xit-elec-a01
+
+      grid exit supplying demand bidder
+
+    class                                         > Node2Xit:Elec
+
+      grid node with exit and support for two grid assets
+
+      my normal socket label is 'sock-1' and my bidirectional
+      socket label is 'grid-1'
+
+    builtin-remark s                              <
+
+    socket-1 l                                    > "node-2-inj-elec-a02.grid-1"
+
+      socket-1 is my associated bidirectional grid asset
+
+    node-commodity l                              > "cm-electricity-01"
+
+      node-commodity defines the underlying commodity
+
+    nodal-prices [$/J] F                          < 0.0 ..
+
+      to convert to the more usual [$/MWh], multiply the
+      given nodal-prices by 278
+
+    header: b/node02.h
+
+entity.node-2-inj-elec-a02
+
+      grid injection from CCGT plant
+
+    class                                         > Node2Inj:Elec
+
+      grid node with injection and support for two grid assets
+
+      my sole bidirectional socket label is 'grid-1'
+
+    builtin-remark s                              <
+
+    socket-1 l                                    > "junc-demand-2-split-elec-a01.sock-1"
+    socket-2 l                                    > "teas-hv-transmission-a02.elec-1"
+
+      socket-1 is my normal supplier (injector), socket-2 is
+      my associated bidirectional grid asset
+
+    node-commodity l                              > "cm-electricity-01"
+
+      node-commodity defines the underlying commodity
+
+    nodal-prices [$/J] F                          < 0.0 ..
+
+      to convert to the more usual [$/MWh], multiply the
+      given nodal-prices by 278
+
+    header: b/node02.h
+
+entity.node-2-xit-elec-a03
+
+      grid exit supplying MV network gateway
+
+    class                                         > Node2Xit:Elec
+
+      grid node with exit and support for two grid assets
+
+      my normal socket label is 'sock-1' and my bidirectional
+      socket label is 'grid-1'
+
+    builtin-remark s                              <
+
+    socket-1 l                                    > "teas-hv-transmission-a03.elec-1"
+
+      socket-1 is my associated bidirectional grid asset
+
+    node-commodity l                              > "cm-electricity-01"
+
+      node-commodity defines the underlying commodity
+
+    nodal-prices [$/J] F                          < 0.0 ..
+
+      to convert to the more usual [$/MWh], multiply the
+      given nodal-prices by 278
+
+    header: b/node02.h
+
+entity.node-2-inj-elec-a04
+
+      grid injection from windfarm
+
+    class                                         > Node2Inj:Elec
+
+      grid node with injection and support for two grid assets
+
+      my sole bidirectional socket label is 'grid-1'
+
+    builtin-remark s                              <
+
+    socket-1 l                                    > "teas-windfarm-a09.elec-1"
+    socket-2 l                                    > "teas-hv-transmission-a04.elec-1"
+
+      socket-1 is my normal supplier (injector), socket-2 is
+      my associated bidirectional grid asset
+
+    node-commodity l                              > "cm-electricity-01"
+
+      node-commodity defines the underlying commodity
+
+    nodal-prices [$/J] F                          < 0.0 ..
+
+      to convert to the more usual [$/MWh], multiply the
+      given nodal-prices by 278
+
+    header: b/node02.h
+
+entity.node-3-nla-elec-a05
+
+      S point of network diamond
+
+    class                                         > Node3NulA:Elec
+
+      type A grid node to connect three grid assets, two of
+      which are cables (not sockets)
+
+      my sole bidirectional socket label is 'grid-1'
+
+    builtin-remark s                              <
+
+    socket-1 l                                    > "teas-hv-transmission-a01.elec-1"
+    socket-2 l                                    > "teas-hv-transmission-a05.elec-1"
+
+      socket-1 and socket-2 are my associated bidirectional
+      grid assets
+
+    node-commodity l                              > "cm-electricity-01"
+
+      node-commodity defines the underlying commodity
+
+    nodal-prices [$/J] F                          < 0.0 ..
+
+      to convert to the more usual [$/MWh], multiply the
+      given nodal-prices by 278
+
+    header: b/node03.h
+
+entity.node-2-inj-elec-a06
+
+      grid injection from hydro scheme
+
+    class                                         > Node2Inj:Elec
+
+      grid node with injection and support for two grid assets
+
+      my sole bidirectional socket label is 'grid-1'
+
+    builtin-remark s                              <
+
+    socket-1 l                                    > "teas-hydro-scheme-a10.elec-1"
+    socket-2 l                                    > "teas-hv-transmission-a06.elec-1"
+
+      socket-1 is my normal supplier (injector), socket-2 is
+      my associated bidirectional grid asset
+
+    node-commodity l                              > "cm-electricity-01"
+
+      node-commodity defines the underlying commodity
+
+    nodal-prices [$/J] F                          < 0.0 ..
+
+      to convert to the more usual [$/MWh], multiply the
+      given nodal-prices by 278
+
+    header: b/node02.h
+
+entity.node-1-xib-elec-a07
+
+      grid exit supplying aluminium smelter gateway
+
+    class                                         > Node1XitB:Elec
+
+      type B grid spur line node with exit which also
+      takes an incoming grid asset
+
+      my sole bidirectional socket label is 'grid-1' and my
+      sole normal socket label is 'sock-1'
+
+    builtin-remark s                              <
+
+    node-commodity l                              > "cm-electricity-01"
+
+      node-commodity defines the underlying commodity
+
+    nodal-prices [$/J] F                          < 0.0 ..
+
+      to convert to the more usual [$/MWh], multiply the
+      given nodal-prices by 278
+
+    header: b/node01.h
+
+ ---------------------------------------- transmission lines
+
+entity.teas-hv-transmission-a01
+
+      SW diamond
+
+    class                                         > TeasDcTransmission
+
+      HV transmission line entity, based on DC power flow,
+      and suitable for use under nodal pricing
+
+      my socket label is 'elec-1'
+
+    builtin-remark s                              <
+
+    socket-1 l                                    > "node-2-xit-elec-a01.grid-1"
+
+      socket-1 is my node entity
+
+    grid-commodity l                              > "cm-electricity-01"
+
+      grid-commodity defines the underlying commodity
+
+    inject-capacity [W] f                         > 400.0e+06
+    ohms-per-metre [ohm/m] f                      > 30.0e-06
+    length [m] f                                  > 500.0e+03
+    discretization-steps [-] i                    > 4
+
+      the discretization-steps are the number of steps used
+      to approximate quadratic transmission losses
+
+    directions B                                  < 1 ..
+    injections [W] F                              < 0.0 ..
+    exits [W] F                                   < 0.0 ..
+    relative-dutys [-] F                          < 0.0 ..
+    relative-losss [-] F                          < 0.0 ..
+
+      directions entry 1 indicates positive flow from my
+      socket to my cable
+
+    nameplate-capacity [W] f                      > 400.0e+06
+    duty-specific-cost-financial [$/J] f          > 0.0
+    size-specific-cost-financial [$/W/s] f        > 8.0e-12
+    standing-cost-financial [$/s] f               > 0.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    annual-discount-rate-decimal [-] f            > 0.08
+    economic-life [y] i                           > 30
+    capex-initial [$] f                           > 1.6e+09
+    capex-terminal [$] f                          > 0.4e+09
+    current-age [y] i                             > 10
+
+      a negative 'capex-terminal' indicates salvage revenue
+      as opposed to decommissioning cost
+
+    embedded-costs-financial [$] F                < 0.0 ..
+
+      the 'embedded-costs-financial' are calculated using the
+      DCF annuity method over the economic life of the entity
+      in question
+
+    header: b/teas01.h
+
+entity.teas-hv-transmission-a02
+
+      NW diamond
+
+    class                                         > TeasDcTransmission
+
+      HV transmission line entity, based on DC power flow,
+      and suitable for use under nodal pricing
+
+      my socket label is 'elec-1'
+
+    builtin-remark s                              <
+
+    socket-1 l                                    > "node-2-xit-elec-a03.grid-1"
+
+      socket-1 is my node entity
+
+    grid-commodity l                              > "cm-electricity-01"
+
+      grid-commodity defines the underlying commodity
+
+    inject-capacity [W] f                         > 400.0e+06
+    ohms-per-metre [ohm/m] f                      > 30.0e-06
+    length [m] f                                  > 500.0e+03
+    discretization-steps [-] i                    > 4
+
+      the discretization-steps are the number of steps used
+      to approximate quadratic transmission losses
+
+    directions B                                  < 1 ..
+    injections [W] F                              < 0.0 ..
+    exits [W] F                                   < 0.0 ..
+    relative-dutys [-] F                          < 0.0 ..
+    relative-losss [-] F                          < 0.0 ..
+
+      directions entry 1 indicates positive flow from my
+      socket to my cable
+
+    nameplate-capacity [W] f                      > 400.0e+06
+    duty-specific-cost-financial [$/J] f          > 0.0
+    size-specific-cost-financial [$/W/s] f        > 8.0e-12
+    standing-cost-financial [$/s] f               > 0.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    annual-discount-rate-decimal [-] f            > 0.08
+    economic-life [y] i                           > 30
+    capex-initial [$] f                           > 1.6e+09
+    capex-terminal [$] f                          > 0.4e+09
+    current-age [y] i                             > 10
+
+      a negative 'capex-terminal' indicates salvage revenue
+      as opposed to decommissioning cost
+
+    embedded-costs-financial [$] F                < 0.0 ..
+
+      the 'embedded-costs-financial' are calculated using the
+      DCF annuity method over the economic life of the entity
+      in question
+
+    header: b/teas01.h
+
+entity.teas-hv-transmission-a03
+
+      NE diamond
+
+    class                                         > TeasDcTransmission
+
+      HV transmission line entity, based on DC power flow,
+      and suitable for use under nodal pricing
+
+      my socket label is 'elec-1'
+
+    builtin-remark s                              <
+
+    socket-1 l                                    > "node-2-inj-elec-a04.grid-1"
+
+      socket-1 is my node entity
+
+    grid-commodity l                              > "cm-electricity-01"
+
+      grid-commodity defines the underlying commodity
+
+    inject-capacity [W] f                         > 400.0e+06
+    ohms-per-metre [ohm/m] f                      > 30.0e-06
+    length [m] f                                  > 500.0e+03
+    discretization-steps [-] i                    > 4
+
+      the discretization-steps are the number of steps used
+      to approximate quadratic transmission losses
+
+    directions B                                  < 1 ..
+    injections [W] F                              < 0.0 ..
+    exits [W] F                                   < 0.0 ..
+    relative-dutys [-] F                          < 0.0 ..
+    relative-losss [-] F                          < 0.0 ..
+
+      directions entry 1 indicates positive flow from my
+      socket to my cable
+
+    nameplate-capacity [W] f                      > 400.0e+06
+    duty-specific-cost-financial [$/J] f          > 0.0
+    size-specific-cost-financial [$/W/s] f        > 8.0e-12
+    standing-cost-financial [$/s] f               > 0.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    annual-discount-rate-decimal [-] f            > 0.08
+    economic-life [y] i                           > 30
+    capex-initial [$] f                           > 1.6e+09
+    capex-terminal [$] f                          > 0.4e+09
+    current-age [y] i                             > 10
+
+      a negative 'capex-terminal' indicates salvage revenue
+      as opposed to decommissioning cost
+
+    embedded-costs-financial [$] F                < 0.0 ..
+
+      the 'embedded-costs-financial' are calculated using the
+      DCF annuity method over the economic life of the entity
+      in question
+
+    header: b/teas01.h
+
+entity.teas-hv-transmission-a04
+
+      SE diamond
+
+    class                                         > TeasDcTransmission
+
+      HV transmission line entity, based on DC power flow,
+      and suitable for use under nodal pricing
+
+      my socket label is 'elec-1'
+
+    builtin-remark s                              <
+
+    socket-1 l                                    > "node-3-nla-elec-a05.grid-1"
+
+      socket-1 is my node entity
+
+    grid-commodity l                              > "cm-electricity-01"
+
+      grid-commodity defines the underlying commodity
+
+    inject-capacity [W] f                         > 400.0e+06
+    ohms-per-metre [ohm/m] f                      > 30.0e-06
+    length [m] f                                  > 500.0e+03
+    discretization-steps [-] i                    > 4
+
+      the discretization-steps are the number of steps used
+      to approximate quadratic transmission losses
+
+    directions B                                  < 1 ..
+    injections [W] F                              < 0.0 ..
+    exits [W] F                                   < 0.0 ..
+    relative-dutys [-] F                          < 0.0 ..
+    relative-losss [-] F                          < 0.0 ..
+
+      directions entry 1 indicates positive flow from my
+      socket to my cable
+
+    nameplate-capacity [W] f                      > 400.0e+06
+    duty-specific-cost-financial [$/J] f          > 0.0
+    size-specific-cost-financial [$/W/s] f        > 8.0e-12
+    standing-cost-financial [$/s] f               > 0.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    annual-discount-rate-decimal [-] f            > 0.08
+    economic-life [y] i                           > 30
+    capex-initial [$] f                           > 1.6e+09
+    capex-terminal [$] f                          > 0.4e+09
+    current-age [y] i                             > 10
+
+      a negative 'capex-terminal' indicates salvage revenue
+      as opposed to decommissioning cost
+
+    embedded-costs-financial [$] F                < 0.0 ..
+
+      the 'embedded-costs-financial' are calculated using the
+      DCF annuity method over the economic life of the entity
+      in question
+
+    header: b/teas01.h
+
+entity.teas-hv-transmission-a05
+
+      spur line to hydro scheme
+
+    class                                         > TeasDcTransmission
+
+      HV transmission line entity, based on DC power flow,
+      and suitable for use under nodal pricing
+
+      my socket label is 'elec-1'
+
+    builtin-remark s                              <
+
+    socket-1 l                                    > "node-2-inj-elec-a06.grid-1"
+
+      socket-1 is my node entity
+
+    grid-commodity l                              > "cm-electricity-01"
+
+      grid-commodity defines the underlying commodity
+
+    inject-capacity [W] f                         > 550.0e+06
+    ohms-per-metre [ohm/m] f                      > 30.0e-06
+    length [m] f                                  > 500.0e+03
+    discretization-steps [-] i                    > 4
+
+      the discretization-steps are the number of steps used
+      to approximate quadratic transmission losses
+
+    directions B                                  < 1 ..
+    injections [W] F                              < 0.0 ..
+    exits [W] F                                   < 0.0 ..
+    relative-dutys [-] F                          < 0.0 ..
+    relative-losss [-] F                          < 0.0 ..
+
+      directions entry 1 indicates positive flow from my
+      socket to my cable
+
+    nameplate-capacity [W] f                      > 400.0e+06
+    duty-specific-cost-financial [$/J] f          > 0.0
+    size-specific-cost-financial [$/W/s] f        > 8.0e-12
+    standing-cost-financial [$/s] f               > 0.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    annual-discount-rate-decimal [-] f            > 0.08
+    economic-life [y] i                           > 30
+    capex-initial [$] f                           > 1.6e+09
+    capex-terminal [$] f                          > 0.4e+09
+    current-age [y] i                             > 10
+
+      a negative 'capex-terminal' indicates salvage revenue
+      as opposed to decommissioning cost
+
+    embedded-costs-financial [$] F                < 0.0 ..
+
+      the 'embedded-costs-financial' are calculated using the
+      DCF annuity method over the economic life of the entity
+      in question
+
+    header: b/teas01.h
+
+entity.teas-hv-transmission-a06
+
+      spur line to aluminium smelter
+
+    class                                         > TeasDcTransmission
+
+      HV transmission line entity, based on DC power flow,
+      and suitable for use under nodal pricing
+
+      my socket label is 'elec-1'
+
+    builtin-remark s                              <
+
+    socket-1 l                                    > "node-1-xib-elec-a07.grid-1"
+
+      socket-1 is my node entity
+
+    grid-commodity l                              > "cm-electricity-01"
+
+      grid-commodity defines the underlying commodity
+
+    inject-capacity [W] f                         > 700.0e+06
+    ohms-per-metre [ohm/m] f                      > 30.0e-06
+    length [m] f                                  > 500.0e+03
+    discretization-steps [-] i                    > 4
+
+      the discretization-steps are the number of steps used
+      to approximate quadratic transmission losses
+
+    directions B                                  < 1 ..
+    injections [W] F                              < 0.0 ..
+    exits [W] F                                   < 0.0 ..
+    relative-dutys [-] F                          < 0.0 ..
+    relative-losss [-] F                          < 0.0 ..
+
+      directions entry 1 indicates positive flow from my
+      socket to my cable
+
+    nameplate-capacity [W] f                      > 400.0e+06
+    duty-specific-cost-financial [$/J] f          > 0.0
+    size-specific-cost-financial [$/W/s] f        > 8.0e-12
+    standing-cost-financial [$/s] f               > 0.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    annual-discount-rate-decimal [-] f            > 0.08
+    economic-life [y] i                           > 30
+    capex-initial [$] f                           > 1.6e+09
+    capex-terminal [$] f                          > 0.4e+09
+    current-age [y] i                             > 10
+
+      a negative 'capex-terminal' indicates salvage revenue
+      as opposed to decommissioning cost
+
+    embedded-costs-financial [$] F                < 0.0 ..
+
+      the 'embedded-costs-financial' are calculated using the
+      DCF annuity method over the economic life of the entity
+      in question
+
+    header: b/teas01.h
+

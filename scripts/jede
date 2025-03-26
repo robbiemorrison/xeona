@@ -1,0 +1,304 @@
+#! /bin/bash
+
+#  file-purpose     : run unit tests and main file test in active directories
+#  file-initiator   : Robbie Morrison <robbie@actrix.co.nz>
+#  file-create-date : Tue 26-Jun-2007 11:16 UTC
+#  file-status      : working
+#  file-keywords    : xeona
+
+#  $Revision: 4685 $
+#  $Date: 2010-07-08 18:57:15 +0200 (Thu, 08 Jul 2010) $
+#  $Author: robbie $
+#  $URL: file:///home/robbie/svn-root/xeona/futz/trunk/scripts/jede $
+
+#  Known bugs
+#
+#      this script is probably adversely sensitive to
+#      whitespace in subdirectory names
+
+# -------------------------
+#  preamble
+# -------------------------
+
+#DEBUG_REPORTING="true"                 # to unset, use anything else but 'true'
+DEBUG_REPORTING="false"                 # to unset, use anything else but 'true'
+
+DIRLIST="source factory actors plant data xml"
+DIRLIST="source factory actors plant data"        # remove xml (not used, requires library)
+
+DIRLIST="siglp   $DIRLIST"              # add in siglp (the one with GlpkViz)
+DIRLIST="connect $DIRLIST"              # add in connect (for the 'conex' unit)
+DIRLIST="xeona   $DIRLIST"              # real
+
+host=$(hostname --short)
+case "$host" in
+    hinau) BASEDIR="$HOME/$SYNK/xeona/svn2/futz/trunk"  ;;  # svn version base for the purposes of this script
+    sojus) BASEDIR="$HOME/$SYNK/xeona/svn/futz"         ;;  # svn version base for the purposes of this script
+    *)     BASEDIR="$HOME/$SYNK/xeona/svn/futz"         ;;  # svn version base for the purposes of this script
+esac
+
+PRUF="pruf"                             # pruf script name
+MACH="mach"                             # mach script name
+
+SCRIPT=$(basename $0)
+
+E_SUCCESS=0
+E_USAGE=2
+E_NOT_BASEDIR=101
+
+# ---------------------------------
+#  display_help()
+# ---------------------------------
+
+function display_help
+{
+echo
+echo "       usage: $SCRIPT [--ask -A]          process active dirs with: $PRUF"
+echo "              $SCRIPT [--ask -A] --       process active dirs with: $PRUF --"
+echo "              $SCRIPT [--ask -A] -<opts>  process active dirs with: $PRUF -<opts>"
+echo "              $SCRIPT  --clean  -c        clean active dirs with  : $MACH -c"
+echo "              $SCRIPT  --xclean -C        clean extended dirs with: $MACH -c"
+echo "              $SCRIPT  --help             this message"
+echo "      option: ask: seek user response after each failed mach call"
+echo "     purpose: run unit tests and main file test in active directories"
+echo "      alerts: two-tone"
+echo "        base: $BASEDIR"
+echo "     pattern: $DIRLIST"
+echo "    examples: quick check                  : \$ $SCRIPT --"
+echo "              more thorough and interative : \$ $SCRIPT -A"
+echo "              everything                   : \$ $SCRIPT -A -tfmpva"
+echo "              clean up with confirmation   : \$ $SCRIPT -c"
+echo
+return 0
+}
+
+# ---------------------------------
+#  report()
+# ---------------------------------
+
+function report
+{
+    local tab=-30                       # the "-" means left justify
+    case "$#" in                        # argument count
+        0) printf "\n"                                   ;;
+        1) printf "$SCRIPT: %s\n" "$1"                   ;;
+        2)  printf "$SCRIPT: %${tab}s : %s\n" "$1" "$2"  ;;
+        *)
+            report "CODING ERROR" "more than two arguments given for report()"
+            exit $E_FAIL
+            ;;
+    esac
+    return 0
+}
+
+# ---------------------------------
+#  deport()
+# ---------------------------------
+
+# debug reporting
+
+function deport { test "$DEBUG_REPORTING" == "true" && echo "$SCRIPT: debug: $1"; }
+
+# ---------------------------------
+#  active_dirs()
+# ---------------------------------
+
+# set 'targets' to the active directory list, based on
+# the hardcoded 'DIRLIST' and the highest 'sort'
+# utility sort order -- CAUTION: the locale can affect
+# sort order and this code is based on the C locale
+# (set LC_ALL=C or perhaps LANG=C if not so)
+
+function active_dirs
+{
+    # the 'find' utility is used because 'ls' cannot
+    # readily distinguish between directories and files
+
+    targets=""                          # reset actual directories list
+
+    cd "$BASEDIR"                       # CAUTION: necessary to start from base dir
+    declare -a all                      # declare as array (optional) to hold targets
+    for dir in $DIRLIST                 # CAUTION: omit soft-quotes for 'DIRLIST'
+      do
+      all=""                            # find: format %P has command-line path removed
+      all=($(find . -maxdepth 1 -name "${dir}?" -type d -printf '%P\n' | sort --reverse))
+
+      target=${all[0]}                  # grab first element of duly sorted list
+      targets="$targets $target"        # concatenate
+
+      deport "active_dirs(): directory string : ${dir}?"
+      deport "active_dirs(): size of all      : ${#all[*]}"
+      deport "active_dirs(): target           : $target"
+    done
+    targets=$(echo $targets)            # strip newlines and surplus white-space
+
+    deport "active_dirs(): targets          : $targets"
+    test -z "$targets" && return 1
+    return 0
+}
+
+# ---------------------------------
+#  extended_dirs()
+# ---------------------------------
+
+# set 'targets' to the extended directory list,
+# ignoring only those subdirectories in the hardcoded
+# case list (below)
+
+function extended_dirs()
+{
+    targets=""                          # reset actual directories list
+
+    cd "$BASEDIR"                       # CAUTION: necessary to start from base dir
+    local names=$(ls -d *)              # list normal but not dot files and directories
+    for name in $names                  # CAUTION: omit soft-quotes for 'names'
+      do
+      if [ -d "$name" ]                 # filter for directories
+          then
+          deport "extended_dirs(): filetered name : $name"
+          case "$name" in               # exclude nominated subdirectories
+              emacs-backups|readme_files|scripts)
+                  deport "extended_dirs(): skipping       : $name"
+                  ;;
+              *)
+                  targets="$targets $name"   # concatinate
+                  ;;
+          esac
+      fi
+    done
+    targets=$(echo $targets)            # strip newlines and surplus white-space
+
+    deport "extended_dirs(): targets        : $targets"
+    test -z "$targets" && return 1
+    return 0
+}
+
+# ---------------------------------
+#  screen command-line
+# ---------------------------------
+
+ASK=""
+
+case "$1" in
+    --ask|-A)
+        ASK="--ask"
+        shift
+        ;;
+esac
+
+case "$1" in
+    --help|--hel|--he|--h|-help|-hel|-he|-h|"-?")
+        display_help
+        $PRUF --help                    # additional help messages
+        exit $E_SUCCESS
+        ;;
+    -)                                  # - is not a valid option
+        echo "$SCRIPT: incorrect usage, try --help"
+        exit $E_USAGE
+        ;;
+    --)                                 # -- is a valid option
+        ARGS="--"                       # perhaps -a (alert) is useful in this context
+        type="process"                  # run type
+        active_dirs                     # function call
+        ;;
+    --clean|-c)                         # intercept -c (clean only active directories)
+        ARGS="-c"
+        type="clean"
+        active_dirs
+        ;;
+    --xclean|-C)                        # intercept -C (clean only extended directories)
+        ARGS="-c"
+        type="clean"
+        extended_dirs                   # extended directories
+        ;;
+    -[a-z]*|-[A-Z]*)                    # -* is a valid option
+        ARGS="$*"                       # grab the entire argument string
+        type="process"
+        active_dirs
+        ;;
+    "")                                 # use pruf defaults if nothing given
+        type="process"
+        active_dirs
+        ;;
+    *)                                  # everything else
+        echo "$SCRIPT: incorrect usage, try --help"
+        exit $E_USAGE
+        ;;
+esac
+
+test -n "$ASK" && ARGS="$ASK $ARGS"     # concatinate as required
+
+# ---------------------------------
+#  active code
+# ---------------------------------
+
+echo
+
+rets=0                                  # sum of returns
+replist=""                              # for final report
+
+for target in $targets
+  do
+  cd "$BASEDIR"                         # useful for warnings in two parts
+  cd "$target"
+
+  case "$type" in
+      clean)
+          report "cleaning directory" "$(pwd -P)"
+          $PRUF $ARGS                   # was $MACH
+          ;;
+      process)
+          report "entering directory" "$target"
+          report "$PRUF call" "$PRUF $ARGS"
+          $PRUF $ARGS
+          ret=$?
+          let "rets += $ret"
+
+          printf -v repline "  %s    %-15s %3d" "$BASEDIR/" "$target" "$ret"
+          repline=$(echo "$repline" | sed 's/ *$//')  # CAUTION: soft-quote '$repline'
+          printf -v replist "%s%s\n" "$replist" "$repline"
+          ;;
+  esac
+done
+
+# ---------------------------------
+#  summary report
+# ---------------------------------
+
+case "$type" in
+    clean)
+        report "elapsed time" "$SECONDS seconds"
+        ;;
+    process)
+        report "elapsed time" "$SECONDS seconds"
+        report "end of run reporting"
+        echo
+        echo "$replist"
+
+        case "$rets" in
+            0)
+                echo "$SCRIPT: overall               : zero overall return status"
+                beep -D 150 -f 1100 -n -D 150 -f 1180
+
+                ;;
+            *)
+                tag=$(echo -e "\033[01;35moverall\033[00m")
+                echo "$SCRIPT: $tag               : nonzero overall return status: $rets"
+                beep -D 150 -f 1100 -n -D 150 -f 1180
+                beep -D 150 -f 1100 -n -D 150 -f 1180
+                ;;
+        esac
+        ;;
+esac
+
+echo
+
+# -------------------------
+#  housekeeping
+# -------------------------
+
+exit $rets
+
+#  $Id: jede 4685 2010-07-08 16:57:15Z robbie $
+#  end of file
+

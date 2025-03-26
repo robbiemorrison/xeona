@@ -1,0 +1,249 @@
+
+#  file-purpose     : simple wrapper for 'mach'
+#  file-initiator   : Robbie Morrison <robbie@actrix.co.nz>
+#  file-create-date : Fri 11-Feb-2011 17:59 UTC
+#  file-status      : working
+#  file-keywords    : xeona
+
+#  $Revision: 8877 $
+#  $Date: 2012-01-17 20:37:04 +0100 (Tue, 17 Jan 2012) $
+#  $Author: robbie $
+#  $URL: file:///home/robbie/svn-root/xeona/futz/trunk/scripts/maxx $
+
+# ---------------------------------
+#  preamble
+# ---------------------------------
+
+XEONA_DIR="$HOME/$SYNK/xeona/svn2/futz/trunk/xeona1"
+
+SCRIPT=$(basename "$0")
+
+MACH="mach"
+MACH="nice mach"                        # 'nice' reduces the call priority
+
+E_SUCCESS=0
+E_FAILURE=1
+E_USAGE=2
+E_NO_UNIT=64
+
+# ---------------------------------
+#  display_help()
+# ---------------------------------
+
+function display_help
+{
+    echo
+    cat << EOM
+           usage: $SCRIPT  [-f|-s]  [-x]     non-release build (-x is strictly redundant but can signal intention)
+                  $SCRIPT  [-f]    <unit>    unit build
+                  $SCRIPT   -r               release build (-f implied, -s has no effect)
+                  $SCRIPT   -l               list current release builds (passive)
+                  $SCRIPT   --rm             remove stale release builds after confirmation (long option only)
+                  $SCRIPT --help             display this message and exit
+         options: -f    apply fresh compile (delete all object files and build afresh)
+                  -s    omit xedocs and xmok tests (full build only)
+         purpose: easy and somewhat tolerant interface to the '$MACH' script
+           avoid: $ nice $SCRIPT  # non-destructive failure but '$SCRIPT' is niced anyway
+         example: $ $SCRIPT a/unit
+     chained use: combined full build and release build, requires clean subversion
+                  $ time ( $SCRIPT -fx && $SCRIPT -fr && echo "both builds passed" && echo )   # include submodel tests
+                  $ time ( $SCRIPT  -s && $SCRIPT -fr && echo "both builds passed" && echo )   # exclude submodel tests
+EOM
+    echo
+}
+
+# ---------------------------------
+#  get_target()
+# ---------------------------------
+
+target="# coding error"
+function get_target
+{
+    local input="$1"
+    local path=$(dirname  "$input")
+    local leaf=$(basename "$input")
+    local stub="${leaf%%.*}"            # strip any and all extensions
+    local glob="$stub.ut[0-9].cc"       # file glob pattern
+    local files=$(find -P "$path" -maxdepth 2 -name "$glob" -type f -print);
+    local count=$(wc --lines <<< "$files");
+    test -z "$files" && count=0         # correction for no files, -z tests for empty string
+
+    case "$count" in
+        0)
+            echo "$SCRIPT: unit not found: $path/$stub"
+            exit $E_NO_UNIT
+            ;;
+        1)
+            target="$path/$stub"
+            ;;
+        *)
+            echo "$SCRIPT: strange result: $path + $files"
+            exit $E_FAILURE
+            ;;
+    esac
+}
+
+# ---------------------------------
+#  ls_release_builds()
+# ---------------------------------
+
+function ls_release_builds
+{
+    if [ $(pwd) != "$XEONA_DIR" ]
+    then
+        echo "release build listing only available from '$XEONA_DIR'"
+        return 0
+    fi
+    rels=$(find -P . -maxdepth 1 -iname "*xeona.r*" -type f -printf '%TY-%Tm-%Td %TT %9s  %p\n' 2>/dev/null | sort)
+    test -z "$rels" && return 1
+    echo "$rels"
+    return 0
+}
+
+# ---------------------------------
+#  rm_release_builds()
+# ---------------------------------
+
+# behaves correctly irrespective of the number of 0000s in 'xeona.r0000'
+
+function rm_release_builds
+{
+    rels=($(find -P . -maxdepth 1 -iname "*xeona.r*" -type f -printf '%p\n' | sort))
+    local elems=${#rels[*]}             # number of elements
+    case "$elems" in
+        0) return 1  ;;                 # nothing found
+        1) return 1  ;;                 # just the latest found, do nothing
+    esac
+
+    let "elems -= 2"                    # once for zero-basing, once to omit highest 0000
+    for i in $(seq 0 $elems)
+    do
+        rm --interactive "${rels[$i]}"
+    done
+    return 0
+}
+
+# ---------------------------------
+#  local_svver ()
+# ---------------------------------
+
+function local_svver                    # based on my '.bashrc' function 'svver'
+{
+    local xeonabin="xeona.mach"
+    local xeona=${XEONA%/trunk/xeona1}
+    local binary="$XEONA/$xeonabin"
+
+    echo -n "subversion  : "
+    svnversion "$xeona"
+    echo -n "mach binary : "
+    if [ -x "$binary" ]
+    then
+        $binary --svn 2> /dev/null
+    else
+        echo "'$binary' not found"
+    fi
+    return 0
+}
+
+# ---------------------------------
+#  display help processing
+# ---------------------------------
+
+delete=""
+extra="eo"
+mode="normal"
+
+case "$1" in
+    --help|--hel|--he|--h|-help|-hel|-he|-h|"-?")
+        display_help
+        exit $E_SUCCESS
+        ;;
+    -l)                                 # process before 'getopts' is correct
+        shift
+        echo
+        local_svver       && echo
+        ls_release_builds && echo
+        exit
+        ;;
+    --rm|-rm)                           # process before 'getopts' is correct, "-rm" is for convenience
+        shift
+        echo
+        local_svver       && echo
+        ls_release_builds && echo
+        rm_release_builds && echo
+        exit
+        ;;
+esac
+
+# ---------------------------------
+#  'getopts' processing
+# ---------------------------------
+
+while getopts ":frsx-" option           # the first ':' was blindly copied from Cooper (2010)
+do
+    case "$option" in
+        f) delete="f"      ;;           # action -f
+        r) mode="release"  ;;
+        s) extra=""        ;;           # disable -eo
+        x) :               ;;           # option -x carries no special meaning
+        -) :               ;;           # accepts '--' for convenience
+    esac
+done
+
+shift $(($OPTIND - 1))                  # part of 'getopts' scan code
+
+# ---------------------------------
+#  remainder of processing
+# ---------------------------------
+
+call=""
+
+case "$1" in
+    "")                                 # main build
+        case "$mode" in
+            normal)
+                options="${delete}4mpv${extra}a"
+                call="$MACH -$options"
+                ;;
+            release)
+                delete="f"              # else 'mach' complains
+                options="${delete}4drx"
+                call="$MACH -$options"
+                ;;
+        esac
+        ;;
+    *)                                  # unit test
+        get_target "$1"
+        options="${delete}4mpva"
+        call="$MACH -$options $target"
+        ;;
+esac
+
+# ---------------------------------
+# active code
+# ---------------------------------
+
+echo
+test "$delete" == "f" && echo "$SCRIPT: note: fresh compile (delete all object files and build afresh)"
+echo "$SCRIPT: call: $call"
+eval "$call"
+callret=$?
+
+test "$mode" == "release" && ls_release_builds && echo
+
+# ---------------------------------
+#  housekeeping
+# ---------------------------------
+
+exit $callret
+
+# SETTINGS
+#
+# emacs text editor settings
+# local variables:
+#   mode: sh
+# end:
+
+#  $Id: maxx 8877 2012-01-17 19:37:04Z robbie $
+#  end of file
+

@@ -1,0 +1,27 @@
+
+# role   = nodal auction
+# study  = trial-008
+# scens  = +e
+# cut    = :
+# tall   = F
+# lines  = T
+# ymax   = 7.0e-08
+# zero   = T
+
+  entity.node-2-xit-elec-a01.nodal-prices                   "nodal prices : a01 : grid exit supplying demand bidder"
+  entity.node-2-inj-elec-a02.nodal-prices                   "nodal prices : a02 : grid injection from CCGT plant"
+  entity.node-2-xit-elec-a03.nodal-prices                   "nodal prices : a03 : grid exit supplying MV network gateway"
+  entity.node-2-inj-elec-a04.nodal-prices                   "nodal prices : a04 : grid injection from windfarm"
+  entity.node-3-nla-elec-a05.nodal-prices                   "nodal prices : a05 : grid injection from hydro scheme"
+  entity.node-2-inj-elec-a06.nodal-prices                   "nodal prices : a06 : grid injection from hydro scheme"
+  entity.node-1-xib-elec-a07.nodal-prices                   "nodal prices : a07 : grid exit supplying aluminium smelter gateway"
+
+##  emacs text editor settings
+##  local variables:
+##    mode: text
+##    make-backup-files: nil
+##    truncate-lines: t
+##    comment-start: "#"
+##    tab-stop-list: (02 12 60)
+##  end:
+

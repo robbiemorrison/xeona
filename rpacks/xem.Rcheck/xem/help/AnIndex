@@ -1,0 +1,15 @@
+xem-package	xem-package
+xem	xem-package
+xem.cleanExportFiles	xem.cleanExportFiles
+xem.consts	xem.consts
+xem.exportYesNo	xem.exportYesNo
+xem.generateExportName	xem.generateExportName
+xem.grab	xem.grab
+xem.keepOpen	xem.keepOpen
+xem.plot	xem.plot
+xem.plot.count	xem.plot
+xem.plot.settings	xem.plot
+xem.plot.svg	xem.plot
+xem.plot.x11	xem.plot
+xem.processCutArg	xem.processCutArg
+xem.xplot	xem.xplot

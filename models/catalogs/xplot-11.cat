@@ -1,0 +1,28 @@
+
+# role   = occupant activity (frequency doubling) bug
+# study  = trial-008
+# scens  = +b
+# cut    = :1000
+# lines  = T
+# tall   = T
+# ymax   = 0
+# zero   = T
+
+  # designed to test the frequency doubling that
+  # scenario 'b' occupants experience under a different
+  # 'rank-orig-domains' ordering
+
+  entity.asop-occupant-param-f02.activity-loads             "occupants : f02 : activity load"
+  entity.asop-occupant-param-f02.electricity-demands        "occupants : f02 : electricity demand"
+
+  entity.teas-building-elec-f02.demands                     "building stock : f02 : electricity demand"
+
+##  emacs text editor settings
+##  local variables:
+##    mode: text
+##    make-backup-files: nil
+##    truncate-lines: t
+##    comment-start: "#"
+##    tab-stop-list: (02 12 60)
+##  end:
+

@@ -1,0 +1,271 @@
+#! /bin/bash
+
+#  file-purpose     : extract entity documentation from 'xeona' headers
+#  file-initiator   : Robbie Morrison <robbie@actrix.co.nz>
+#  file-create-date : Fri 08-Aug-2008 08:18 UTC
+#  file-status      : working
+#  file-keywords    : xeona
+
+#  $Revision: 3496 $
+#  $Date: 2009-10-09 10:39:32 +0200 (Fri, 09 Oct 2009) $
+#  $Author: robbie $
+#  $URL: file:///home/robbie/svn-root/xeona/futz/trunk/scripts/xedoc $
+
+# ---------------------------------
+#  representative entry
+# ---------------------------------
+
+#  //  ==== XEDOC =================================================
+#  //
+#  //  entity.actor-0
+#  //
+#  //      class                                    > Actor
+#  //
+#  //      builtin-remark s                         <
+#  //
+#  //      this class is highly incomplete and should not be used
+#  //
+#  //  ============================================================
+
+#  CAUTION: this script is designed to be reasonably
+#  tolerant to typos -- however:
+#
+#      exactly four leading '=' must be used
+#      'XEDOC' must be spelled and cased exactly as shown
+#      left padding (to the comment string) must be zero, one, or two spaces
+#
+#  default "relative to comment string" 'tab-stop-list' is ( 04 45 47)
+
+# ---------------------------------
+#  settings
+# ---------------------------------
+
+MAINCC="main.cc"                        # name of main file, used to confirm base directory
+
+# ---------------------------------
+#  preamble
+# ---------------------------------
+
+SCRIPT=$(basename "$0")
+
+E_SUCCESS=0
+E_FAILURE=1
+E_USAGE=2
+E_NO_MAIN=10
+E_NO_HEADERS_IDENTIFIED=11
+
+# ---------------------------------
+#  display_help()
+# ---------------------------------
+
+function display_help
+{
+
+    echo
+    echo "         usage: $SCRIPT              list the model requirements for entities"
+    echo "                $SCRIPT  --include   list as above in special xeona #include format"
+    echo "                $SCRIPT  --show      display a skeleton entry"
+    echo "                $SCRIPT  --help      display this message and exit"
+    echo "       purpose: scans appropriate headers and extracts entity requirements directly from the code"
+    echo "      activity: this script is entirely passive"
+    echo "         notes: - test entities are not suitably documented and therefore not recovered"
+    echo "                - informational reporting uses 'stderr' to facilitate dumping"
+    echo "                - see also 'emacs f10 >' to reindent XEM files"
+    echo "     hardcodes: subdirectory: $SDIR"
+    test $(which gawk) || echo "       WARNING: 'gawk' utility not found on your system"
+    echo
+}
+
+# ---------------------------------
+#  print_example()
+# ---------------------------------
+
+# here-documents:
+#
+# the escaped EOF means no "parameter substitution,
+# command substitution, and arithmetic expansion"
+# (bash manpage)
+#
+# there must be no trailing chars after the final "EOF"
+
+function print_example
+{
+cat << \EOF                             # the "\EOF" is escaped
+
+//  ==== XEDOC =================================================
+//
+//  entity.class-0
+//
+//      class                                    > Class
+//
+//        some comment
+//
+//      builtin-remark s                         <
+//
+//  ============================================================
+
+EOF
+}
+
+# ---------------------------------
+#  process command-line
+# ---------------------------------
+
+mode=""
+
+case "$1" in
+    --help|--hel|--he|--h|-help|-hel|-he|-h|"-?")
+        display_help
+        exit $E_SUCCESS
+        ;;
+    --show|-s)
+        print_example
+        exit $E_SUCCESS
+        ;;
+    --include|-i)
+        mode="include"
+        ;;
+    "")
+        mode="normal"
+        ;;
+    *)
+        echo "$SCRIPT: try --help for usage"
+        exit $E_USAGE
+        ;;
+esac
+
+# ---------------------------------
+#  confirm_base()
+# ---------------------------------
+
+function confirm_base
+{
+    test -f "$MAINCC" && return 0
+    echo "$SCRIPT: context failure: file not found (as proxy for base directory): $MAINCC "
+    return 1
+}
+
+# ---------------------------------
+#  identify_headers
+# ---------------------------------
+
+headers=""                              # unit headers (as opposed to stand-alone headers)
+
+function identify_headers
+{
+    local header
+    local file
+
+    for file in $( make ccs 2>/dev/null )    # target "ccs" is supported by 'makefile'
+      do
+      header="${file%.cc}.h"            # swap ".cc" for ".h"
+      test -f "$header" || continue     # abandon loop if file not found
+      headers="$headers $header"        # concatenate
+    done
+    test -n "$headers" && headers="${headers:1}"  # strip leading space
+
+    test -n "$headers" && return 0      # headers found
+    echo "$SCRIPT: no headers found"
+    return 1                            # no headers found
+}
+
+# ---------------------------------
+#  active code
+# ---------------------------------
+
+#  Notes for both modes
+#
+#      entry header must begin, as a absolute minimum "//====XEDOC===="
+#      exit header must begin, ditto                  "//===="
+#
+#      more precisely:
+#
+#        RS            record separator (default "\n")
+#        ORS           output record separator (default "\n")
+#        $1            first field
+#        $0            entire record
+#        FILENAME      current input file
+#        [[:space:]]   ASCII space or horizontal tab chars
+#
+#      the 'sed' call strips leading C++ comments from "//" to "//  "
+#      the 'grep' call omits lines containing the pattern shown from identified records
+#
+#      CAUTION: note the different escaping requirements for 'regex' postfix
+#      operator '?' in 'gawk' and 'sed'
+#
+#      CAUTION: RS as a 'regex' only in 'gawk' and 'mawk' but not 'awk'
+#
+#  Additional notes for the 'include' mode
+#
+#      the second 'gawk' call converts real newlines to "\n" strings
+#      the final 'sed' call converts """ strings to "\"" strings, the 'g' flag is essential
+
+# confirm run from base directory
+
+confirm_base || exit $E_NO_MAIN
+
+# generate file list
+
+identify_headers || exit $E_NO_HEADERS_IDENTIFIED
+
+# main processing
+
+case "$mode" in
+
+    normal)
+
+        loops=0                         # number of headers processed
+        for file in $headers            # CAUTION: no soft or strong quotes here
+          do
+          let "++loops"
+          gawk 'BEGIN { RS = "//[[:space:]]*===="; ORS = "" } \
+              $1 ~ /XEDOC/ { print $0; printf("    header: %s\n\n", FILENAME) } \
+              END { }' \
+              "$file" | \
+              sed 's/\/\/[[:space:]]\?[[:space:]]\?//' | \
+              grep --invert-match "[[:space:]]*XEDOC[[:space:]]*=====*"
+        done
+
+        {
+            echo
+            echo "---"
+            echo "$SCRIPT: headers proceed   : $loops"
+            echo "$SCRIPT: working directory : $(pwd -P)"
+            echo
+        } >&2                           # code block redirected to stderr (to facilitate dumping)
+        ;;
+
+    include)
+
+        echo -n "\""
+        for file in $headers            # CAUTION: no soft or strong quotes here
+          do
+          gawk 'BEGIN { RS = "//[[:space:]]*===="; ORS = "" } \
+              $1 ~ /XEDOC/ { print $0; printf("    header: %s\n\n", FILENAME) } \
+              END { }' \
+              "$file" | \
+              sed 's/\/\/[[:space:]]\?[[:space:]]\?//' | \
+              grep --invert-match "[[:space:]]*XEDOC[[:space:]]*=====*" | \
+              gawk 'BEGIN { RS = "\n"; ORS = "\\n" } { print $0 }' | \
+              sed 's/"/\\"/g'
+        done
+        echo "\""
+        ;;
+
+esac
+
+# ---------------------------------
+#  housekeeping
+# ---------------------------------
+
+exit $E_SUCCESS
+
+# ---------------------------------
+#  junk
+# ---------------------------------
+
+# BEGIN { getline; } can be useful
+
+#  $Id: xedoc 3496 2009-10-09 08:39:32Z robbie $
+#  end of file
+

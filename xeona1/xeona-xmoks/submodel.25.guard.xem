@@ -1,0 +1,515 @@
+
+note
+
+    $Revision: 8815 $
+    $Date: 2012-01-12 14:53:50 +0100 (Thu, 12 Jan 2012) $
+    $Author: robbie $
+    $URL: file:///home/robbie/svn-root/xeona/futz/trunk/xeona1/xeona-xmoks/submodel.25.guard.xem $
+
+    xem-role: submodel
+
+ --------------------------------------------- program admin
+
+program.last-run
+
+    process-id                                    <
+    run-kind                                      <
+    used-svn                                      <
+    timestamp-start (UTC)                         <
+    simulate-time (hh:mm:ss or s)                 <
+    simulate-return                               <
+
+program.data-format
+
+    minimum-svn                                   > 7541
+
+program.run-script-settings
+
+    script-model-status s                         > "okay"
+    script-run-me b                               > 1
+    script-option-exittrip i                      > 2
+    script-option-nodata b                        > 0
+    script-option-jumpy b                         > 0
+
+program.r-processing
+
+    r-policy i                                    > 31
+    r-title s                                     > "adaptive hydro model"
+    r-plot-list s                                 > "entity.teas-hydro-scheme-1.reservoir-inventorys"
+    r-highlight-output s                          > ""
+
+program.post-processing
+
+    summarize-list s                              > "entity.teas-hydro-scheme-1.potential-productions entity.teas-hydro-scheme-1.actual-productions entity.teas-hydro-scheme-1.reservoir-inventorys entity.teas-load-elec-ts-1.loads entity.node-0-injxit-elec-1.nodal-prices"
+
+ ----------------------------------------------------- model
+
+      implements the adaptive hydro model
+      caution : 'AsopBasic' is the only non-LMP operator possible
+      caution : in which case 'TeasLoadElecTs' is the only load possible
+      caution : produces nonzero unit prices and running 168 steps (one week) empties the storage
+
+ ---------------------------------------- mandatory entities
+
+entity.time-horizon
+
+    class                                         > TimeHorizon
+
+      the TimeHorizon entity is REQUIRED and the
+      "time-horizon" identifier is MANDATORY
+
+    builtin-remark s                              <
+
+    steps [-] i                                   > 168
+  # steps [-] i                                   > 8760
+    interval [s] i                                > 3600
+    start-hour [-] i                              > 0
+    start-day [-] i                               > 1
+    leap-year [-] b                               > 0
+
+      the start-hour begins midnight local time and ranges
+      [0,23] and the start-day begins 01-Jan and ranges [1,365]
+
+      when leap-year is true then 29 February is presumed to
+      exist (although not all entities will support this)
+
+    hemisphere s                                  > "N"
+
+      the hemisphere is {N,S} for north and south
+
+      the modeler should ensuring that timeseries data given
+      elsewhere aligns with the specification given here
+
+      header: b/builtins.h
+
+entity.overseer
+
+    class                                         > Overseer
+
+      the Overseer entity is REQUIRED and the "overseer"
+      identifier is MANDATORY
+
+      the overseer does little more that invoke the various
+      originating domains in nominated order at each new
+      interval
+
+    builtin-remark s                              <
+
+    captrans-algorithm s                          > "simple"
+
+      captrans-algorithm takes "fixed" | "simple" | "hop-relit"
+      but only "simple" is currently implemented (this call
+      contains experimental macro-controlled hop-relit code)
+
+    ranked-orig-domains L                         > "domain-controller-1"
+
+      the originating domain controllers must be given in
+      order of DESCENDING priority, any unannounced domains
+      will be discovered naturally during the various
+      traversals
+
+    total-financial [$] f                         < 0.0
+    total-greenhouse [kg] f                       < 0.0
+    total-nox [kg] f                              < 0.0
+    total-depletion [J] f                         < 0.0
+    total-landuse [m^2] f                         < 0.0
+
+    total-shortrun-financial [$] f                < 0.0
+    total-shortrun-greenhouse [kg] f              < 0.0
+    total-shortrun-nox [kg] f                     < 0.0
+    total-shortrun-depletion [J] f                < 0.0
+    total-shortrun-landuse [m2] f                 < 0.0
+
+      the cost-type totals cover the entire horizon, with
+      first step truncation given by program.last-run.run-kind
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+    embedded-costs-financial [$] F                < 0.0 ..
+    variable-costs-greenhouse [kg] F              < 0.0 ..
+    fixed-costs-greenhouse [kg] F                 < 0.0 ..
+    embedded-costs-greenhouse [kg] F              < 0.0 ..
+    variable-costs-nox [kg] F                     < 0.0 ..
+    fixed-costs-nox [kg] F                        < 0.0 ..
+    embedded-costs-nox [kg] F                     < 0.0 ..
+    variable-costs-depletion [J] F                < 0.0 ..
+    fixed-costs-depletion [J] F                   < 0.0 ..
+    embedded-costs-depletion [J] F                < 0.0 ..
+    variable-costs-landuse [m^2] F                < 0.0 ..
+    fixed-costs-landuse [m^2] F                   < 0.0 ..
+    embedded-costs-landuse [m^2] F                < 0.0 ..
+
+      header: b/overseer.h
+
+ ------------ DOMAIN 1 ------------------------- sole domain
+
+entity.domain-controller-1
+
+    class                                         > DomainController
+
+      a domain controller entity (the only one provided)
+      which can take one of a number of commitment modes --
+      but REQUIRES that the managed entities support the
+      elected mode
+
+    builtin-remark s                              <
+
+    domain-role s                                 > "role"
+
+    init-scale-problem b                          > 1
+    init-use-advanced-initial-basis b             > 1
+    init-use-simplex-presolver b                  > 1
+    init-use-mip-presolver b                      > 1
+    init-apply-numerical-zero b                   > 1
+
+    trip-kkt-report-level i                       > 1
+    trip-coeff-span-level i                       > 1
+
+      these four GLPK solver behavior settings should
+      normally be set to true unless run-time tests indicate
+      otherwise -- also coeffs means structural coefficients
+
+    commitment-mode s                             > "lmp"
+
+      supported commitment-mode values (lmp is nodal pricing):
+      fin | ghg | nox | dep | luc | lmp | merit | first
+
+    ranked-selgates L                             > ""
+
+      the ranked-selgates (bridging the right side) must be
+      null, one, or listed in DESCENDING priority
+
+    asset-operators L                             > "asop-basic-1 asop-grid-1 asop-lmp-bid-hydro1-1"
+
+      the asset-operators may be null, individual, or listed
+      in no particular order
+
+    demand-junctions L                            > ""
+
+      the demand-junctions, which split and join demand, may
+      be null, individual, or listed in no particular order
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+      the following are consolidations for the entire domain
+
+    subtotal-financial [$] f                      < 0.0
+    subtotal-greenhouse [kg] f                    < 0.0
+    subtotal-nox [kg] f                           < 0.0
+    subtotal-depletion [J] f                      < 0.0
+    subtotal-landuse [m2] f                       < 0.0
+
+    header: b/domcon.h
+
+ ---------------------------------------------- hydro scheme
+
+entity.asop-lmp-bid-hydro1-1
+
+    class                                         > AsopLmpBidHydro1
+
+      an asset operator for managing one or more hydro-
+      electric schemes within a nodal market
+
+      although the associated TeasHydroScheme asset
+      forwards information on its state, the bid formation
+      algorithm and settings are held here
+
+      two bids are made: a zero-price bid with the quantity
+      set to track the inventory target and a premium-price
+      bid offering the remaining capacity at high price --
+      the first more-or-less ensures dispatch and the
+      second more-or-less means last in line
+
+    builtin-remark s                              <
+
+    technical-assets L                            > "teas-hydro-scheme-1"
+
+      technical-assets share the same strategy parameters
+
+    inflow-weighting [-] f                        > 0.5
+    basic-bid-price [$/J] f                       > 1.0e-09
+    premium-bid-price [$/J] f                     > 100.0e-09
+
+      an expectation of current inflow is needed to calculate
+      the zero-price bid quantity and the inflow-weighting
+      [0,1] controls the estimate: 0 for actual previous
+      inflow (persistence) and 1 for historical monthly
+      inflow (average monthly) -- the premium-bid price is
+      determined by the premium-bid-price and available
+      capacity
+
+    lake-targets [-] s                            > "0.70 0.73 0.73 0.71 0.67 0.63 0.58 0.53 0.50 0.52 0.55 0.62"
+
+      the relative monthly lake-targets [0,1] are used,
+      together with status information from the hydro asset,
+      to manage the bid formation -- 12 values are needed
+      (space-separated and in double-quotes)
+
+    standing-cost-financial [$/s] f               > 5.0e-03
+    standing-cost-greenhouse [kg/s] f             > 5.0e-03
+    standing-cost-nox [kg/s] f                    > 0.0
+    standing-cost-depletion [J/s] f               > 0.0
+    standing-cost-landuse [m^2/s] f               > 0.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    header: b/asop02.h
+
+entity.teas-hydro-scheme-1
+
+    class                                         > TeasHydroScheme
+
+      a hydroelectric scheme with storage that receives
+      inflows and which can spill water -- note that the
+      opening and closing inventories are not required to
+      match
+
+      this entity is designed to be paired with
+      AsopLmpBidHydro1 when part of a nodal market
+
+      a scheme may represent more than one station if
+      integrated and managed collectively
+
+    builtin-remark s                              <
+
+    socket-electricity-commodity l                > "cm-electricity-1"
+
+      socket-electricity-commodity defines the shared
+      electricity commodity
+
+    inflow-context l                              > "cx-inflow-sets-1"
+
+      the context entity must be a sub-class of CxInflow
+
+    generator-capacity [W] f                      > 540e+06
+    storage-volume [m3] f                         > 74e+06
+    operating-depth [m]                           > 0.80
+    static-head [m] f                             > 92
+    primary-efficiency [-] f                      > 0.82
+    opening-storage [-] f                         > 0.95
+
+      the storage-volume can be set to near zero to yield
+      run-of-river operation
+
+    potential-productions [W] F                   < 0.0 ..
+    actual-productions [W] F                      < 0.0 ..
+    reservoir-storages [-] F                      < 0.0 ..
+    closing-inventory [m3] f                      < 0.0
+    inventory-delta [-] f                         < 0.0
+    mean-inflow [m3/s] f                          < 0.0
+    capacity-factor [-] f                         < 0.0
+    spill-factor [-] f                            < 0.0
+    spill-count [-] i                             < 0
+
+      reservoir-storages [0-1] are relative,
+      inventory-delta [0,1] is the relative change,
+      capacity-factor [0,1] is the ratio of actual output to
+      generator capacity, spill-factor is the ratio of
+      discarded to potential output
+
+    submitted-bidsets [W,$/J] X                   < "0.0 0.0" ..
+
+      submitted-bidsets are provided by the operator, but
+      stored and reported from here
+
+    nameplate-capacity [W] f                      > 5000e+03
+    duty-specific-cost-financial [$/J] f          > 1.0
+    size-specific-cost-financial [$/W/s] f        > 2.0
+    standing-cost-financial [$/s] f               > 3.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    annual-discount-rate-decimal [-] f            > 0.10
+    economic-life [y] i                           > 25
+    capex-initial [$] f                           > +120e+03
+    capex-terminal [$] f                          > -10e+03
+    current-age [y] i                             > 2
+
+      a negative capex-terminal indicates salvage revenues as
+      opposed to decommissioning cost
+
+    embedded-costs-financial [$] F                < 0.0 ..
+
+    header: b/teas07.h
+
+ --------------------------------------------------- network
+
+entity.asop-grid-1
+
+    class                                         > AsopGrid
+
+      asset operator who controls LMP nodes and transmission
+      assets
+
+    builtin-remark s                              <
+
+    lmp-nodes L                                   > "node-0-injxit-elec-1"
+    technical-assets L                            > ""
+    voltage-angle-reference [degree] f            > 0.0
+
+      the technical-assets should be limited to transmission
+      assets and node caps, iff AC transmission is being
+      used, the voltage-angle-reference is applied to node-1
+
+    header: b/asop02.h
+
+entity.node-0-injxit-elec-1
+
+      base commodity in {Cert,Cseq,Elec,Fund,Heat,Oxid,Thrm,Work}
+
+    class                                         > Node0InjXit:Elec
+
+      non-network node with injection and exit -- which lacks
+      any transmission connection but offers a normal socket
+      and cable
+
+      my sole normal socket label is 'sock-1'
+
+    builtin-remark s                              <
+
+    socket-1 l                                    > "teas-hydro-scheme-1.elec-1"
+
+      socket-1 is my normal supplier (injector)
+
+    node-commodity l                              > "cm-electricity-1"
+
+      node-commodity defines the underlying commodity
+
+    nodal-prices [$/J] F                          < 0.0 ..
+
+      to convert to the more usual [$/MWh], multiply the
+      given nodal-prices by 278
+
+    header: b/node01.h
+
+ ------------------------------------------------------ load
+
+entity.asop-basic-1
+
+    class                                         > AsopBasic
+
+      basic asset operator with a null control object and
+      without internal cost formation
+
+    builtin-remark s                              <
+
+    technical-assets L                            > "teas-load-elec-ts-1"
+
+      technical-assets in any order
+
+    header: b/asop01.h
+
+entity.teas-load-elec-ts-1
+
+      100MW lasts 1332 steps, 80MW lasts 1631, 75MW lasts 4550,
+        73MW lasts 5022, 72MW lasts 5073
+      30MW is results in excessive spill, 50MW sometimes dips,
+        65MW dips to about half, 70MW to about 20%, 71MW to 9.48%
+
+    class                                         > TeasLoadElecTs
+
+      prescribed electricity load, lacking both flexibility
+      and context dependency
+
+    builtin-remark s                              <
+
+    socket-electricity l                          > "node-0-injxit-elec-1.sock-1"
+    cable-electricity-commodity l                 > "cm-electricity-1"
+
+      the above fields define my supplier and their socket
+      label and our common electricity commodity
+
+    loads [W] F                                   > +71e+06 ..
+
+      the loads are simply specified
+
+    nameplate-capacity [W] f                      > 2.0e+06
+    duty-specific-cost-financial [$/J] f          > 100.0
+    size-specific-cost-financial [$/W/s] f        > 200.0
+    standing-cost-financial [$/s] f               > 300.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    annual-discount-rate-decimal [-] f            > 0.10
+    economic-life [y] i                           > 25
+    capex-initial [$] f                           > 120e+03
+    capex-terminal [$] f                          > -10e+03
+    current-age [y] i                             > 2
+
+      a negative capex-terminal indicates salvage revenue as
+      opposed to decommissioning cost
+
+    embedded-costs-financial [$] F                < 0.0 ..
+
+      the embedded-costs-financial are calculated using the
+      DCF annuity method over the economic life of the entity
+      in question
+
+    header: b/teas03.h
+
+ ----------------------------------------------- commodities
+
+entity.cm-electricity-1
+
+    class                                         > CmElectricity
+
+      J-quantified electricity commodity
+
+      technical assets using electricity adopt a DC-power
+      flow model and thereby ignore shunt losses -- this
+      commodity provides suitable support
+
+    builtin-remark s                              <
+
+    voltage [V] f                                 > 220.0e+03
+
+      for fixed-frequency AC power, use the RMS (root-mean-
+      square) voltage (as opposed to the peak-to-peak value)
+
+    header: b/commods.h
+
+ -------------------------------------------------- contexts
+
+entity.cx-inflow-sets-1
+
+    class                                         > CxInflowSets
+
+    builtin-remark s                              <
+
+      optional comment
+
+    flowset-id s                                  > "benmore1983"
+    scale [-] f                                   > 1.0
+
+      flowset-id is the identifier of an embedded flowset,
+      scale [0,inf] rescales the entire timeseries
+
+    flowset-description s                         < "_"
+    flowset-mean [m3/s] f                         < 0.0
+    flowset-minimum [m3/s] f                      < 0.0
+    flowset-maximum [m3/s] f                      < 0.0
+    flowset [m3/s] F                              < 0.0 ..
+
+    header: e/cxamb03.h
+
+ ------------------------------------------------------ tail
+
+note
+
+    $Id: submodel.25.guard.xem 8815 2012-01-12 13:53:50Z robbie $
+
+note
+
+    useful emacs text editor settings
+    local variables:
+      mode: xem
+      tab-stop-list: (04 50 52)
+      truncate-lines: t
+    end:
+
+model-end
+

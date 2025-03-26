@@ -1,0 +1,246 @@
+--- poc.008.guard.xem	2012-04-07 18:35:26.568409879 +0200
++++ sen.05.xem	2012-04-07 18:35:46.508358315 +0200
+@@ -33,18 +33,18 @@
+     script-option-jumpy b                         > 0
+ 
+ program.study-description
+ 
+     study-name s                                  > "phd"
+-    scenario-name s                               > "reference energy system"
++    scenario-name s                               > "carbon capture added"
+     scenario-author s                             > "robbie"
+-    scenario-leta s (+,a-z)                       > "+"
++    scenario-leta s (+,a-z)                       > "e"
+ 
+ program.r-processing
+ 
+     r-policy i                                    > 31
+-    r-title s                                     > "mainline model"
++    r-title s                                     > "scenario e"
+     r-plot-list s                                 > ""
+     r-highlight-output s                          > ""
+ 
+ program.post-processing
+ 
+@@ -117,11 +117,11 @@
+ 
+       captrans-algorithm takes "fixed" | "simple" | "hop-relit"
+       but only "simple" is currently implemented (this call
+       contains experimental macro-controlled hop-relit code)
+ 
+-    ranked-orig-domains L (close-to-demand)       > "domain-controller-f domain-controller-e domain-controller-a domain-controller-d"
++    ranked-orig-domains L (close-to-demand)       > "domain-controller-f domain-controller-e domain-controller-a domain-controller-c domain-controller-d"
+ 
+       the originating domain controllers must be given in
+       order of DESCENDING priority, any unannounced domains
+       will be discovered naturally during the various
+       traversals
+@@ -202,11 +202,11 @@
+     asset-operators L                             > "asop-grid-a01 asop-lmp-bid-adaptive1-a02 asop-lmp-bid-stated-ts1-a03 asop-lmp-bid-hydro1-a04 asop-lmp-bid-param-a05"
+ 
+       the asset-operators may be null, individual, or listed
+       in no particular order
+ 
+-    demand-junctions L                            > "junc-demand-2-split-elec-a01 junc-demand-2-join-oxidgas-a02"
++    demand-junctions L                            > "junc-demand-2-split-elec-a01 junc-demand-2-join-oxidgas-a02 junc-demand-2-join-cseq-a03"
+ 
+       the demand-junctions, which split and join demand, may
+       be null, individual, or listed in no particular order
+ 
+     variable-costs-financial [$] F                < 0.0 ..
+@@ -897,22 +897,22 @@
+       the preceding and desired commitments and predetermined
+       price change rules (read the source code for details)
+ 
+     builtin-remark s                              <
+ 
+-    technical-assets L                            > "teas-ccgt-nocapture-a07 teas-ccgt-nocapture-a08"
++    technical-assets L                            > "teas-ccgt-capture-a07 teas-ccgt-capture-a08"
+ 
+       technical-assets share the same opening bid and
+       other adaptation parameters
+ 
+     market-side s                                 > "supply"
+ 
+       the consumer or producer status of the operator is
+       determined by market-side in {demand,supply} respectively
+ 
+     opening-bidset [W,$/J] x                      > "150.0e+06 28.00e-09 * 150.0e+06 40.00e-09 * 50.0e+06 60.0e-09"
+-    floor-price [$/J] f                           > 10.0e-09
++    floor-price [$/J] f                           > 20.0e-09
+     target-commitment [W] f                       > 250.0e+06
+     relative-hysteresis [-] f                     > 0.1
+     price-factor [-] f                            > 0.1
+     price-delta [$/J] f                           > 1.00e-09
+     price-cap-multiplier [-] f                    > 5.0
+@@ -953,11 +953,11 @@
+     variable-costs-financial [$] F                < 0.0 ..
+     fixed-costs-financial [$] F                   < 0.0 ..
+ 
+     header: b/asop02.h
+ 
+-entity.teas-ccgt-nocapture-a07
++# entity.teas-ccgt-nocapture-a07
+ 
+       unabated CCGT plant using HHV figures
+ 
+       unit 1
+ 
+@@ -1046,11 +1046,11 @@
+       DCF annuity method over the economic life of the entity
+       in question
+ 
+     header: b/teas02.h
+ 
+-entity.teas-ccgt-nocapture-a08
++# entity.teas-ccgt-nocapture-a08
+ 
+       unabated CCGT plant using HHV figures
+ 
+       unit 2
+ 
+@@ -1139,11 +1139,11 @@
+       DCF annuity method over the economic life of the entity
+       in question
+ 
+     header: b/teas02.h
+ 
+-# entity.teas-ccgt-capture-a07
++entity.teas-ccgt-capture-a07
+ 
+       CCGT plant with carbon capture using HHV figures
+ 
+       unit 1
+ 
+@@ -1254,11 +1254,11 @@
+       DCF annuity method over the economic life of the entity
+       in question
+ 
+     header: b/teas02.h
+ 
+-# entity.teas-ccgt-capture-a08
++entity.teas-ccgt-capture-a08
+ 
+       CCGT plant with carbon capture using HHV figures
+ 
+       unit 2
+ 
+@@ -1378,12 +1378,12 @@
+ 
+       my sole socket label is 'sock-1'
+ 
+     builtin-remark s                              <
+ 
+-    socket-1 l                                    > "teas-ccgt-nocapture-a07.elec-1"
+-    socket-2 l                                    > "teas-ccgt-nocapture-a08.elec-1"
++    socket-1 l                                    > "teas-ccgt-capture-a07.elec-1"
++    socket-2 l                                    > "teas-ccgt-capture-a08.elec-1"
+ 
+       socket-1 and socket-2 are my two potential suppliers
+ 
+     junction-commodity l                          > "cm-electricity-01"
+ 
+@@ -1411,11 +1411,11 @@
+ 
+       junction-commodity defines the underlying commodity
+ 
+     header: b/junc02.h
+ 
+-# entity.junc-demand-2-join-cseq-a03
++entity.junc-demand-2-join-cseq-a03
+ 
+       joins carbon sequestration services demand from the two CCGT units
+ 
+     class                                         > JuncDemand2Join:Cseq
+ 
+@@ -2128,11 +2128,11 @@
+ 
+     header: b/teas04.h
+ 
+  ------------ DOMAIN C ---------------------- carbon storage
+ 
+-# entity.domain-controller-c
++entity.domain-controller-c
+ 
+       carbons storage domain
+ 
+     class                                         > DomainController
+ 
+@@ -2197,11 +2197,11 @@
+ 
+     header: b/domcon.h
+ 
+  ------------------------------------------ storage facility
+ 
+-# entity.asop-internal-costs-c01
++entity.asop-internal-costs-c01
+ 
+       carbon storage operator
+ 
+     class                                         > AsopInternalCosts
+ 
+@@ -2223,11 +2223,11 @@
+     variable-costs-financial [$] F                < 0.0 ..
+     fixed-costs-financial [$] F                   < 0.0 ..
+ 
+     header: b/asop01.h
+ 
+-# entity.teas-ccs-geological-c01
++entity.teas-ccs-geological-c01
+ 
+       carbon storage facility
+ 
+     class                                         > TeasCcsGeological
+ 
+@@ -2310,11 +2310,11 @@
+ 
+     header: b/teas09.h
+ 
+  ---------------------------------------- electricity supply
+ 
+-# entity.asop-internal-costs-c02
++entity.asop-internal-costs-c02
+ 
+       carbon storage electricity supply operator
+ 
+     class                                         > AsopInternalCosts
+ 
+@@ -2336,11 +2336,11 @@
+     variable-costs-financial [$] F                < 0.0 ..
+     fixed-costs-financial [$] F                   < 0.0 ..
+ 
+     header: b/asop01.h
+ 
+-# entity.teas-source-all-elec-c02
++entity.teas-source-all-elec-c02
+ 
+       carbon storage electricity supply
+ 
+     class                                         > TeasSourceAll:Elec
+ 
+@@ -2421,11 +2421,11 @@
+     embedded-costs-depletion [J] F                < 0.0 ..
+     embedded-costs-landuse [m2] F                 < 0.0 ..
+ 
+     header: b/teas04.h
+ 
+-# entity.cm-electricity-c01
++entity.cm-electricity-c01
+ 
+       HV grid electricity
+ 
+     class                                         > CmElectricity
+ 
+@@ -2444,11 +2444,11 @@
+ 
+     header: b/commods.h
+ 
+  ------------------------------------------------ sell gates
+ 
+-# entity.gate-stated-tariff-cseq-c01
++entity.gate-stated-tariff-cseq-c01
+ 
+       carbon sequestration services
+ 
+     class                                         > GateStatedTariff:Cseq
+ 

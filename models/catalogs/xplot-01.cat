@@ -1,0 +1,24 @@
+
+# role   = xplot test case (read-only)
+# study  = trial-008
+# scens  = +e
+# cut      1000:2000
+# cut    = :
+# lines  = F
+# tall   = T
+# ymax   = 0
+# zero   = F
+
+  entity.teas-ccs-geological-c01.burials                    "CCS facility : c01 : geological burials"
+  entity.teas-hydro-scheme-a10.reservoir-storages           "hydro scheme : a10 : reservoir storage"
+  entity.overseer.total-financial                           "system total financial"
+
+##  emacs text editor settings
+##  local variables:
+##    mode: text
+##    make-backup-files: nil
+##    truncate-lines: t
+##    comment-start: "#"
+##    tab-stop-list: (02 12 60)
+##  end:
+

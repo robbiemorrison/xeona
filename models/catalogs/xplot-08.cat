@@ -1,0 +1,50 @@
+
+# role   = windfarms
+# study  = trial-008
+# scens  = *
+# cut    = :
+# lines  = T
+# tall   = T
+# ymax   = 0
+# zero   = T
+
+  # HV windfarm
+
+  entity.cx-ambient-air-tmy-01.wind-speeds                  "ambient air : 01 : typical meteorological year wind speed (HV windfarm)"
+  entity.cx-ambient-air-tmy-01.air-temps                    "ambient air : 01 : typical meteorological year temperature (HV windfarm)"
+
+  entity.teas-windfarm-a09.potential-productions            "HV windfarm : a09 : potential productions"
+  entity.teas-windfarm-a09.actual-productions               "HV windfarm : a09 : actual productions"
+
+  entity.teas-windfarm-a09.availability                     "HV windfarm : a09 : availability"
+  entity.teas-windfarm-a09.spill                            "HV windfarm : a09 : spill"
+  entity.teas-windfarm-a09.variable-costs-financial         "HV windfarm : a09 : variable costs financial"
+  entity.teas-windfarm-a09.fixed-costs-financial            "HV windfarm : a09 : fixed costs financial"
+  entity.teas-windfarm-a09.embedded-costs-financial         "HV windfarm : a09 : embedded costs financial"
+
+  # MV windfarm
+
+  entity.cx-ambient-air-sim-03.wind-speeds                  "ambient air : 03 : simulated wind speed (MV windfarm)"
+
+  entity.teas-windfarm-e02.potential-productions            "MV windfarm : e02 : potential productions"
+  entity.teas-windfarm-e02.actual-productions               "MV windfarm : e02 : actual productions"
+
+  entity.teas-windfarm-e02.availability                     "MV windfarm : e02 : availability"
+  entity.teas-windfarm-e02.spill                            "MV windfarm : e02 : spill"
+  entity.teas-windfarm-e02.variable-costs-financial         "MV windfarm : e02 : variable costs financial"
+  entity.teas-windfarm-e02.fixed-costs-financial            "MV windfarm : e02 : fixed costs financial"
+  entity.teas-windfarm-e02.embedded-costs-financial         "MV windfarm : e02 : embedded costs financial"
+
+  # notes
+  #
+  # PV facility uses 'cx-ambient-air-tmy-05'
+
+##  emacs text editor settings
+##  local variables:
+##    mode: text
+##    make-backup-files: nil
+##    truncate-lines: t
+##    comment-start: "#"
+##    tab-stop-list: (02 12 60)
+##  end:
+

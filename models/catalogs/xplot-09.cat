@@ -1,0 +1,39 @@
+
+# role   = PV facility
+# study  = trial-008
+# scens  = *
+# cut    = :
+# lines  = T
+# tall   = T
+# ymax   = 0
+# zero   = T
+
+  entity.cx-ambient-air-tmy-05.latitude                     "ambient air : 05 : typical meteorological year latitude"
+  entity.cx-ambient-air-tmy-05.longitude                    "ambient air : 05 : typical meteorological year longitude"
+  entity.cx-ambient-air-tmy-05.elevation                    "ambient air : 05 : typical meteorological year elevation"
+  entity.cx-ambient-air-tmy-05.wind-speeds                  "ambient air : 05 : typical meteorological year wind speed"
+  entity.cx-ambient-air-tmy-05.air-temps                    "ambient air : 05 : typical meteorological year air temperature"
+
+  entity.cx-ambient-solar-tmy-04.latitude                   "solar : 04 : typical meteorological year latitude"
+  entity.cx-ambient-solar-tmy-04.longitude                  "solar : 04 : typical meteorological year longitude"
+  entity.cx-ambient-solar-tmy-04.elevation                  "solar : 04 : typical meteorological year elevation"
+  entity.cx-ambient-solar-tmy-04.solar-direct               "solar : 04 : typical meteorological year solar direct"
+  entity.cx-ambient-solar-tmy-04.solar-diffuse              "solar : 04 : typical meteorological year solar diffuse"
+  entity.cx-ambient-solar-tmy-04.sun-zenith                 "solar : 04 : typical meteorological year sun zenith"
+
+  entity.teas-pv-installation-f01.potential-productions     "PV installation : f01 : potential productions"
+  entity.teas-pv-installation-f01.actual-productions        "PV installation : f01 : actual productions"
+  entity.teas-pv-installation-f01.discard                   "PV installation : f01 : discard"
+  entity.teas-pv-installation-f01.variable-costs-financial  "PV installation : f01 : variable costs financial"
+  entity.teas-pv-installation-f01.fixed-costs-financial     "PV installation : f01 : fixed costs financial"
+  entity.teas-pv-installation-f01.embedded-costs-financial  "PV installation : f01 : embedded costs financial"
+
+##  emacs text editor settings
+##  local variables:
+##    mode: text
+##    make-backup-files: nil
+##    truncate-lines: t
+##    comment-start: "#"
+##    tab-stop-list: (02 12 60)
+##  end:
+

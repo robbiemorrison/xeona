@@ -1,0 +1,37 @@
+--- poc.008.guard.xem	2012-04-07 18:35:26.568409879 +0200
++++ sen.01.xem	2012-04-07 18:35:46.418357112 +0200
+@@ -33,18 +33,18 @@
+     script-option-jumpy b                         > 0
+ 
+ program.study-description
+ 
+     study-name s                                  > "phd"
+-    scenario-name s                               > "reference energy system"
++    scenario-name s                               > "indoor temp now 18C was 21C"
+     scenario-author s                             > "robbie"
+-    scenario-leta s (+,a-z)                       > "+"
++    scenario-leta s (+,a-z)                       > "a"
+ 
+ program.r-processing
+ 
+     r-policy i                                    > 31
+-    r-title s                                     > "mainline model"
++    r-title s                                     > "scenario a"
+     r-plot-list s                                 > ""
+     r-highlight-output s                          > ""
+ 
+ program.post-processing
+ 
+@@ -3716,11 +3716,11 @@
+     day-start [h] i                               > 8
+     day-end [h] i                                 > 20
+ 
+       day-start and day-end on [0,24] at beginning of hour
+ 
+-    temperature-set-point [C] f                   > 21.0
++    temperature-set-point [C] f                   > 18.0
+     activity-load-day-person [W] f                > 140
+     activity-load-night-person [W] f              > 100
+     electricity-demand-day-base [W] f             > 1.0e+03
+     electricity-demand-night-base [W] f           > 0.5e+03
+     electricity-demand-day-person [W] f           > 0.5e+03

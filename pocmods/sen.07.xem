@@ -1,0 +1,4243 @@
+
+note
+
+    $Revision: 9217 $
+    $Date: 2012-04-03 17:38:18 +0200 (Tue, 03 Apr 2012) $
+    $Author: robbie $
+    $URL: file:///home/robbie/svn-root/xeona/futz/trunk/pocmods/poc.008.guard.xem $
+
+    xem-role   : proof-of-concept
+    xem-status : final tuning
+
+ --------------------------------------------- program admin
+
+program.last-run
+
+    process-id                                    <
+    run-kind                                      <
+    used-svn                                      <
+    timestamp-start (UTC)                         <
+    simulate-time (hh:mm:ss or s)                 <
+    simulate-return                               <
+
+program.data-format
+
+    minimum-svn                                   > 9102
+
+program.run-script-settings
+
+    script-model-status s                         > "wip"
+    script-run-me b                               > 0
+    script-option-exittrip i                      > 2
+    script-option-nodata b                        > 0
+    script-option-jumpy b                         > 0
+
+program.study-description
+
+    study-name s                                  > "phd"
+    scenario-name s                               > "large high-voltage windfarm removed"
+    scenario-author s                             > "robbie"
+    scenario-leta s (+,a-z)                       > "g"
+
+program.r-processing
+
+    r-policy i                                    > 31
+    r-title s                                     > "scenario g"
+    r-plot-list s                                 > ""
+    r-highlight-output s                          > ""
+
+program.post-processing
+
+    summarize-list s (key flows)                  > "entity.teas-ccgt-capture-a07.productions entity.teas-ccgt-capture-a08.productions entity.teas-windfarm-a09.potential-productions entity.teas-windfarm-a09.actual-productions entity.teas-windfarm-e02.potential-productions entity.teas-windfarm-e02.actual-productions entity.teas-hydro-scheme-a10.potential-productions entity.teas-hydro-scheme-a10.actual-productions entity.teas-load-all-elec-a11.loads entity.asop-inelastic-ts-b01.demands entity.gate-stated-tariff-elec-a01.quantitys entity.gate-stated-tariff-elec-a02.quantitys entity.teas-source-all-oxidgas-d01.extractions entity.teas-ccgt-capture-a07.carbon-captures entity.teas-ccgt-capture-a08.carbon-captures entity.teas-ccs-geological-c01.burials"
+  # summarize-list s (overall financial costs)    > "entity.overseer.variable-costs-financial entity.overseer.fixed-costs-financial entity.overseer.embedded-costs-financial entity.domain-controller-a.variable-costs-financial entity.domain-controller-b.variable-costs-financial entity.domain-controller-c.variable-costs-financial entity.domain-controller-d.variable-costs-financial entity.domain-controller-e.variable-costs-financial entity.domain-controller-f.variable-costs-financial"
+    report-list s                                 > "entity.overseer.total-shortrun-financial entity.overseer.total-shortrun-greenhouse entity.teas-ccs-geological-c01.burials entity.teas-building-elec-f02.demands entity.teas-windfarm-a09.spill entity.teas-windfarm-e02.spill entity.teas-hydro-scheme-a10.reservoir-storages entity.teas-load-all-elec-a11.loads entity.gate-stated-tariff-elec-a01.quantitys entity.teas-source-all-oxidgas-d01.extractions entity.teas-pv-installation-f01.actual-productions entity.teas-simple-storage-elec-f03.closing-inventorys entity.teas-building-elec-f02.hvac-dutys entity.cm-natural-gas-02.spec-combustion-enthalpy entity.teas-building-elec-f02.floor-performance"
+
+ --------------------------------------- model documentation
+
+      refer the typeset description elsewhere
+
+ ---------------------------------------- mandatory entities
+
+entity.time-horizon
+
+      time horizon object
+
+    class                                         > TimeHorizon
+
+      the TimeHorizon entity is REQUIRED and the
+      'time-horizon' identifier is MANDATORY
+
+    builtin-remark s                              <
+
+    steps [-] i                                   > 12
+  # steps [-] i                                   > 8760
+    interval [s] i                                > 3600
+    start-hour [-] i                              > 0
+    start-day [-] i                               > 1
+    leap-year [-] b                               > 0
+
+      the interval [300,86400] is further restricted to
+      common multiples of one hour ranging 5 mins to 24 hours
+
+      the start-hour begins midnight local time and ranges
+      [0,23] and the start-day begins 01-Jan and ranges
+      [1,365] -- used to align internal and model timeseries
+      when the latter commences after 00:00 on 01 January
+
+      when leap-year is true then 29 February is presumed to
+      exist (although not all entities will support this)
+
+    hemisphere s                                  > "S"
+
+      the hemisphere is {N,S} for north and south
+
+      the modeler should ensuring that timeseries data given
+      elsewhere aligns with the specification given here
+
+    header: b/builtins.h
+
+entity.overseer
+
+      system coordination object
+
+      originating domains: a, c, d, e, f
+
+    class                                         > Overseer
+
+      the Overseer entity is REQUIRED and the "overseer"
+      identifier is MANDATORY
+
+      the overseer does little more that invoke the various
+      originating domains in nominated order at each new
+      interval
+
+    builtin-remark s                              <
+
+    captrans-algorithm s                          > "simple"
+
+      captrans-algorithm takes "fixed" | "simple" | "hop-relit"
+      but only "simple" is currently implemented (this call
+      contains experimental macro-controlled hop-relit code)
+
+    ranked-orig-domains L (close-to-demand)       > "domain-controller-f domain-controller-e domain-controller-a domain-controller-d"
+
+      the originating domain controllers must be given in
+      order of DESCENDING priority, any unannounced domains
+      will be discovered naturally during the various
+      traversals
+
+    total-financial [$] f                         < 0.0
+    total-greenhouse [kg] f                       < 0.0
+    total-nox [kg] f                              < 0.0
+    total-depletion [J] f                         < 0.0
+    total-landuse [m2] f                          < 0.0
+
+    total-shortrun-financial [$] f                < 0.0
+    total-shortrun-greenhouse [kg] f              < 0.0
+    total-shortrun-nox [kg] f                     < 0.0
+    total-shortrun-depletion [J] f                < 0.0
+    total-shortrun-landuse [m2] f                 < 0.0
+
+      the cost-type totals cover the entire horizon, with
+      first step truncation given by program.last-run.run-kind
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+    embedded-costs-financial [$] F                < 0.0 ..
+    variable-costs-greenhouse [kg] F              < 0.0 ..
+    fixed-costs-greenhouse [kg] F                 < 0.0 ..
+    embedded-costs-greenhouse [kg] F              < 0.0 ..
+    variable-costs-nox [kg] F                     < 0.0 ..
+    fixed-costs-nox [kg] F                        < 0.0 ..
+    embedded-costs-nox [kg] F                     < 0.0 ..
+    variable-costs-depletion [J] F                < 0.0 ..
+    fixed-costs-depletion [J] F                   < 0.0 ..
+    embedded-costs-depletion [J] F                < 0.0 ..
+    variable-costs-landuse [m2] F                 < 0.0 ..
+    fixed-costs-landuse [m2] F                    < 0.0 ..
+    embedded-costs-landuse [m2] F                 < 0.0 ..
+
+      header: b/overseer.h
+
+ ------------ DOMAIN A ------------------- nodal electricity
+
+entity.domain-controller-a
+
+      nodal pricing domain
+
+    class                                         > DomainController
+
+      a domain controller entity (the only one provided)
+      which can take one of a number of commitment modes --
+      but REQUIRES that the managed entities support the
+      elected mode
+
+    builtin-remark s                              <
+
+    domain-role s                                 > "high voltage network with nodal pricing"
+
+    init-scale-problem b                          > 1
+    init-use-advanced-initial-basis b             > 1
+    init-use-simplex-presolver b                  > 1
+    init-use-mip-presolver b                      > 1
+    init-apply-numerical-zero b                   > 1
+
+    trip-kkt-report-level i                       > 1
+    trip-coeff-span-level i                       > 1
+
+      these four GLPK solver behavior settings should
+      normally be set to true unless run-time tests indicate
+      otherwise -- also coeffs means structural coefficients
+
+    commitment-mode s                             > "lmp"
+
+      supported commitment-mode values (lmp is nodal pricing):
+      fin | ghg | nox | dep | luc | lmp | merit | first
+
+    ranked-selgates L                             > "gate-stated-tariff-elec-a01 gate-stated-tariff-elec-a02"
+
+      the ranked-selgates (bridging the right side) must be
+      null, one, or listed in DESCENDING priority
+
+    asset-operators L                             > "asop-grid-a01 asop-lmp-bid-adaptive1-a02 asop-lmp-bid-hydro1-a04 asop-lmp-bid-param-a05"
+
+      the asset-operators may be null, individual, or listed
+      in no particular order
+
+    demand-junctions L                            > "junc-demand-2-split-elec-a01 junc-demand-2-join-oxidgas-a02"
+
+      the demand-junctions, which split and join demand, may
+      be null, individual, or listed in no particular order
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+      the following are consolidations for the entire domain
+
+    subtotal-financial [$] f                      < 0.0
+    subtotal-greenhouse [kg] f                    < 0.0
+    subtotal-nox [kg] f                           < 0.0
+    subtotal-depletion [J] f                      < 0.0
+    subtotal-landuse [m2] f                       < 0.0
+
+    header: b/domcon.h
+
+ --------------------------------------------- grid operator
+
+entity.asop-grid-a01
+
+      transmission network operator
+
+    class                                         > AsopGrid
+
+      asset operator who controls LMP nodes and transmission
+      assets
+
+    builtin-remark s                              <
+
+    lmp-nodes L                                   > "node-2-xit-elec-a01 node-2-inj-elec-a02 node-2-xit-elec-a03 node-2-nul-elec-a04 node-3-nla-elec-a05 node-2-inj-elec-a06 node-1-xib-elec-a07"
+    technical-assets L                            > "teas-hv-transmission-a01 teas-hv-transmission-a02 teas-hv-transmission-a03 teas-hv-transmission-a04 teas-hv-transmission-a05 teas-hv-transmission-a06"
+    voltage-angle-reference [degree] f            > 0.0
+
+      the technical-assets should be limited to transmission
+      assets and node caps, iff AC transmission is being
+      used, the voltage-angle-reference is applied to node-1
+
+    header: b/asop02.h
+
+ ------------------------------------------------- lmp nodes
+
+entity.node-2-xit-elec-a01
+
+      grid exit supplying demand bidder
+
+    class                                         > NodeAc2Xit:Elec
+
+      AC grid node with exit and support for two grid assets
+
+      my normal socket label is 'sock-1'
+      my bidirectional socket label is 'grid-1'
+
+    builtin-remark s                              <
+
+    socket-1 l                                    > "node-2-inj-elec-a02.grid-1"
+
+      socket-1 is my associated bidirectional grid asset
+
+    node-commodity l                              > "cm-electricity-01"
+
+      node-commodity defines the underlying commodity
+
+    nodal-prices [$/J] F                          < 0.0 ..
+    voltage-angles [degrees] F                    < 0.0 ..
+
+      to convert to the more usual [$/MWh], multiply the
+      given nodal-prices by 278
+
+    header: b/node05.h
+
+entity.node-2-inj-elec-a02
+
+      grid injection from CCGT plant
+
+    class                                         > NodeAc2Inj:Elec
+
+      AC grid node with injection and support for two grid
+      assets
+
+      my sole bidirectional socket label is 'grid-1'
+
+    builtin-remark s                              <
+
+    socket-1 l                                    > "junc-demand-2-split-elec-a01.sock-1"
+    socket-2 l                                    > "teas-hv-transmission-a02.grid-1"
+
+      socket-1 is my normal supplier (injector), socket-2 is
+      my associated bidirectional grid asset
+
+    node-commodity l                              > "cm-electricity-01"
+
+      node-commodity defines the underlying commodity
+
+    nodal-prices [$/J] F                          < 0.0 ..
+    voltage-angles [degrees] F                    < 0.0 ..
+
+      to convert to the more usual [$/MWh], multiply the
+      given nodal-prices by 278
+
+    header: b/node05.h
+
+entity.node-2-xit-elec-a03
+
+      grid exit supplying MV network gateway
+
+    class                                         > NodeAc2Xit:Elec
+
+      AC grid node with exit and support for two grid assets
+
+      my normal socket label is 'sock-1'
+      my bidirectional socket label is 'grid-1'
+
+    builtin-remark s                              <
+
+    socket-1 l                                    > "teas-hv-transmission-a03.grid-1"
+
+      socket-1 is my associated bidirectional grid asset
+
+    node-commodity l                              > "cm-electricity-01"
+
+      node-commodity defines the underlying commodity
+
+    nodal-prices [$/J] F                          < 0.0 ..
+    voltage-angles [degrees] F                    < 0.0 ..
+
+      to convert to the more usual [$/MWh], multiply the
+      given nodal-prices by 278
+
+    header: b/node05.h
+
+entity.node-2-nul-elec-a04
+
+      E point of network diamond, was grid injection from windfarm
+
+    class                                         > NodeAc2Nul:Elec
+
+      AC grid node to connect two grid assets
+
+      my sole bidirectional socket label is 'grid-1'
+
+    builtin-remark s                              <
+
+    socket-1 l                                    > "teas-hv-transmission-a04.grid-1"
+
+      socket-1 is my associated bidirectional grid asset
+
+    node-commodity l                              > "cm-electricity-01"
+
+      node-commodity defines the underlying commodity
+
+    nodal-prices [$/J] F                          < 0.0 ..
+    voltage-angles [degrees] F                    < 0.0 ..
+
+      to convert to the more usual [$/MWh], multiply the
+      given nodal-prices by 278
+
+    header: b/node05.h
+
+entity.node-3-nla-elec-a05
+
+      S point of network diamond
+
+    class                                         > NodeAc3NulA:Elec
+
+      type A AC grid node to connect three grid assets, two
+      of which are cables (not sockets)
+
+      my sole bidirectional socket label is 'grid-1'
+
+    builtin-remark s                              <
+
+    socket-1 l                                    > "teas-hv-transmission-a01.grid-1"
+    socket-2 l                                    > "teas-hv-transmission-a05.grid-1"
+
+      socket-1 and socket-2 are my associated bidirectional
+      grid assets
+
+    node-commodity l                              > "cm-electricity-01"
+
+      node-commodity defines the underlying commodity
+
+    nodal-prices [$/J] F                          < 0.0 ..
+    voltage-angles [degrees] F                    < 0.0 ..
+
+      to convert to the more usual [$/MWh], multiply the
+      given nodal-prices by 278
+
+    header: b/node06.h
+
+entity.node-2-inj-elec-a06
+
+      grid injection from hydro scheme
+
+    class                                         > NodeAc2Inj:Elec
+
+      AC grid node with injection and support for two grid
+      assets
+
+      my sole bidirectional socket label is 'grid-1'
+
+    builtin-remark s                              <
+
+    socket-1 l                                    > "teas-hydro-scheme-a10.elec-1"
+    socket-2 l                                    > "teas-hv-transmission-a06.grid-1"
+
+      socket-1 is my normal supplier (injector), socket-2 is
+      my associated bidirectional grid asset
+
+    node-commodity l                              > "cm-electricity-01"
+
+      node-commodity defines the underlying commodity
+
+    nodal-prices [$/J] F                          < 0.0 ..
+    voltage-angles [degrees] F                    < 0.0 ..
+
+      to convert to the more usual [$/MWh], multiply the
+      given nodal-prices by 278
+
+    header: b/node05.h
+
+entity.node-1-xib-elec-a07
+
+      grid exit supplying aluminium smelter gateway
+
+    class                                         > NodeAc1XitB:Elec
+
+      type B AC grid spur line node with exit which also
+      takes an incoming grid asset
+
+      my sole bidirectional socket label is 'grid-1'
+      my sole normal socket label is 'sock-1'
+
+    builtin-remark s                              <
+
+    node-commodity l                              > "cm-electricity-01"
+
+      node-commodity defines the underlying commodity
+
+    nodal-prices [$/J] F                          < 0.0 ..
+    voltage-angles [degrees] F                    < 0.0 ..
+
+      to convert to the more usual [$/MWh], multiply the
+      given nodal-prices by 278
+
+    header: b/node04.h
+
+ ---------------------------------------- transmission lines
+
+entity.teas-hv-transmission-a01
+
+      SW diamond
+
+    class                                         > TeasAcTransmission
+
+      HV AC transmission line entity, based on enhanced DC
+      power flow (Motto etal 2002), and suitable for use
+      under nodal pricing -- the specific impedence values
+      are for 220kV (Purchala etal 2005 table 1)
+
+      my socket label is 'grid-1'
+
+    builtin-remark s                              <
+
+    socket-1 l                                    > "node-2-xit-elec-a01.grid-1"
+
+      socket-1 is my node entity
+
+    grid-commodity l                              > "cm-electricity-01"
+
+      grid-commodity defines the underlying commodity
+
+    capacity [W] f                                > 400e+06
+    resistance-per-metre [ohm/m] f                > 38e-06
+    reactance-per-metre [ohm/m] f                 > 250e-06
+    length [m] f                                  > 200e+03
+    voltage-angle-delta-upper [degrees] f         > 45.0
+    discretization-steps [-] i                    > 10
+
+      self-explanatory except the quadratic loss parameter
+      voltage-angle-delta-upper on [0,90] where 90 is safe
+      but should be tuned downward after reviewing results
+      and the reactance-per-metre cannot be zero
+
+    directions B                                  < 1 ..
+    injections [W] F                              < 0.0 ..
+    exits [W] F                                   < 0.0 ..
+    relative-dutys [-] F                          < 0.0 ..
+    relative-losss [-] F                          < 0.0 ..
+    voltage-angle-deltas [degrees] F              < 0.0 ..
+    capacitate-count [-] i                        < 0
+
+      directions entry 1 indicates flow from my cable to my
+      socket -- while 0 indicates the opposite
+
+    nameplate-capacity [W] f                      > 400e+06
+    duty-specific-cost-financial [$/J] f          > 0.0
+    size-specific-cost-financial [$/W/s] f        > 3.0e-12
+    standing-cost-financial [$/s] f               > 0.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    annual-discount-rate-decimal [-] f            > 0.08
+    economic-life [y] i                           > 30
+    capex-initial [$] f                           > 3.2e+09
+    capex-terminal [$] f                          > 0.8e+09
+    current-age [y] i                             > 10
+
+      a negative capex-terminal indicates salvage income as
+      opposed to decommissioning cost
+
+    embedded-costs-financial [$] F                < 0.0 ..
+
+      the 'embedded-costs-financial' are calculated using the
+      DCF annuity method over the economic life of the entity
+      in question
+
+    header: b/teas01.h
+
+entity.teas-hv-transmission-a02
+
+      NW diamond
+
+    class                                         > TeasAcTransmission
+
+      HV AC transmission line entity, based on enhanced DC
+      power flow (Motto etal 2002), and suitable for use
+      under nodal pricing -- the specific impedence values
+      are for 220kV (Purchala etal 2005 table 1)
+
+      my socket label is 'grid-1'
+
+    builtin-remark s                              <
+
+    socket-1 l                                    > "node-2-xit-elec-a03.grid-1"
+
+      socket-1 is my node entity
+
+    grid-commodity l                              > "cm-electricity-01"
+
+      grid-commodity defines the underlying commodity
+
+    capacity [W] f                                > 400e+06
+    resistance-per-metre [ohm/m] f                > 38e-06
+    reactance-per-metre [ohm/m] f                 > 250e-06
+    length [m] f                                  > 200e+03
+    voltage-angle-delta-upper [degrees] f         > 45.0
+    discretization-steps [-] i                    > 10
+
+      self-explanatory except the quadratic loss parameter
+      voltage-angle-delta-upper on [0,90] where 90 is safe
+      but should be tuned downward after reviewing results
+      and the reactance-per-metre cannot be zero
+
+    directions B                                  < 1 ..
+    injections [W] F                              < 0.0 ..
+    exits [W] F                                   < 0.0 ..
+    relative-dutys [-] F                          < 0.0 ..
+    relative-losss [-] F                          < 0.0 ..
+    voltage-angle-deltas [degrees] F              < 0.0 ..
+    capacitate-count [-] i                        < 0
+
+      directions entry 1 indicates flow from my cable to my
+      socket -- while 0 indicates the opposite
+
+    nameplate-capacity [W] f                      > 400e+06
+    duty-specific-cost-financial [$/J] f          > 0.0
+    size-specific-cost-financial [$/W/s] f        > 3.0e-12
+    standing-cost-financial [$/s] f               > 0.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    annual-discount-rate-decimal [-] f            > 0.08
+    economic-life [y] i                           > 30
+    capex-initial [$] f                           > 3.2e+09
+    capex-terminal [$] f                          > 0.8e+09
+    current-age [y] i                             > 10
+
+      a negative capex-terminal indicates salvage income as
+      opposed to decommissioning cost
+
+    embedded-costs-financial [$] F                < 0.0 ..
+
+      the 'embedded-costs-financial' are calculated using the
+      DCF annuity method over the economic life of the entity
+      in question
+
+    header: b/teas01.h
+
+entity.teas-hv-transmission-a03
+
+      NE diamond
+
+    class                                         > TeasAcTransmission
+
+      HV AC transmission line entity, based on enhanced DC
+      power flow (Motto etal 2002), and suitable for use
+      under nodal pricing -- the specific impedence values
+      are for 220kV (Purchala etal 2005 table 1)
+
+      my socket label is 'grid-1'
+
+    builtin-remark s                              <
+
+    socket-1 l                                    > "node-2-nul-elec-a04.grid-1"
+
+      socket-1 is my node entity
+
+    grid-commodity l                              > "cm-electricity-01"
+
+      grid-commodity defines the underlying commodity
+
+    capacity [W] f                                > 400e+06
+    resistance-per-metre [ohm/m] f                > 38e-06
+    reactance-per-metre [ohm/m] f                 > 250e-06
+    length [m] f                                  > 200e+03
+    voltage-angle-delta-upper [degrees] f         > 45.0
+    discretization-steps [-] i                    > 10
+
+      self-explanatory except the quadratic loss parameter
+      voltage-angle-delta-upper on [0,90] where 90 is safe
+      but should be tuned downward after reviewing results
+      and the reactance-per-metre cannot be zero
+
+    directions B                                  < 1 ..
+    injections [W] F                              < 0.0 ..
+    exits [W] F                                   < 0.0 ..
+    relative-dutys [-] F                          < 0.0 ..
+    relative-losss [-] F                          < 0.0 ..
+    voltage-angle-deltas [degrees] F              < 0.0 ..
+    capacitate-count [-] i                        < 0
+
+      directions entry 1 indicates flow from my cable to my
+      socket -- while 0 indicates the opposite
+
+    nameplate-capacity [W] f                      > 400e+06
+    duty-specific-cost-financial [$/J] f          > 0.0
+    size-specific-cost-financial [$/W/s] f        > 3.0e-12
+    standing-cost-financial [$/s] f               > 0.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    annual-discount-rate-decimal [-] f            > 0.08
+    economic-life [y] i                           > 30
+    capex-initial [$] f                           > 3.2e+09
+    capex-terminal [$] f                          > 0.8e+09
+    current-age [y] i                             > 10
+
+      a negative capex-terminal indicates salvage income as
+      opposed to decommissioning cost
+
+    embedded-costs-financial [$] F                < 0.0 ..
+
+      the 'embedded-costs-financial' are calculated using the
+      DCF annuity method over the economic life of the entity
+      in question
+
+    header: b/teas01.h
+
+entity.teas-hv-transmission-a04
+
+      SE diamond
+
+    class                                         > TeasAcTransmission
+
+      HV AC transmission line entity, based on enhanced DC
+      power flow (Motto etal 2002), and suitable for use
+      under nodal pricing -- the specific impedence values
+      are for 220kV (Purchala etal 2005 table 1)
+
+      my socket label is 'grid-1'
+
+    builtin-remark s                              <
+
+    socket-1 l                                    > "node-3-nla-elec-a05.grid-1"
+
+      socket-1 is my node entity
+
+    grid-commodity l                              > "cm-electricity-01"
+
+      grid-commodity defines the underlying commodity
+
+    capacity [W] f                                > 400e+06
+    resistance-per-metre [ohm/m] f                > 38e-06
+    reactance-per-metre [ohm/m] f                 > 250e-06
+    length [m] f                                  > 200e+03
+    voltage-angle-delta-upper [degrees] f         > 45.0
+    discretization-steps [-] i                    > 10
+
+      self-explanatory except the quadratic loss parameter
+      voltage-angle-delta-upper on [0,90] where 90 is safe
+      but should be tuned downward after reviewing results
+      and the reactance-per-metre cannot be zero
+
+    directions B                                  < 1 ..
+    injections [W] F                              < 0.0 ..
+    exits [W] F                                   < 0.0 ..
+    relative-dutys [-] F                          < 0.0 ..
+    relative-losss [-] F                          < 0.0 ..
+    voltage-angle-deltas [degrees] F              < 0.0 ..
+    capacitate-count [-] i                        < 0
+
+      directions entry 1 indicates flow from my cable to my
+      socket -- while 0 indicates the opposite
+
+    nameplate-capacity [W] f                      > 400e+06
+    duty-specific-cost-financial [$/J] f          > 0.0
+    size-specific-cost-financial [$/W/s] f        > 3.0e-12
+    standing-cost-financial [$/s] f               > 0.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    annual-discount-rate-decimal [-] f            > 0.08
+    economic-life [y] i                           > 30
+    capex-initial [$] f                           > 3.2e+09
+    capex-terminal [$] f                          > 0.8e+09
+    current-age [y] i                             > 10
+
+      a negative capex-terminal indicates salvage income as
+      opposed to decommissioning cost
+
+    embedded-costs-financial [$] F                < 0.0 ..
+
+      the 'embedded-costs-financial' are calculated using the
+      DCF annuity method over the economic life of the entity
+      in question
+
+    header: b/teas01.h
+
+entity.teas-hv-transmission-a05
+
+      spur line to hydro scheme
+
+    class                                         > TeasAcTransmission
+
+      HV AC transmission line entity, based on enhanced DC
+      power flow (Motto etal 2002), and suitable for use
+      under nodal pricing -- the specific impedence values
+      are for 220kV (Purchala etal 2005 table 1)
+
+      my socket label is 'grid-1'
+
+    builtin-remark s                              <
+
+    socket-1 l                                    > "node-2-inj-elec-a06.grid-1"
+
+      socket-1 is my node entity
+
+    grid-commodity l                              > "cm-electricity-01"
+
+      grid-commodity defines the underlying commodity
+
+    capacity [W] f                                > 800e+06
+    resistance-per-metre [ohm/m] f                > 38e-06
+    reactance-per-metre [ohm/m] f                 > 250e-06
+    length [m] f                                  > 200e+03
+    voltage-angle-delta-upper [degrees] f         > 45.0
+    discretization-steps [-] i                    > 10
+
+      self-explanatory except the quadratic loss parameter
+      voltage-angle-delta-upper on [0,90] where 90 is safe
+      but should be tuned downward after reviewing results
+      and the reactance-per-metre cannot be zero
+
+    directions B                                  < 1 ..
+    injections [W] F                              < 0.0 ..
+    exits [W] F                                   < 0.0 ..
+    relative-dutys [-] F                          < 0.0 ..
+    relative-losss [-] F                          < 0.0 ..
+    voltage-angle-deltas [degrees] F              < 0.0 ..
+    capacitate-count [-] i                        < 0
+
+      directions entry 1 indicates flow from my cable to my
+      socket -- while 0 indicates the opposite
+
+    nameplate-capacity [W] f                      > 800e+06
+    duty-specific-cost-financial [$/J] f          > 0.0
+    size-specific-cost-financial [$/W/s] f        > 3.0e-12
+    standing-cost-financial [$/s] f               > 0.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    annual-discount-rate-decimal [-] f            > 0.08
+    economic-life [y] i                           > 30
+    capex-initial [$] f                           > 6.4e+09
+    capex-terminal [$] f                          > 1.6e+09
+    current-age [y] i                             > 10
+
+      a negative capex-terminal indicates salvage income as
+      opposed to decommissioning cost
+
+    embedded-costs-financial [$] F                < 0.0 ..
+
+      the 'embedded-costs-financial' are calculated using the
+      DCF annuity method over the economic life of the entity
+      in question
+
+    header: b/teas01.h
+
+entity.teas-hv-transmission-a06
+
+      spur line to aluminium smelter
+
+    class                                         > TeasAcTransmission
+
+      HV AC transmission line entity, based on enhanced DC
+      power flow (Motto etal 2002), and suitable for use
+      under nodal pricing -- the specific impedence values
+      are for 220kV (Purchala etal 2005 table 1)
+
+      my socket label is 'grid-1'
+
+    builtin-remark s                              <
+
+    socket-1 l                                    > "node-1-xib-elec-a07.grid-1"
+
+      socket-1 is my node entity
+
+    grid-commodity l                              > "cm-electricity-01"
+
+      grid-commodity defines the underlying commodity
+
+    capacity [W] f                                > 800e+06
+    resistance-per-metre [ohm/m] f                > 38e-06
+    reactance-per-metre [ohm/m] f                 > 250e-06
+    length [m] f                                  > 100e+03
+    voltage-angle-delta-upper [degrees] f         > 45.0
+    discretization-steps [-] i                    > 10
+
+      self-explanatory except the quadratic loss parameter
+      voltage-angle-delta-upper on [0,90] where 90 is safe
+      but should be tuned downward after reviewing results
+      and the reactance-per-metre cannot be zero
+
+    directions B                                  < 1 ..
+    injections [W] F                              < 0.0 ..
+    exits [W] F                                   < 0.0 ..
+    relative-dutys [-] F                          < 0.0 ..
+    relative-losss [-] F                          < 0.0 ..
+    voltage-angle-deltas [degrees] F              < 0.0 ..
+    capacitate-count [-] i                        < 0
+
+      directions entry 1 indicates flow from my cable to my
+      socket -- while 0 indicates the opposite
+
+    nameplate-capacity [W] f                      > 800e+06
+    duty-specific-cost-financial [$/J] f          > 0.0
+    size-specific-cost-financial [$/W/s] f        > 3.0e-12
+    standing-cost-financial [$/s] f               > 0.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    annual-discount-rate-decimal [-] f            > 0.08
+    economic-life [y] i                           > 30
+    capex-initial [$] f                           > 3.2e+09
+    capex-terminal [$] f                          > 0.8e+09
+    current-age [y] i                             > 10
+
+      a negative capex-terminal indicates salvage income as
+      opposed to decommissioning cost
+
+    embedded-costs-financial [$] F                < 0.0 ..
+
+      the 'embedded-costs-financial' are calculated using the
+      DCF annuity method over the economic life of the entity
+      in question
+
+    header: b/teas01.h
+
+ ----------------------------------- ccgt with capture plant
+
+entity.asop-lmp-bid-adaptive1-a02
+
+      nodal operator for ccgt plant
+
+      setting the target-commitment from 250 to 300MW appears problematic
+
+    class                                         > AsopLmpBidAdaptive1
+
+      asset operator with automated nodal bidding based on
+      the preceding and desired commitments and predetermined
+      price change rules (read the source code for details)
+
+    builtin-remark s                              <
+
+    technical-assets L                            > "teas-ccgt-nocapture-a07 teas-ccgt-nocapture-a08"
+
+      technical-assets share the same opening bid and
+      other adaptation parameters
+
+    market-side s                                 > "supply"
+
+      the consumer or producer status of the operator is
+      determined by market-side in {demand,supply} respectively
+
+    opening-bidset [W,$/J] x                      > "150.0e+06 28.00e-09 * 150.0e+06 40.00e-09 * 50.0e+06 60.0e-09"
+    floor-price [$/J] f                           > 10.0e-09
+    target-commitment [W] f                       > 250.0e+06
+    relative-hysteresis [-] f                     > 0.1
+    price-factor [-] f                            > 0.1
+    price-delta [$/J] f                           > 1.00e-09
+    price-cap-multiplier [-] f                    > 5.0
+
+      opening-bidset is the starting bidset in the form of
+      (quantity band, unit price) bids in any order,
+      floor-price applies to the weighted-average price,
+      target-commitment is the desired duty,
+      relative-hysteresis defines the commitment zone within
+      which no adaptation occurs (zero to disable),
+      price-factor is the (non-negative) price multiplier
+      applied first (zero to disable), and price-delta is the
+      (non-negative) price increment/decrement applied second
+      (zero to disable)
+
+      for example, if a price rise is required, then:
+      bidset = bidset_previous * (1 + price-factor) + price-delta
+
+    multi-asset-price-tweak [-] f                 > 0.001
+
+      the multi-asset-price-tweak is to prioritize assets and
+      could be say 0.1% or zero to disable
+
+    submitted-bidsets [W,$/J] X                   < "0.0 0.0" ..
+    final-bidsets [W,$/J] x                       < "0.0 0.0 / 0.0 0.0"
+
+      submitted-bidsets are the actual bidsets for the
+      asset-to-report starting with the opening-bidset,
+      final-bidsets are the final step bidsets, duly
+      slash-separated
+
+    standing-cost-financial [$/s] f               > 1.0e-03
+    standing-cost-greenhouse [kg/s] f             > 8.0e-06
+    standing-cost-nox [kg/s] f                    > 0.0
+    standing-cost-depletion [J/s] f               > 0.0
+    standing-cost-landuse [m2/s] f                > 0.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    header: b/asop02.h
+
+entity.teas-ccgt-nocapture-a07
+
+      unabated CCGT plant using HHV figures
+
+      unit 1
+
+    class                                         > TeasCcgt
+
+      industrial-scale CCGT installation featuring low-duty
+      cutout and the influence of ambient air temperature on
+      efficiency and capacity
+
+      the modeler is responsible for ensuring that the
+      parametrizations used here match the fuel type and
+      whether the fuel is characterized by LHV or HHV
+
+      the HHV of natural gas is about 54.0e+06 J/kg
+
+      the values provided cover the Alstom GT26 CCGT
+      plant installed in Taranaki, New Zealand in 1998
+      and presume HHV
+
+      my socket label is 'elec-1'
+
+    builtin-remark s                              <
+
+    socket-oxidize l                              > "junc-demand-2-join-oxidgas-a02.sock-1"
+    cable-oxidize-commodity l                     > "cm-natural-gas-02"
+
+      the socket-oxidize and cable-oxidize-commodity define
+      my supplier and their socket label and our common
+      oxidizable fuel commodity
+
+    socket-electricity-commodity l                > "cm-electricity-01"
+
+      the socket-electricity-commodity defines the common
+      electricity commodity
+
+    on-design-capacity [W] f                      > 360e+06
+    on-design-efficiency [-] f                    > 0.515
+    cutout-capacity-factor [-] f                  > 0.5
+    cutout-efficiency-factor [-] f                > 0.80
+    fuel-ancillary [W] f                          > 36.0e+03
+
+      the on-design-capacity and on-design-efficiency [0,1]
+      are at 15C and 100kPa and based on net production, the
+      cutout-capacity-factor [0,1] is relative to the
+      adjusted capacity, the cutout-efficiency-factor [0,1]
+      is relative to the adjusted efficiency, and the
+      fuel-ancillary defines the shutdown fuel usage
+      converted by combustion enthalpy
+
+    ambient-air-context l                         > "cx-ambient-air-tmy-01"
+
+      the ambient-air-context provides temperature data,
+      no adjustment is made for pressure or humidity
+
+    productions [W] F                             < 0.0 ..
+    fuel-demands [kg/s] F                         < 0.0 ..
+    carbon-emissions [kg/s] F                     < 0.0 ..
+    capacitys [W] F                               < 0.0 ..
+    shutdown-statuss [-] B                        < 0 ..
+
+      productions represent the actual output figures,
+      capacitys are the temperature-adjusted potentials, and
+      shutdown-statuss are true (1) if the plant ran
+
+    nameplate-capacity [W] f                      > 360.0e06
+    duty-specific-cost-financial [$/J] f          > 1.20e-09
+    size-specific-cost-financial [$/W/s] f        > 1.22e-09
+    standing-cost-financial [$/s] f               > 0.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+    variable-costs-greenhouse [kg] F              < 0.0 ..
+
+    annual-discount-rate-decimal [-] f            > 0.10
+    economic-life [y] i                           > 25
+    capex-initial [$] f                           > 605e+06
+    capex-terminal [$] f                          > 0.0
+    current-age [y] i                             > 2
+
+      a negative capex-terminal indicates salvage income as
+      opposed to decommissioning cost
+
+    embedded-costs-financial [$] F                < 0.0 ..
+
+      the embedded-costs-financial are calculated using the
+      DCF annuity method over the economic life of the entity
+      in question
+
+    header: b/teas02.h
+
+entity.teas-ccgt-nocapture-a08
+
+      unabated CCGT plant using HHV figures
+
+      unit 2
+
+    class                                         > TeasCcgt
+
+      industrial-scale CCGT installation featuring low-duty
+      cutout and the influence of ambient air temperature on
+      efficiency and capacity
+
+      the modeler is responsible for ensuring that the
+      parametrizations used here match the fuel type and
+      whether the fuel is characterized by LHV or HHV
+
+      the HHV of natural gas is about 54.0e+06 J/kg
+
+      the values provided cover the Alstom GT26 CCGT
+      plant installed in Taranaki, New Zealand in 1998
+      and presume HHV
+
+      my socket label is 'elec-1'
+
+    builtin-remark s                              <
+
+    socket-oxidize l                              > "junc-demand-2-join-oxidgas-a02.sock-2"
+    cable-oxidize-commodity l                     > "cm-natural-gas-02"
+
+      the socket-oxidize and cable-oxidize-commodity define
+      my supplier and their socket label and our common
+      oxidizable fuel commodity
+
+    socket-electricity-commodity l                > "cm-electricity-01"
+
+      the socket-electricity-commodity defines the common
+      electricity commodity
+
+    on-design-capacity [W] f                      > 360.0e+06
+    on-design-efficiency [-] f                    > 0.505
+    cutout-capacity-factor [-] f                  > 0.5
+    cutout-efficiency-factor [-] f                > 0.80
+    fuel-ancillary [W] f                          > 36.0e+03
+
+      the on-design-capacity and on-design-efficiency [0,1]
+      are at 15C and 100kPa and based on net production, the
+      cutout-capacity-factor [0,1] is relative to the
+      adjusted capacity, the cutout-efficiency-factor [0,1]
+      is relative to the adjusted efficiency, and the
+      fuel-ancillary defines the shutdown fuel usage
+      converted by combustion enthalpy
+
+    ambient-air-context l                         > "cx-ambient-air-tmy-01"
+
+      the ambient-air-context provides temperature data,
+      no adjustment is made for pressure or humidity
+
+    productions [W] F                             < 0.0 ..
+    fuel-demands [kg/s] F                         < 0.0 ..
+    carbon-emissions [kg/s] F                     < 0.0 ..
+    capacitys [W] F                               < 0.0 ..
+    shutdown-statuss [-] B                        < 0 ..
+
+      productions represent the actual output figures,
+      capacitys are the temperature-adjusted potentials, and
+      shutdown-statuss are true (1) if the plant ran
+
+    nameplate-capacity [W] f                      > 360.0e06
+    duty-specific-cost-financial [$/J] f          > 1.20e-09
+    size-specific-cost-financial [$/W/s] f        > 1.22e-09
+    standing-cost-financial [$/s] f               > 0.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+    variable-costs-greenhouse [kg] F              < 0.0 ..
+
+    annual-discount-rate-decimal [-] f            > 0.10
+    economic-life [y] i                           > 25
+    capex-initial [$] f                           > 605e+06
+    capex-terminal [$] f                          > 0.0
+    current-age [y] i                             > 2
+
+      a negative capex-terminal indicates salvage income as
+      opposed to decommissioning cost
+
+    embedded-costs-financial [$] F                < 0.0 ..
+
+      the embedded-costs-financial are calculated using the
+      DCF annuity method over the economic life of the entity
+      in question
+
+    header: b/teas02.h
+
+# entity.teas-ccgt-capture-a07
+
+      CCGT plant with carbon capture using HHV figures
+
+      unit 1
+
+      cannot be favored with slightly better efficiency because
+      commitment is based on bidding
+
+      takes {OxidGas}
+
+    class                                         > TeasCcgtCapture
+
+      industrial-scale CCGT installation with carbon capture,
+      featuring low-duty cutout and the influence of ambient
+      air temperature on efficiency and capacity
+
+      this asset builds on the CCGT class by downgrading the
+      efficiency and capacity using fixed multipliers
+
+      the modeler is responsible for ensuring that the
+      parametrizations used here match the fuel type and
+      whether the fuel is characterized by LHV or HHV
+
+      the HHV of natural gas is about 54.0e+06 J/kg and
+      combustion produces 2.74x carbon dioxide by mass
+
+      my socket label is 'elec-1'
+
+    builtin-remark s                              <
+
+    socket-oxidize l                              > "junc-demand-2-join-oxidgas-a02.sock-1"
+    socket-carbon-seq l                           > "junc-demand-2-join-cseq-a03.sock-1"
+    cable-oxidize-commodity l                     > "cm-natural-gas-02"
+    cable-carbon-seq-commodity l                  > "cm-carbon-seq-03"
+
+      the socket-oxidize and cable-oxidize-commodity define
+      my supplier and their socket label and our common
+      oxidizable fuel commodity, similarly for
+      socket-carbon-seq and cable-carbon-seq-commodity
+
+    socket-electricity-commodity l                > "cm-electricity-01"
+
+      the socket-electricity-commodity defines the common
+      electricity commodity
+
+    on-design-capacity [W] f                      > 360.0e+06
+    on-design-efficiency [-] f                    > 0.515
+    cutout-capacity-factor [-] f                  > 0.50
+    cutout-efficiency-factor [-] f                > 0.70
+    fuel-ancillary [W] f                          > 36.0e+03
+
+      the on-design-capacity and on-design-efficiency are
+      at 15C and 100kPa and based on net production, the
+      cutout-capacity-factor [0,1] is relative to the
+      adjusted capacity, the cutout-efficiency-factor [0,1]
+      is relative to the adjusted efficiency, and the
+      fuel-ancillary defines the shutdown fuel usage
+      converted by combustion enthalpy
+
+    carbon-capture-rate [-] f                     > 0.90
+    efficiency-hit [-] f                          > 0.40
+    capacity-hit [-] f                            > 0.20
+
+      the carbon-capture-rate [0,1] is self-explanatory and
+      the efficiency-hit [0,1] and capacity-hit [0,1] are the
+      increase in fuel load and decrease in electrical output
+      which results from the carbon capture subsystem (of
+      unspecified technology) -- plant cost increases should
+      be factored in directly (see below)
+
+    ambient-air-context l                         > "cx-ambient-air-tmy-01"
+
+      the ambient-air-context provides temperature data,
+      no adjustment is made for pressure or humidity
+
+    productions [W] F                             < 0.0 ..
+    fuel-demands [kg/s] F                         < 0.0 ..
+    carbon-emissions [kg/s] F                     < 0.0 ..
+    carbon-captures [kg/s] F                      < 0.0 ..
+    capacitys [W] F                               < 0.0 ..
+    shutdown-statuss [-] B                        < 0 ..
+
+      productions represent the actual output figures,
+      carbon-captures represent the carbon dioxide sent for
+      sequestration, capacitys are the temperature-adjusted
+      potentials, and shutdown-statuss are true (1) if the
+      plant ran
+
+    nameplate-capacity [W] f                      > 360.0e+06
+    duty-specific-cost-financial [$/J] f          > 1.20e-09
+    size-specific-cost-financial [$/W/s] f        > 1.22e-09
+    standing-cost-financial [$/s] f               > 0.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+    variable-costs-greenhouse [kg] F              < 0.0 ..
+
+    annual-discount-rate-decimal [-] f            > 0.10
+    economic-life [y] i                           > 25
+    capex-initial [$] f                           > 605.0e+06
+    capex-terminal [$] f                          > 0.0
+    current-age [y] i                             > 2
+
+      a negative capex-terminal indicates salvage revenue as
+      opposed to decommissioning cost
+
+    embedded-costs-financial [$] F                < 0.0 ..
+
+      the embedded-costs-financial are calculated using the
+      DCF annuity method over the economic life of the entity
+      in question
+
+    header: b/teas02.h
+
+# entity.teas-ccgt-capture-a08
+
+      CCGT plant with carbon capture using HHV figures
+
+      unit 2
+
+      takes {OxidGas}
+
+    class                                         > TeasCcgtCapture
+
+      industrial-scale CCGT installation with carbon capture,
+      featuring low-duty cutout and the influence of ambient
+      air temperature on efficiency and capacity
+
+      this asset builds on the CCGT class by downgrading the
+      efficiency and capacity using fixed multipliers
+
+      the modeler is responsible for ensuring that the
+      parametrizations used here match the fuel type and
+      whether the fuel is characterized by LHV or HHV
+
+      the HHV of natural gas is about 54.0e+06 J/kg and
+      combustion produces 2.74x carbon dioxide by mass
+
+      my socket label is 'elec-1'
+
+    builtin-remark s                              <
+
+    socket-oxidize l                              > "junc-demand-2-join-oxidgas-a02.sock-2"
+    socket-carbon-seq l                           > "junc-demand-2-join-cseq-a03.sock-2"
+    cable-oxidize-commodity l                     > "cm-natural-gas-02"
+    cable-carbon-seq-commodity l                  > "cm-carbon-seq-03"
+
+      the socket-oxidize and cable-oxidize-commodity define
+      my supplier and their socket label and our common
+      oxidizable fuel commodity, similarly for
+      socket-carbon-seq and cable-carbon-seq-commodity
+
+    socket-electricity-commodity l                > "cm-electricity-01"
+
+      the socket-electricity-commodity defines the common
+      electricity commodity
+
+    on-design-capacity [W] f                      > 360.0e+06
+    on-design-efficiency [-] f                    > 0.505
+    cutout-capacity-factor [-] f                  > 0.50
+    cutout-efficiency-factor [-] f                > 0.70
+    fuel-ancillary [W] f                          > 36.0e+03
+
+      the on-design-capacity and on-design-efficiency are
+      at 15C and 100kPa and based on net production, the
+      cutout-capacity-factor [0,1] is relative to the
+      adjusted capacity, the cutout-efficiency-factor [0,1]
+      is relative to the adjusted efficiency, and the
+      fuel-ancillary defines the shutdown fuel usage
+      converted by combustion enthalpy
+
+    carbon-capture-rate [-] f                     > 0.90
+    efficiency-hit [-] f                          > 0.40
+    capacity-hit [-] f                            > 0.20
+
+      the carbon-capture-rate [0,1] is self-explanatory and
+      the efficiency-hit [0,1] and capacity-hit [0,1] are the
+      increase in fuel load and decrease in electrical output
+      which results from the carbon capture subsystem (of
+      unspecified technology) -- plant cost increases should
+      be factored in directly (see below)
+
+    ambient-air-context l                         > "cx-ambient-air-tmy-01"
+
+      the ambient-air-context provides temperature data,
+      no adjustment is made for pressure or humidity
+
+    productions [W] F                             < 0.0 ..
+    fuel-demands [kg/s] F                         < 0.0 ..
+    carbon-emissions [kg/s] F                     < 0.0 ..
+    carbon-captures [kg/s] F                      < 0.0 ..
+    capacitys [W] F                               < 0.0 ..
+    shutdown-statuss [-] B                        < 0 ..
+
+      productions represent the actual output figures,
+      carbon-captures represent the carbon dioxide sent for
+      sequestration, capacitys are the temperature-adjusted
+      potentials, and shutdown-statuss are true (1) if the
+      plant ran
+
+    nameplate-capacity [W] f                      > 360.0e+06
+    duty-specific-cost-financial [$/J] f          > 1.20e-09
+    size-specific-cost-financial [$/W/s] f        > 1.22e-09
+    standing-cost-financial [$/s] f               > 0.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+    variable-costs-greenhouse [kg] F              < 0.0 ..
+
+    annual-discount-rate-decimal [-] f            > 0.10
+    economic-life [y] i                           > 25
+    capex-initial [$] f                           > 605.0e+06
+    capex-terminal [$] f                          > 0.0
+    current-age [y] i                             > 2
+
+      a negative capex-terminal indicates salvage revenue as
+      opposed to decommissioning cost
+
+    embedded-costs-financial [$] F                < 0.0 ..
+
+      the embedded-costs-financial are calculated using the
+      DCF annuity method over the economic life of the entity
+      in question
+
+    header: b/teas02.h
+
+entity.junc-demand-2-split-elec-a01
+
+      splits demand between the two CCGT units
+
+    class                                         > JuncDemand2Split:Elec
+
+      a two cable demand splitting junction for given commodity
+
+      my sole socket label is 'sock-1'
+
+    builtin-remark s                              <
+
+    socket-1 l                                    > "teas-ccgt-nocapture-a07.elec-1"
+    socket-2 l                                    > "teas-ccgt-nocapture-a08.elec-1"
+
+      socket-1 and socket-2 are my two potential suppliers
+
+    junction-commodity l                          > "cm-electricity-01"
+
+      junction-commodity defines the underlying commodity
+
+    header: b/junc01.h
+
+entity.junc-demand-2-join-oxidgas-a02
+
+      joins natural gas demand from the two CCGT units
+
+    class                                         > JuncDemand2Join:OxidGas
+
+      a two socket demand joining junction for given commodity
+
+      my two socket labels are 'sock-1' and 'sock-2'
+
+    builtin-remark s                              <
+
+    socket-1 l                                    > "gate-stated-tariff-ef-natgas-d01.sock-1"
+
+      socket-1 is my sole supplier
+
+    junction-commodity l                          > "cm-natural-gas-02"
+
+      junction-commodity defines the underlying commodity
+
+    header: b/junc02.h
+
+# entity.junc-demand-2-join-cseq-a03
+
+      joins carbon sequestration services demand from the two CCGT units
+
+    class                                         > JuncDemand2Join:Cseq
+
+      a two socket demand joining junction for given commodity
+
+      my two socket labels are 'sock-1' and 'sock-2'
+
+    builtin-remark s                              <
+
+    socket-1 l                                    > "gate-stated-tariff-cseq-c01.sock-1"
+
+      socket-1 is my sole supplier
+
+    junction-commodity l                          > "cm-carbon-seq-03"
+
+      junction-commodity defines the underlying commodity
+
+    header: b/junc02.h
+
+ -------------------------------------------------- windfarm
+
+# entity.asop-lmp-bid-stated-ts1-a03
+
+      nodal operator for grid-connected windfarm
+
+    class                                         > AsopLmpBidStatedTs1
+
+      asset operator using a single read-in (as apposed to
+      stochastic or adaptive) nodal bidding timeseries
+
+    builtin-remark s                              <
+
+    technical-assets L                            > "teas-windfarm-a09"
+
+      the order of the technical-assets is not significant
+
+    market-side s                                 > "supply"
+
+      the consumer or producer status of the operator is
+      determined by market-side in {demand,supply} respectively
+
+    bidsets-1 [W,$/J] X                           > "150.0e+06 00.00e-09" ..
+
+      bidsets-1 is the sole bidset timeseries in the form of
+      (quantity band, unit price) bids in any order
+
+    standing-cost-financial [$/s] f               > 300.0e-06
+    standing-cost-greenhouse [kg/s] f             > 0.0
+    standing-cost-nox [kg/s] f                    > 0.0
+    standing-cost-depletion [J/s] f               > 0.0
+    standing-cost-landuse [m2/s] f                > 0.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    header: b/asop02.h
+
+# entity.teas-windfarm-a09
+
+      grid-connected 50 x 3MW windfarm
+
+    class                                         > TeasWindfarm
+
+      a windfarm comprising one or more identical turbines,
+      which can also spill wind
+
+      my socket label is 'elec-1'
+
+    builtin-remark s                              <
+
+    count [-] i                                   > 50
+    turbine-rating [W] f                          > 3000.0e+03
+    lo-cut-speed [m/s] f                          > 4.0
+    hi-cut-speed [m/s] f                          > 25.0
+
+      the turbine-rating applies at the cut-out-speed and can
+      be multiplied by count to calculate the windfarm capacity
+
+    socket-electricity-commodity l                > "cm-electricity-01"
+
+      socket-electricity-commodity defines the shared
+      electricity commodity
+
+    ambient-air-context l                         > "cx-ambient-air-tmy-01"
+
+      the context entity must be a sub-class of CxAmbientAir
+
+    potential-productions [W] F                   < 0.0 ..
+    actual-productions [W] F                      < 0.0 ..
+    availability [-] f                            < 0.0
+    spill [-] f                                   < 0.0
+
+      availability [0,1] is the ratio of potential output to
+      turbine-rating, spill [0,1] is the ratio of discarded
+      to potential output
+
+    nameplate-capacity [W] f                      > 3000.0e+03
+    duty-specific-cost-financial [$/J] f          > 1.4e-09
+    size-specific-cost-financial [$/W/s] f        > 0.0
+    standing-cost-financial [$/s] f               > 0.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    annual-discount-rate-decimal [-] f            > 0.10
+    economic-life [y] i                           > 25
+    capex-initial [$] f                           > +7.80e+06
+    capex-terminal [$] f                          > -0.78e+06
+    current-age [y] i                             > 2
+
+      a negative capex-terminal indicates salvage revenues as
+      opposed to decommissioning cost
+
+    embedded-costs-financial [$] F                < 0.0 ..
+
+    header: b/teas02.h
+
+ ---------------------------------------------- hydro scheme
+
+entity.asop-lmp-bid-hydro1-a04
+
+      adaptive nodal operator for hydro scheme
+
+    class                                         > AsopLmpBidHydro1
+
+      an asset operator for managing one or more hydro-
+      electric schemes within a nodal market
+
+      although the associated TeasHydroScheme asset forwards
+      information on its status, the bid formation algorithm
+      and settings are held here
+
+      two bids are made: a zero-price bid with the quantity
+      set to track the inventory target and a premium-price
+      bid offering the remaining capacity at high price --
+      the first more-or-less ensures dispatch and the
+      second more-or-less means last in line
+
+    builtin-remark s                              <
+
+    technical-assets L                            > "teas-hydro-scheme-a10"
+
+      technical-assets share the same strategy parameters
+
+    inflow-weighting [-] f                        > 0.5
+    basic-bid-price [$/J] f                       > 1.0e-09
+    premium-bid-price [$/J] f                     > 50.0e-09
+
+      an expectation of current inflow is needed to calculate
+      the zero-price bid quantity and the inflow-weighting
+      [0,1] controls the estimate: 0 for actual previous
+      inflow (persistence) and 1 for historical monthly
+      inflow (average monthly) -- the premium-bid price is
+      determined by the premium-bid-price and available
+      capacity
+
+    lake-targets [-] s                            > "0.70 0.73 0.73 0.71 0.67 0.63 0.58 0.53 0.50 0.52 0.55 0.62"
+
+      the relative monthly lake-targets [0,1] are used,
+      together with status information from the hydro asset,
+      to manage the bid formation -- 12 values are needed
+      (space-separated and in double-quotes)
+
+    standing-cost-financial [$/s] f               > 5.0e-04
+    standing-cost-greenhouse [kg/s] f             > 4.0e-06
+    standing-cost-nox [kg/s] f                    > 0.0
+    standing-cost-depletion [J/s] f               > 0.0
+    standing-cost-landuse [m2/s] f                > 0.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    header: b/asop02.h
+
+entity.teas-hydro-scheme-a10
+
+      hydro scheme
+
+    class                                         > TeasHydroScheme
+
+      a hydroelectric scheme with storage that receives
+      inflows and which can spill water -- note that the
+      opening and closing inventories are not required to
+      match
+
+      this entity is designed to be paired with
+      AsopLmpBidHydro1 when part of a nodal market
+
+      a scheme may represent more than one hydro station if
+      these form a chain and are managed collectively
+
+    builtin-remark s                              <
+
+    socket-electricity-commodity l                > "cm-electricity-01"
+
+      socket-electricity-commodity defines the shared
+      electricity commodity
+
+    inflow-context l                              > "cx-inflow-sets-02"
+
+      the context entity must be a sub-class of CxInflow
+
+    generator-capacity [W] f                      > 540.0e+06
+    storage-volume [m3] f                         > 30.0e+08
+  # storage-volume [m3] f                         > 74.0e+06
+    operating-depth [m] f                         > 0.80
+    static-head [m] f                             > 92
+    primary-efficiency [-] f                      > 0.82
+    opening-storage [-] f                         > 0.72
+
+      the above parameters are, where appropriate, nominal,
+      the storage-volume can be set to near zero to yield
+      run-of-river operation
+
+    potential-productions [W] F                   < 0.0 ..
+    actual-productions [W] F                      < 0.0 ..
+    reservoir-storages [-] F                      < 0.0 ..
+    closing-inventory [m3] f                      < 0.0
+    inventory-delta [-] f                         < 0.0
+    mean-inflow [m3/s] f                          < 0.0
+    capacity-factor [-] f                         < 0.0
+    spill-factor [-] f                            < 0.0
+    spill-count [-] i                             < 0
+
+      reservoir-storages [0-1] are relative,
+      inventory-delta [0,1] is the relative change,
+      capacity-factor [0,1] is the ratio of actual output to
+      generator capacity, spill-factor is the ratio of
+      discarded to actual output
+
+    submitted-bidsets [W,$/J] X                   < "0.0 0.0" ..
+
+      submitted-bidsets are provided by the operator, but
+      stored and reported from here
+
+    nameplate-capacity [W] f                      > 540.0e+06
+    duty-specific-cost-financial [$/J] f          > 3.0e-09
+    size-specific-cost-financial [$/W/s] f        > 0.0
+    standing-cost-financial [$/s] f               > 0.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    annual-discount-rate-decimal [-] f            > 0.08
+    economic-life [y] i                           > 25
+    capex-initial [$] f                           > 430.0e+06
+    capex-terminal [$] f                          > 43.0e+03
+    current-age [y] i                             > 50
+
+      a negative capex-terminal indicates salvage revenues as
+      opposed to decommissioning cost
+
+    embedded-costs-financial [$] F                < 0.0 ..
+
+    header: b/teas07.h
+
+entity.cx-inflow-sets-02
+
+      inflows for hydro scheme
+
+    class                                         > CxInflowSets
+
+      ambient inflow context which serves embedded data --
+      currently limited to the 1983 Benmore flowset
+      distributed by the New Zealand Electricity Commission
+
+      this context resamples for intervals other than 3600s
+
+    builtin-remark s                              <
+
+    flowset-id s                                  > "benmore1983"
+    scale [-] f                                   > 1.9
+
+      flowset-id is the identifier of an embedded flowset,
+      scale [0,inf] rescales the entire timeseries
+
+    flowset-description s                         < "_"
+    flowset-mean [m3/s] f                         < 0.0
+    flowset-minimum [m3/s] f                      < 0.0
+    flowset-maximum [m3/s] f                      < 0.0
+    flowset [m3/s] F                              < 0.0 ..
+
+    header: e/cxamb03.h
+
+ --------------------------------------- demand bidding load
+
+entity.asop-lmp-bid-param-a05
+
+      demand bidder with bid selections timeseries
+
+      Xem | Insert | Generate a selections list
+      selections-list : 1 : 0 = 3 4 : 2 = 9 10
+
+    class                                         > AsopLmpBidParam
+
+      asset operator using a single read-in (as apposed to
+      stochastic or adaptive) nodal bidding timeseries, but
+      simplified thru parametrization
+
+    builtin-remark s                              <
+
+    technical-assets L                            > "teas-load-all-elec-a11"
+
+      the order of the technical-assets is not significant
+
+    market-side s                                 > "demand"
+
+      the consumer or producer status of the operator is
+      determined by market-side in {demand,supply} respectively
+
+    bidset-list [W,$/J] s                         > "50.0e+06 40.00e-09 * 30.0e+06 28.00e-09 / 30.0e+06 40.00e-09 * 30.0e+06 28.00e-09 / 10.0e+06 40.00e-09 * 30.0e+06 28.00e-09 / 00.0e+06 00.00e-09 * 20.0e+06 28.00e-09"
+    bidset-selections [-] I                       > 1 ..
+    bid-price-multiplier [-] f                    > 1.0
+
+      the bidset-list is a single double-quoted string of
+      slash-separated bidsets, which comprise the usual
+      star-separated (quantity band, unit price) pairs -- the
+      one-based bidset-selections list identifies which
+      bidset to use, and zero means simply bid '0.0 0.0'
+
+    submitted-bidsets [W,$/J] X                   < "0.0 0.0" ..
+
+      submitted-bidsets records the bidsets used
+
+    standing-cost-financial [$/s] f               > 0.0
+    standing-cost-greenhouse [kg/s] f             > 0.0
+    standing-cost-nox [kg/s] f                    > 0.0
+    standing-cost-depletion [J/s] f               > 0.0
+    standing-cost-landuse [m2/s] f                > 0.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    header: b/asop02.h
+
+entity.teas-load-all-elec-a11
+
+      demand bidder load, with capex and opex set to zero
+
+    class                                         > TeasLoadAll:Elec
+
+      a load entity which is operator coupled for load
+      definition, for example to AsopInelasticTs, and with
+      support for all costs
+
+    builtin-remark s                              <
+
+    socket-1 l                                    > "node-2-xit-elec-a01.sock-1"
+
+      socket-1 is my supplier
+
+    cable-commodity l                             > "cm-electricity-01"
+
+      cable-commodity defines the underlying commodity
+
+    demand-hi-bound [W] f                         > 100.0e+06
+
+    loads [W] F                                   < 0.0 ..
+
+      demand-hi-bound is the maximum load, loads are the
+      actual loads
+
+    nameplate-capacity [W] f                      > 100.0e+06
+    duty-specific-cost-financial [$/J] f          > 0.0
+    size-specific-cost-financial [$/W/s] f        > 0.0
+    standing-cost-financial [$/s] f               > 0.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    annual-discount-rate-decimal [-] f            > 0.10
+    economic-life [y] i                           > 25
+    capex-initial [$] f                           > 0.0
+    capex-terminal [$] f                          > 0.0
+    current-age [y] i                             > 10
+
+      a negative capex-terminal indicates salvage revenue as
+      opposed to decommissioning cost
+
+    embedded-costs-financial [$] F                < 0.0 ..
+
+      the embedded-costs-financial are calculated using the
+      DCF annuity method over the economic life of the entity
+      in question
+
+    duty-specific-cost-greenhouse [kg/J] f        > 0.0
+    size-specific-cost-greenhouse [kg/W] f        > 0.0
+    standing-cost-greenhouse [kg/s] f             > 0.0
+    duty-specific-cost-nox [kg/J] f               > 0.0
+    size-specific-cost-nox [kg/J] f               > 0.0
+    standing-cost-nox [kg/s] f                    > 0.0
+    duty-specific-cost-depletion [J/J] f          > 0.0
+    size-specific-cost-depletion [J/W] f          > 0.0
+    standing-cost-depletion [J/s] f               > 0.0
+    duty-specific-cost-landuse [m2/J] f           > 0.0
+    size-specific-cost-landuse [m2/W] f           > 0.0
+    standing-cost-landuse [m2/s] f                > 0.0
+
+    variable-costs-greenhouse [kg] F              < 0.0 ..
+    fixed-costs-greenhouse [kg] F                 < 0.0 ..
+    variable-costs-nox [kg] F                     < 0.0 ..
+    fixed-costs-nox [kg] F                        < 0.0 ..
+    variable-costs-depletion [J] F                < 0.0 ..
+    fixed-costs-depletion [J] F                   < 0.0 ..
+    variable-costs-landuse [m2] F                 < 0.0 ..
+    fixed-costs-landuse [m2] F                    < 0.0 ..
+
+    physical-life [y] i                           > 30
+    investment-greenhouse [kg] f                  > 3.0e+03
+    investment-nox [kg] f                         > 0.0
+    investment-depletion [J] f                    > 3.0e+03
+    investment-landuse [m2] f                     > 0.0
+
+    embedded-costs-greenhouse [kg] F              < 0.0 ..
+    embedded-costs-nox [kg] F                     < 0.0 ..
+    embedded-costs-depletion [J] F                < 0.0 ..
+    embedded-costs-landuse [m2] F                 < 0.0 ..
+
+    header: b/teas04.h
+
+ ------------------------------------------ general contexts
+
+entity.cx-ambient-air-tmy-01
+
+      typical meteorological year (TMY) air context
+
+    class                                         > CxAmbientAirTMY
+
+      ambient air context which serves the NIWA TMY (typical
+      meteorological year) dataset for Otago, New Zealand
+
+      resampling is supported
+
+    builtin-remark s                              <
+
+    latitude [deg] f                              < 0
+    longitude [deg] f                             < 0
+    elevation [m] f                               < 0
+
+    hours-offset [-] i                            > 0
+    days-offset [-] i                             > 0
+    wind-speed-scale [-] f                        > 1.0
+    temperature-shift [C] f                       > 0.0
+
+      hours-offset and days-offset are used to vary the
+      starting point
+
+    wind-speeds [m/s] F                           < 0.0 ..
+    air-temps [C] F                               < 0.0 ..
+
+    header: e/cxamb01.h
+
+ ------------------------------------------------ sell gates
+
+entity.gate-stated-tariff-elec-a01
+
+      sales to urban area
+
+    class                                         > GateStatedTariff:Elec
+
+      gateway entity which uses stated (rather than
+      stochastic, unilaterally set, or negotiated) tariffs
+
+      time-of-use (TOU) tariffs can be explicitly given in
+      the tariffsets timeseries
+
+      the 'Cm*' qualifier (here * = Work) specifies the
+      relevant high-level commodity class
+
+      my socket label is 'sock-1'
+
+    builtin-remark s                              <
+
+    socket l                                      > "node-2-xit-elec-a03.sock-1"
+    common-commodity l                            > "cm-electricity-01"
+
+      the above fields define my supplier and their socket
+      label and our common commodity
+
+    tariffsets X                                  > "2.0e+00 * 210.0e+06 40.0e-09 * 210.0e+06 60.0e-09" ..
+
+      the optional leading term (1.6e-06) in the tariffsets
+      field represents a fixed charge [$/s] -- the remaining
+      star-separated pairs being not necessarily convex
+      quantity/price [J $] offers
+
+    defined-capacitys [W] F                       > 420.0e+06 ..
+
+      data capture
+
+    quantitys [W] F                               < 0.0 ..
+    marginal-prices [$/J] F                       < 0.0 ..
+    total-costs [$] F                             < 0.0 ..
+
+    header: b/gate01.h
+
+entity.gate-stated-tariff-elec-a02
+
+      sales to aluminium smelter
+
+    class                                         > GateStatedTariff:Elec
+
+      gateway entity which uses stated (rather than
+      stochastic, unilaterally set, or negotiated) tariffs
+
+      time-of-use (TOU) tariffs can be explicitly given in
+      the tariffsets timeseries
+
+      the 'Cm*' qualifier (here * = Work) specifies the
+      relevant high-level commodity class
+
+      my socket label is 'sock-1'
+
+    builtin-remark s                              <
+
+    socket l                                      > "node-1-xib-elec-a07.sock-1"
+    common-commodity l                            > "cm-electricity-01"
+
+      the above fields define my supplier and their socket
+      label and our common commodity
+
+    tariffsets X                                  > "0.0e+00 * 549.0e+06 25.0e-09 * 91.0e+06 50.0e-09" ..
+
+      the optional leading term (1.6e-06) in the tariffsets
+      field represents a fixed charge [$/s] -- the remaining
+      star-separated pairs being not necessarily convex
+      quantity/price [J $] offers
+
+    defined-capacitys [W] F                       > 640.0e+06 ..
+
+      data capture
+
+    quantitys [W] F                               < 0.0 ..
+    marginal-prices [$/J] F                       < 0.0 ..
+    total-costs [$] F                             < 0.0 ..
+
+    header: b/gate01.h
+
+ ------------ DOMAIN B ------------------- aluminium smelter
+
+entity.domain-controller-b
+
+      aluminium smelter domain
+
+    class                                         > DomainController
+
+      a domain controller entity (the only one provided)
+      which can take one of a number of commitment modes --
+      but REQUIRES that the managed entities support the
+      elected mode
+
+    builtin-remark s                              <
+
+    domain-role s                                 > "aluminium smelter"
+
+    init-scale-problem b                          > 1
+    init-use-advanced-initial-basis b             > 1
+    init-use-simplex-presolver b                  > 1
+    init-use-mip-presolver b                      > 1
+    init-apply-numerical-zero b                   > 1
+
+    trip-kkt-report-level i                       > 1
+    trip-coeff-span-level i                       > 1
+
+      these four GLPK solver behavior settings should
+      normally be set to true unless run-time tests indicate
+      otherwise -- also coeffs means structural coefficients
+
+    commitment-mode s                             > "fin"
+
+      supported commitment-mode values (lmp is nodal pricing):
+      fin | ghg | nox | dep | luc | lmp | merit | first
+
+    ranked-selgates L                             > ""
+
+      the ranked-selgates (bridging the right side) must be
+      null, one, or listed in DESCENDING priority
+
+    asset-operators L                             > "asop-inelastic-ts-b01"
+
+      the asset-operators may be null, individual, or listed
+      in no particular order
+
+    demand-junctions L                            > ""
+
+      the demand-junctions, which split and join demand, may
+      be null, individual, or listed in no particular order
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+      the following are consolidations for the entire domain
+
+    subtotal-financial [$] f                      < 0.0
+    subtotal-greenhouse [kg] f                    < 0.0
+    subtotal-nox [kg] f                           < 0.0
+    subtotal-depletion [J] f                      < 0.0
+    subtotal-landuse [m2] f                       < 0.0
+
+    header: b/domcon.h
+
+entity.asop-inelastic-ts-b01
+
+      operator for aluminium smelter with load curve
+
+      590MW represents an average production rate of 0.46kg/s
+
+    class                                         > AsopInelasticTs
+
+      asset operator with stated demand and thereby
+      price-inelastic behavior
+
+    builtin-remark s                              <
+
+    technical-assets L                            > "teas-load-all-elec-b01"
+
+      the technical-assets should have the same quantifying
+      extensity
+
+    demands [W] F                                 > 590.0e+06 ..
+
+      the demand needs to be extensity-compatible with the
+      associated assets (not checked), in addition each asset
+      gets the same value
+
+    header: b/asop03.h
+
+entity.teas-load-all-elec-b01
+
+      load sink representing aluminium smelter
+
+    class                                         > TeasLoadAll:Elec
+
+      a load entity which is operator coupled for load
+      definition, for example to AsopInelasticTs, and with
+      support for all costs
+
+    builtin-remark s                              <
+
+    socket-1 l                                    > "gate-stated-tariff-elec-a02.sock-1"
+
+      socket-1 is my supplier
+
+    cable-commodity l                             > "cm-electricity-01"
+
+      cable-commodity defines the underlying commodity
+
+    demand-hi-bound [W] f                         > 610.0e+06
+
+    loads [W] F                                   < 0.0 ..
+
+      demand-hi-bound is the maximum load, loads are the
+      actual loads
+
+    nameplate-capacity [W] f                      > 610.0e+06
+    duty-specific-cost-financial [$/J] f          > 410.0e-09
+    size-specific-cost-financial [$/W/s] f        > 0.0
+    standing-cost-financial [$/s] f               > 0.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    annual-discount-rate-decimal [-] f            > 0.08
+    economic-life [y] i                           > 20
+    capex-initial [$] f                           > 1400.0e+06
+    capex-terminal [$] f                          > 350.0e+06
+    current-age [y] i                             > 40
+
+      a negative capex-terminal indicates salvage revenue as
+      opposed to decommissioning cost
+
+    embedded-costs-financial [$] F                < 0.0 ..
+
+      the embedded-costs-financial are calculated using the
+      DCF annuity method over the economic life of the entity
+      in question
+
+    duty-specific-cost-greenhouse [kg/J] f        > 39.0e-09
+    size-specific-cost-greenhouse [kg/W] f        > 0.0
+    standing-cost-greenhouse [kg/s] f             > 0.0
+    duty-specific-cost-nox [kg/J] f               > 0.0
+    size-specific-cost-nox [kg/J/s] f             > 0.0
+    standing-cost-nox [kg/s] f                    > 0.0
+    duty-specific-cost-depletion [J/J] f          > 0.0
+    size-specific-cost-depletion [J/J/s] f        > 0.0
+    standing-cost-depletion [J/s] f               > 0.0
+    duty-specific-cost-landuse [m2/J] f           > 0.0
+    size-specific-cost-landuse [m2/J/s] f         > 0.0
+    standing-cost-landuse [m2/s] f                > 0.0
+
+    variable-costs-greenhouse [kg] F              < 0.0 ..
+    fixed-costs-greenhouse [kg] F                 < 0.0 ..
+    variable-costs-nox [kg] F                     < 0.0 ..
+    fixed-costs-nox [kg] F                        < 0.0 ..
+    variable-costs-depletion [J] F                < 0.0 ..
+    fixed-costs-depletion [J] F                   < 0.0 ..
+    variable-costs-landuse [m2] F                 < 0.0 ..
+    fixed-costs-landuse [m2] F                    < 0.0 ..
+
+    physical-life [y] i                           > 50
+    investment-greenhouse [kg] f                  > 0.0
+    investment-nox [kg] f                         > 0.0
+    investment-depletion [J] f                    > 0.0
+    investment-landuse [m2] f                     > 0.0
+
+    embedded-costs-greenhouse [kg] F              < 0.0 ..
+    embedded-costs-nox [kg] F                     < 0.0 ..
+    embedded-costs-depletion [J] F                < 0.0 ..
+    embedded-costs-landuse [m2] F                 < 0.0 ..
+
+    header: b/teas04.h
+
+ ------------ DOMAIN C ---------------------- carbon storage
+
+# entity.domain-controller-c
+
+      carbons storage domain
+
+    class                                         > DomainController
+
+      a domain controller entity (the only one provided)
+      which can take one of a number of commitment modes --
+      but REQUIRES that the managed entities support the
+      elected mode
+
+    builtin-remark s                              <
+
+    domain-role s                                 > "carbon storage"
+
+    init-scale-problem b                          > 1
+    init-use-advanced-initial-basis b             > 1
+    init-use-simplex-presolver b                  > 1
+    init-use-mip-presolver b                      > 1
+    init-apply-numerical-zero b                   > 1
+
+      these five GLPK solver behavior settings should
+      normally be set to true unless run-time tests indicate
+      otherwise -- numerical zero rounding applies to both
+      input coefficients and output values
+
+    trip-kkt-report-level i                       > 1
+    trip-coeff-span-level i                       > 1
+
+      trip-kkt-report-level in { 0 1 2 3 } for no check, then
+      report awful, close, and every, trip-coeff-span-level
+      in { 0 1 2 } for no check, then report bad and every
+      min and max abs coeff from original matrix
+
+    commitment-mode s                             > "fin"
+
+      supported commitment-mode values (lmp is nodal pricing):
+      fin | ghg | nox | dep | luc | lmp | merit | first
+
+    ranked-selgates L                             > "gate-stated-tariff-cseq-c01"
+
+      the ranked-selgates (bridging the right side) must be
+      null, one, or listed in DESCENDING priority
+
+    asset-operators L                             > "asop-internal-costs-c01 asop-internal-costs-c02"
+
+      the asset-operators may be null, individual, or listed
+      in no particular order
+
+    demand-junctions L                            > ""
+
+      the demand-junctions, which split and join demand, may
+      be null, individual, or listed in no particular order
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+      the following are consolidations for the entire domain
+
+    subtotal-financial [$] f                      < 0.0
+    subtotal-greenhouse [kg] f                    < 0.0
+    subtotal-nox [kg] f                           < 0.0
+    subtotal-depletion [J] f                      < 0.0
+    subtotal-landuse [m2] f                       < 0.0
+
+    header: b/domcon.h
+
+ ------------------------------------------ storage facility
+
+# entity.asop-internal-costs-c01
+
+      carbon storage operator
+
+    class                                         > AsopInternalCosts
+
+      basic asset operator with a null control objective and
+      with internal cost formation
+
+    builtin-remark s                              <
+
+    technical-assets L                            > "teas-ccs-geological-c01"
+
+      the order of the technical-assets is not significant
+
+    standing-cost-financial [$/s] f               > 0.0
+    standing-cost-greenhouse [kg/s] f             > 0.0
+    standing-cost-nox [kg/s] f                    > 0.0
+    standing-cost-depletion [J/s] f               > 0.0
+    standing-cost-landuse [m2/s] f                > 0.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    header: b/asop01.h
+
+# entity.teas-ccs-geological-c01
+
+      carbon storage facility
+
+    class                                         > TeasCcsGeological
+
+      industrial-scale carbon dioxide geological store using
+      injection pumps powered by electricity
+
+      in modeling terms, the facility "produces"
+      supercritical carbon dioxide sequestration services on
+      demand -- with the carbon dioxide flowing (somewhat
+      paradoxically) parallel to demand
+
+      the long-haul commitment to monitor leakage and
+      maintain capping is not expressly represented
+
+      my socket label is 'cseq-1'
+
+    builtin-remark s                              <
+
+    socket-electricity l                          > "teas-source-all-elec-c02.sock-1"
+    cable-electricity-commodity l                 > "cm-electricity-c01"
+
+      the socket-electricity and cable-electricity-commodity
+      define my electricity supplier and their socket label
+      and our common electricity commodity
+
+    socket-carbon-seq-commodity l                 > "cm-carbon-seq-03"
+
+      the socket-electricity-commodity defines the common
+      electricity commodity
+
+    divisor [-] i                                 > 10
+    demand-hi-bound [kg/s] f                      > 1200.0
+    specific-electricity-usage [J/kg] f           > 2.5e+05
+
+      the divisor is used to downsize a large capture
+      facility for use in a reduced-scope model (in the same
+      way that a building entity can be replicated by
+      specifying a count of two or more)
+
+      the demand-hi-bound defines the maximum sequestration
+      rate and the specific-electricity-usage defines the
+      electricity demand per unit sequestration
+
+    carbon-dioxide-leakage-rate [1/1000yr] f      > 0.01
+
+      the carbon-dioxide-leakage-rate per thousand years (1%
+      is low) is used to calculate the sequestration
+      contribution, assuming straight-line losses
+
+    burials [kg/s] F                              < 0.0 ..
+    electricity-demands [W] F                     < 0.0 ..
+    annual-leakage-contribution [kg] f            < 0
+
+      burials represent the actual sequestration services,
+      electricity-demands are self-explanatory, and the
+      annual-leakage-contribution is described above
+
+    nameplate-capacity [kg/s] f                   > 120.0
+    duty-specific-cost-financial [$/kg] f         > 50.0e-03
+    size-specific-cost-financial [$/kg/s] f       > 0.0
+    standing-cost-financial [$/s] f               > 0.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    annual-discount-rate-decimal [-] f            > 0.15
+    economic-life [y] i                           > 25
+    capex-initial [$] f                           > 300.0e+06
+    capex-terminal [$] f                          > 30.0e+06
+    current-age [y] i                             > 1
+
+      a negative capex-terminal indicates salvage revenue as
+      opposed to decommissioning cost
+
+    embedded-costs-financial [$] F                < 0.0 ..
+
+      the embedded-costs-financial are calculated using the
+      DCF annuity method over the economic life of the entity
+      in question
+
+    header: b/teas09.h
+
+ ---------------------------------------- electricity supply
+
+# entity.asop-internal-costs-c02
+
+      carbon storage electricity supply operator
+
+    class                                         > AsopInternalCosts
+
+      basic asset operator with a null control objective and
+      with internal cost formation
+
+    builtin-remark s                              <
+
+    technical-assets L                            > "teas-source-all-elec-c02"
+
+      the order of the technical-assets is not significant
+
+    standing-cost-financial [$/s] f               > 0.0
+    standing-cost-greenhouse [kg/s] f             > 0.0
+    standing-cost-nox [kg/s] f                    > 0.0
+    standing-cost-depletion [J/s] f               > 0.0
+    standing-cost-landuse [m2/s] f                > 0.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    header: b/asop01.h
+
+# entity.teas-source-all-elec-c02
+
+      carbon storage electricity supply
+
+    class                                         > TeasSourceAll:Elec
+
+      an operator-coupled source entity with support for
+      capacity bounds and all costs
+
+      my socket label is 'sock-1'
+
+    builtin-remark s                              <
+
+    socket-commodity l                            > "cm-electricity-c01"
+
+      socket-commodity defines the supplied commodity
+
+    extract-lo-bound [W] f                        > 0.0
+    extract-hi-bound [W] f                        > 8.0e+07
+
+      extract-hi-bound is used by the simulation whereas
+      nameplate-capacity informs the financial calculations
+
+    extractions [W] F                             < 0.0 ..
+
+      extractions are the actual extractions
+
+    nameplate-capacity [W] f                      > 8.0e+07
+    duty-specific-cost-financial [$/J] f          > 0.0
+    size-specific-cost-financial [$/W/s] f        > 0.0
+    standing-cost-financial [$/s] f               > 0.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    annual-discount-rate-decimal [-] f            > 0.10
+    economic-life [y] i                           > 25
+    capex-initial [$] f                           > 120.0e+03
+    capex-terminal [$] f                          > -10.0e+03
+    current-age [y] i                             > 2
+
+      a negative capex-terminal indicates salvage revenue as
+      opposed to decommissioning cost
+
+    embedded-costs-financial [$] F                < 0.0 ..
+
+      the embedded-costs-financial are calculated using the
+      DCF annuity method over the economic life of the entity
+      in question
+
+    duty-specific-cost-greenhouse [kg/J] f        > 0.0
+    size-specific-cost-greenhouse [kg/W] f        > 0.0
+    standing-cost-greenhouse [kg/s] f             > 0.0
+    duty-specific-cost-nox [kg/J] f               > 0.0
+    size-specific-cost-nox [kg/W] f               > 0.0
+    standing-cost-nox [kg/s] f                    > 0.0
+    duty-specific-cost-depletion [J/J] f          > 0.0
+    size-specific-cost-depletion [J/W] f          > 0.0
+    standing-cost-depletion [J/s] f               > 0.0
+    duty-specific-cost-landuse [m2/J] f           > 0.0
+    size-specific-cost-landuse [m2/W] f           > 0.0
+    standing-cost-landuse [m2/s] f                > 0.0
+
+    variable-costs-greenhouse [kg] F              < 0.0 ..
+    fixed-costs-greenhouse [kg] F                 < 0.0 ..
+    variable-costs-nox [kg] F                     < 0.0 ..
+    fixed-costs-nox [kg] F                        < 0.0 ..
+    variable-costs-depletion [J] F                < 0.0 ..
+    fixed-costs-depletion [J] F                   < 0.0 ..
+    variable-costs-landuse [m2] F                 < 0.0 ..
+    fixed-costs-landuse [m2] F                    < 0.0 ..
+
+    physical-life [y] i                           > 30
+    investment-greenhouse [kg] f                  > 3.0e+03
+    investment-nox [kg] f                         > 0.0
+    investment-depletion [J] f                    > 3.0e+03
+    investment-landuse [m2] f                     > 0.0
+
+    embedded-costs-greenhouse [kg] F              < 0.0 ..
+    embedded-costs-nox [kg] F                     < 0.0 ..
+    embedded-costs-depletion [J] F                < 0.0 ..
+    embedded-costs-landuse [m2] F                 < 0.0 ..
+
+    header: b/teas04.h
+
+# entity.cm-electricity-c01
+
+      HV grid electricity
+
+    class                                         > CmElectricity
+
+      J-quantified electricity commodity
+
+      technical assets using electricity adopt a DC-power
+      flow model and thereby ignore shunt losses -- this
+      commodity provides suitable support
+
+    builtin-remark s                              <
+
+    voltage [V] f                                 > 115.0e+03
+
+      for fixed-frequency AC power, use the RMS (root-mean-
+      square) voltage (as opposed to the peak-to-peak value)
+
+    header: b/commods.h
+
+ ------------------------------------------------ sell gates
+
+# entity.gate-stated-tariff-cseq-c01
+
+      carbon sequestration services
+
+    class                                         > GateStatedTariff:Cseq
+
+      gateway entity which uses stated (rather than
+      stochastic, unilaterally set, or negotiated) tariffs
+
+      time-of-use (TOU) tariffs can be explicitly given in
+      the tariffsets timeseries
+
+      the 'Cm*' qualifier (here * = Work) specifies the
+      relevant high-level commodity class
+
+      my socket label is 'sock-1'
+
+    builtin-remark s                              <
+
+    socket l                                      > "teas-ccs-geological-c01.cseq-1"
+    common-commodity l                            > "cm-carbon-seq-03"
+
+      the above fields define my supplier and their socket
+      label and our common commodity
+
+    tariffsets X                                  > "200.0e-03 * 120.0e+00 8.0e-03" ..
+
+      the optional leading term (1.6e-06) in the tariffsets
+      field represents a fixed charge [$/s] -- the remaining
+      star-separated pairs being not necessarily convex
+      quantity/price [J $] offers
+
+    defined-capacitys [kg/s] F                    > 120.0 ..
+
+      data capture
+
+    quantitys [kg/s] F                            < 0.0 ..
+    marginal-prices [$/kg] F                      < 0.0 ..
+    total-costs [$] F                             < 0.0 ..
+
+    header: b/gate01.h
+
+ ------------ DOMAIN D ----------------------- gas subsystem
+
+entity.domain-controller-d
+
+       gas extraction and reticulation subsystem
+
+    class                                         > DomainController
+
+      a domain controller entity (the only one provided)
+      which can take one of a number of commitment modes --
+      but REQUIRES that the managed entities support the
+      elected mode
+
+    builtin-remark s                              <
+
+    domain-role s                                 > "gas subsystem"
+
+    init-scale-problem b                          > 1
+    init-use-advanced-initial-basis b             > 1
+    init-use-simplex-presolver b                  > 1
+    init-use-mip-presolver b                      > 1
+    init-apply-numerical-zero b                   > 1
+
+    trip-kkt-report-level i                       > 1
+    trip-coeff-span-level i                       > 1
+
+      these four GLPK solver behavior settings should
+      normally be set to true unless run-time tests indicate
+      otherwise -- also coeffs means structural coefficients
+
+      these four GLPK solver behavior settings should be set
+      to true unless run-time tests indicate otherwise
+
+    commitment-mode s                             > "fin"
+
+      supported commitment-mode values (lmp is nodal pricing):
+      fin | ghg | nox | dep | luc | lmp | merit | first
+
+    ranked-selgates L                             > "gate-stated-tariff-ef-natgas-d01 gate-stated-tariff-efac-natgas-d02"
+
+      the ranked-selgates (bridging the right side) must be
+      null, one, or listed in DESCENDING priority
+
+    asset-operators L                             > "asop-internal-costs-d01 asop-internal-costs-d02"
+
+      the asset-operators may be null, individual, or listed
+      in no particular order
+
+    demand-junctions L                            > "junc-demand-2-join-oxidgas-d01"
+
+      the demand-junctions, which split and join demand, may
+      be null, individual, or listed in no particular order
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+      the following are consolidations for the entire domain
+
+    subtotal-financial [$] f                      < 0.0
+    subtotal-greenhouse [kg] f                    < 0.0
+    subtotal-nox [kg] f                           < 0.0
+    subtotal-depletion [J] f                      < 0.0
+    subtotal-landuse [m2] f                       < 0.0
+
+    header: b/domcon.h
+
+ ---------------------------------------------- gas sourcing
+
+entity.asop-internal-costs-d01
+
+      gas extraction operator
+
+    class                                         > AsopInternalCosts
+
+      basic asset operator with a null control objective and
+      with internal cost formation
+
+    builtin-remark s                              <
+
+    technical-assets L                            > "teas-source-all-oxidgas-d01"
+
+      the order of the technical-assets is not significant
+
+    standing-cost-financial [$/s] f               > 0.0
+    standing-cost-greenhouse [kg/s] f             > 0.0
+    standing-cost-nox [kg/s] f                    > 0.0
+    standing-cost-depletion [J/s] f               > 0.0
+    standing-cost-landuse [m2/s] f                > 0.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    header: b/asop01.h
+
+entity.teas-source-all-oxidgas-d01
+
+      gas extraction wellhead
+
+    class                                         > TeasSourceAll:OxidGas
+
+      an operator-coupled source entity with support for
+      capacity bounds and all costs
+
+      my socket label is 'sock-1'
+
+    builtin-remark s                              <
+
+    socket-commodity l                            > "cm-natural-gas-02"
+
+      socket-commodity defines the supplied commodity
+
+    extract-lo-bound [kg/s] f                     > 0.0
+    extract-hi-bound [kg/s] f                     > 70.0
+
+      extract-hi-bound is used by the simulation whereas
+      nameplate-capacity informs the financial calculations
+
+    extractions [kg/s] F                          < 0.0 ..
+
+      extractions are the actual extractions
+
+    nameplate-capacity [kg/s] f                   > 70.0
+    duty-specific-cost-financial [$/kg] f         > 76.0e-03
+    size-specific-cost-financial [$/kg/s/s] f     > 0.0
+    standing-cost-financial [$/s] f               > 0.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    annual-discount-rate-decimal [-] f            > 0.10
+    economic-life [y] i                           > 25
+    capex-initial [$] f                           > 8.0e+09
+    capex-terminal [$] f                          > 2.0e+09
+    current-age [y] i                             > 10
+
+      a negative capex-terminal indicates salvage revenue as
+      opposed to decommissioning cost
+
+    embedded-costs-financial [$] F                < 0.0 ..
+
+      the embedded-costs-financial are calculated using the
+      DCF annuity method over the economic life of the entity
+      in question
+
+    duty-specific-cost-greenhouse [kg/kg] f       > 0.0
+    size-specific-cost-greenhouse [kg/kg/s] f     > 0.0
+    standing-cost-greenhouse [kg/s] f             > 0.0
+    duty-specific-cost-nox [kg/kg] f              > 0.0
+    size-specific-cost-nox [kg/kg/s] f            > 0.0
+    standing-cost-nox [kg/s] f                    > 0.0
+    duty-specific-cost-depletion [J/kg] f         > 54.0e+06
+    size-specific-cost-depletion [J/kg/s] f       > 0.0
+    standing-cost-depletion [J/s] f               > 0.0
+    duty-specific-cost-landuse [m2/kg] f          > 0.0
+    size-specific-cost-landuse [m2/kg/s] f        > 0.0
+    standing-cost-landuse [m2/s] f                > 0.0
+
+    variable-costs-greenhouse [kg] F              < 0.0 ..
+    fixed-costs-greenhouse [kg] F                 < 0.0 ..
+    variable-costs-nox [kg] F                     < 0.0 ..
+    fixed-costs-nox [kg] F                        < 0.0 ..
+    variable-costs-depletion [J] F                < 0.0 ..
+    fixed-costs-depletion [J] F                   < 0.0 ..
+    variable-costs-landuse [m2] F                 < 0.0 ..
+    fixed-costs-landuse [m2] F                    < 0.0 ..
+
+    physical-life [y] i                           > 30
+    investment-greenhouse [kg] f                  > 0.0
+    investment-nox [kg] f                         > 0.0
+    investment-depletion [J] f                    > 0.0
+    investment-landuse [m2] f                     > 0.0
+
+    embedded-costs-greenhouse [kg] F              < 0.0 ..
+    embedded-costs-nox [kg] F                     < 0.0 ..
+    embedded-costs-depletion [J] F                < 0.0 ..
+    embedded-costs-landuse [m2] F                 < 0.0 ..
+
+    header: b/teas04.h
+
+ ------------------------------------------ gas transmission
+
+entity.asop-internal-costs-d02
+
+      natural gas pipeline operator
+
+    class                                         > AsopInternalCosts
+
+      basic asset operator with a null control objective and
+      with internal cost formation
+
+    builtin-remark s                              <
+
+    technical-assets L                            > "teas-pipeline-gas-d02"
+
+      the order of the technical-assets is not significant
+
+    standing-cost-financial [$/s] f               > 0.0
+    standing-cost-greenhouse [kg/s] f             > 0.0
+    standing-cost-nox [kg/s] f                    > 0.0
+    standing-cost-depletion [J/s] f               > 0.0
+    standing-cost-landuse [m2/s] f                > 0.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    header: b/asop01.h
+
+entity.teas-pipeline-gas-d02
+
+      natural gas pipeline
+
+      the 'fixed-compressor-usage' chokes above about 1.0e-05
+
+    class                                         > TeasPipelineGas
+
+      an asset for transporting specialized gas commodities
+      of type oxidize, with self-powered compressor stations
+      and support for leakage
+
+      my socket label is 'oxid-1'
+
+    builtin-remark s                              <
+
+    socket-oxidize l                              > "teas-source-all-oxidgas-d01.sock-1"
+    pipe-oxidize-commodity l                      > "cm-natural-gas-02"
+
+      socket-oxidize defines my supplier and their socket
+      label and pipe-oxidize-commodity defines the
+      transported commodity
+
+    out-hi-bound [kg/s] f                         > 70.0
+    pipe-diameter [m] f                           > 400e-03
+    pipeline-length [m] f                         > 100e+03
+    leakage-factor [kg/s/m] f                     > 1.5e-06
+    fixed-compressor-usage [kg/m/s] f             > 1.0e-05
+
+      the out-hi-bound sets the pipeline capacity on output,
+      the low capacity being zero, pipe-diameter and
+      pipeline-length are self-explanatory, the
+      leakage-factor is the leakage rate normalized per metre
+      of length (perhaps 0.5% overall), and the
+      fixed-compressor-usage is deemed duty-independent
+
+    inputs [kg/s] F                               < 0.0 ..
+    outputs [kg/s] F                              < 0.0 ..
+    absolute-leakage-rate [kg/s] f                < 0.0
+    relative-leakage-rate [-] f                   < 0.0
+    absolute-compressor-usage [kg/s] f            < 0.0
+    relative-compressor-usage [kg/s] f            < 0.0
+
+      the above should be self-explanatory
+
+    nameplate-capacity [kg/s] f                   > 70.0
+    duty-specific-cost-financial [$/kg] f         > 5.0e-03
+    size-specific-cost-financial [$/kg/s/s] f     > 0.0
+    standing-cost-financial [$/s] f               > 0.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    annual-discount-rate-decimal [-] f            > 0.10
+    economic-life [y] i                           > 25
+    capex-initial [$] f                           > 110e+06
+    capex-terminal [$] f                          > 28e+06
+    current-age [y] i                             > 10
+
+      a negative capex-terminal indicates salvage revenue as
+      opposed to decommissioning cost
+
+    embedded-costs-financial [$] F                < 0.0 ..
+
+      the embedded-costs-financial are calculated using the
+      DCF annuity method over the economic life of the entity
+      in question
+
+    header: b/teas08.h
+
+ ---------------------------------------------- gas splitter
+
+entity.junc-demand-2-join-oxidgas-d01
+
+      demand joining junction
+
+    class                                         > JuncDemand2Join:OxidGas
+
+      a two socket demand joining junction for given commodity
+
+      my two socket labels are 'sock-1' and 'sock-2'
+
+    builtin-remark s                              <
+
+    socket-1 l                                    > "teas-pipeline-gas-d02.oxid-1"
+
+      socket-1 is my sole supplier
+
+    junction-commodity l                          > "cm-natural-gas-02"
+
+      junction-commodity defines the underlying commodity
+
+    header: b/junc02.h
+
+ -------------------------------------------- gas sell gates
+
+entity.gate-stated-tariff-ef-natgas-d01
+
+      sells to HV subsystem (domain a)
+
+      non-convex (unit price reducing) tariff
+
+    class                                         > GateStatedTariffEFac:OxidGas
+
+      gateway entity which uses stated (rather than
+      stochastic, unilaterally set, or negotiated) tariffs
+      and which supports an average emissions factor
+
+      time-of-use (TOU) tariffs can be explicitly given in
+      the tariffsets timeseries
+
+      the 'Cm*' qualifier (here * = Work) specifies the
+      relevant high-level commodity class
+
+      my socket label is 'sock-1'
+
+    builtin-remark s                              <
+
+    socket l                                      > "junc-demand-2-join-oxidgas-d01.sock-1"
+    common-commodity l                            > "cm-natural-gas-02"
+
+      the above fields define my supplier and their socket
+      label and our common commodity
+
+    tariffsets X                                  > "0.0 * 20.00e+00 0.50e-00 * 50.00e+00 0.40e-00" ..
+
+      the optional leading term (1.6e-06) in the tariffsets
+      field represents a fixed charge [$/s] -- the remaining
+      star-separated pairs being not necessarily convex
+      quantity/price [J $] offers
+
+    ghg-unit-penalty [kg/kg] f                    > 0.0
+    nox-unit-penalty [kg/kg] f                    > 0.0
+    dep-unit-penalty [J/kg] f                     > 0.0
+    luc-unit-penalty [m2/kg] f                    > 0.0
+
+      the ghg-unit-penalty is used to add a non-consolidating
+      CO2e penalty to the buy-side stream -- thereby allowing
+      electricity supply to include an average emissions factor
+
+    defined-capacitys [kg/s] F                    > 60.0 ..
+
+      data capture follows
+
+    quantitys [kg/s] F                            < 0.0 ..
+    marginal-prices [$/kg] F                      < 0.0 ..
+    total-costs [$] F                             < 0.0 ..
+    total-ghg-penaltys [kg] F                     < 0.0 ..
+
+      the total-ghg-penaltys are based on ghg-unit-penalty
+
+    header: b/gate01.h
+
+entity.gate-stated-tariff-efac-natgas-d02
+
+      sells gas to urban subsystem (domain f)
+
+      non-convex (unit price reducing) tariff
+
+    class                                         > GateStatedTariffEFac:OxidGas
+
+      gateway entity which uses stated (rather than
+      stochastic, unilaterally set, or negotiated) tariffs
+      and which supports an average emissions factor
+
+      time-of-use (TOU) tariffs can be explicitly given in
+      the tariffsets timeseries
+
+      the 'Cm*' qualifier (here * = Work) specifies the
+      relevant high-level commodity class
+
+      my socket label is 'sock-1'
+
+    builtin-remark s                              <
+
+    socket l                                      > "junc-demand-2-join-oxidgas-d01.sock-2"
+    common-commodity l                            > "cm-natural-gas-02"
+
+      the above fields define my supplier and their socket
+      label and our common commodity
+
+    tariffsets X                                  > "0.0 * 3.00e+00 0.60e-00 * 7.00e+00 0.50e-00" ..
+
+      the optional leading term (1.6e-06) in the tariffsets
+      field represents a fixed charge [$/s] -- the remaining
+      star-separated pairs being not necessarily convex
+      quantity/price [J $] offers
+
+    ghg-unit-penalty [kg/kg] f                    > 0.0
+    nox-unit-penalty [kg/kg] f                    > 0.0
+    dep-unit-penalty [J/kg] f                     > 0.0
+    luc-unit-penalty [m2/kg] f                    > 0.0
+
+      the ghg-unit-penalty is used to add a non-consolidating
+      CO2e penalty to the buy-side stream -- thereby allowing
+      electricity supply to include an average emissions factor
+
+    defined-capacitys [kg/s] F                    > 10.0 ..
+
+      data capture follows
+
+    quantitys [kg/s] F                            < 0.0 ..
+    marginal-prices [$/kg] F                      < 0.0 ..
+    total-costs [$] F                             < 0.0 ..
+    total-ghg-penaltys [kg] F                     < 0.0 ..
+
+      the total-ghg-penaltys are based on ghg-unit-penalty
+
+    header: b/gate01.h
+
+ ------------ DOMAIN E -------------------------- mv network
+
+entity.domain-controller-e
+
+      MV voltage subsystem
+
+    class                                         > DomainController
+
+      a domain controller entity (the only one provided)
+      which can take one of a number of commitment modes --
+      but REQUIRES that the managed entities support the
+      elected mode
+
+    builtin-remark s                              <
+
+    domain-role s                                 > "medium voltage network"
+
+    init-scale-problem b                          > 1
+    init-use-advanced-initial-basis b             > 1
+    init-use-simplex-presolver b                  > 1
+    init-use-mip-presolver b                      > 1
+    init-apply-numerical-zero b                   > 1
+
+    trip-kkt-report-level i                       > 1
+    trip-coeff-span-level i                       > 1
+
+      these four GLPK solver behavior settings should
+      normally be set to true unless run-time tests indicate
+      otherwise -- also coeffs means structural coefficients
+
+    commitment-mode s                             > "fin"
+
+      supported commitment-mode values (lmp is nodal pricing):
+      fin | ghg | nox | dep | luc | lmp | merit | first
+
+    ranked-selgates L                             > "gate-stated-tariff-efac-elec-e01"
+
+      the ranked-selgates (bridging the right side) must be
+      null, one, or listed in DESCENDING priority
+
+    asset-operators L                             > "asop-internal-costs-e01 asop-internal-costs-e02"
+
+      the asset-operators may be null, individual, or listed
+      in no particular order
+
+    demand-junctions L                            > "junc-demand-2-split-elec-e01"
+
+      the demand-junctions, which split and join demand, may
+      be null, individual, or listed in no particular order
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+      the following are consolidations for the entire domain
+
+    subtotal-financial [$] f                      < 0.0
+    subtotal-greenhouse [kg] f                    < 0.0
+    subtotal-nox [kg] f                           < 0.0
+    subtotal-depletion [J] f                      < 0.0
+    subtotal-landuse [m2] f                       < 0.0
+
+    header: b/domcon.h
+
+ --------------------------------------- incoming substation
+
+entity.asop-internal-costs-e01
+
+       substation operator
+
+    class                                         > AsopInternalCosts
+
+      basic asset operator with a null control objective and
+      with internal cost formation
+
+    builtin-remark s                              <
+
+    technical-assets L                            > "teas-substation-e01 teas-substation-e03"
+
+      the order of the technical-assets is not significant
+
+    standing-cost-financial [$/s] f               > 0.0
+    standing-cost-greenhouse [kg/s] f             > 0.0
+    standing-cost-nox [kg/s] f                    > 0.0
+    standing-cost-depletion [J/s] f               > 0.0
+    standing-cost-landuse [m2/s] f                > 0.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    header: b/asop01.h
+
+entity.teas-substation-e01
+
+       HV/MV substation
+
+    class                                         > TeasSubstation
+
+      substation asset used to step up or down line voltages,
+      which also forms losses and costs
+
+      my socket label is 'elec-1'
+
+    builtin-remark s                              <
+
+    socket-electricity l                          > "gate-stated-tariff-elec-a01.sock-1"
+    cable-electricity-commodity l                 > "cm-electricity-01"
+
+      the socket-electricity and cable-electricity-commodity
+      define my supplier and their socket label and our
+      common electricity commodity
+
+    socket-electricity-commodity l                > "cm-electricity-04"
+
+      the socket-electricity-commodity defines the common
+      electricity commodity shared with my demander
+
+    out-hi-bound [W] f                            > 400.0e+06
+    fixed-efficiency [-] f                        > 0.97
+    no-load-loss [W] f                            > 0.5e+06
+
+      the out-hi-bound sets the substation capacity on
+      output, the low capacity being zero, fixed-efficiency
+      and no-load-loss are self-explanatory
+
+    outputs [W] F                                 < 0.0 ..
+
+    nameplate-capacity [W] f                      > 400.0e+06
+    duty-specific-cost-financial [$/J] f          > 0.0
+    size-specific-cost-financial [$/W/s] f        > 0.0
+    standing-cost-financial [$/s] f               > 0.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    annual-discount-rate-decimal [-] f            > 0.10
+    economic-life [y] i                           > 25
+    capex-initial [$] f                           > 6.0e+06
+    capex-terminal [$] f                          > 1.2e+06
+    current-age [y] i                             > 2
+
+      a negative capex-terminal indicates salvage revenue as
+      opposed to decommissioning cost
+
+    embedded-costs-financial [$] F                < 0.0 ..
+
+      the embedded-costs-financial are calculated using the
+      DCF annuity method over the economic life of the entity
+      in question
+
+    header: b/teas01.h
+
+ ----------------------------------------- embedded windfarm
+
+entity.asop-internal-costs-e02
+
+      windfarm operator
+
+    class                                         > AsopInternalCosts
+
+      basic asset operator with a null control objective and
+      with internal cost formation
+
+    builtin-remark s                              <
+
+    technical-assets L                            > "teas-windfarm-e02"
+
+      the order of the technical-assets is not significant
+
+    standing-cost-financial [$/s] f               > 5.0e-03
+    standing-cost-greenhouse [kg/s] f             > 5.0e-03
+    standing-cost-nox [kg/s] f                    > 0.0
+    standing-cost-depletion [J/s] f               > 0.0
+    standing-cost-landuse [m2/s] f                > 0.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    header: b/asop01.h
+
+entity.teas-windfarm-e02
+
+      windfarm comprising 5 x 1MW turbines
+
+      the duty-specific-cost-financial set to zero to ensure
+      dispatch, this shows the limitations of existing
+      financial data
+
+    class                                         > TeasWindfarm
+
+      a windfarm comprising one or more identical turbines,
+      which can also spill wind
+
+    builtin-remark s                              <
+
+    count [-] i                                   > 5
+    turbine-rating [W] f                          > 1000e+03
+    lo-cut-speed [m/s] f                          > 3.0
+    hi-cut-speed [m/s] f                          > 22.0
+
+      the turbine-rating applies at the cut-out-speed and can
+      be multiplied by count to calculate the windfarm capacity
+
+    socket-electricity-commodity l                > "cm-electricity-04"
+
+      socket-electricity-commodity defines the shared
+      electricity commodity
+
+    ambient-air-context l                         > "cx-ambient-air-sim-03"
+
+      the context entity must be a sub-class of CxAmbientAir
+
+    potential-productions [W] F                   < 0.0 ..
+    actual-productions [W] F                      < 0.0 ..
+    availability [-] f                            < 0.0
+    spill [-] f                                   < 0.0
+
+      availability [0,1] is the ratio of potential output to
+      turbine-rating, spill [0,1] is the ratio of discarded
+      to potential output
+
+    nameplate-capacity [W] f                      > 5000e+03
+    duty-specific-cost-financial [$/J] f          > 0.0
+    size-specific-cost-financial [$/W/s] f        > 0.0
+    standing-cost-financial [$/s] f               > 0.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    annual-discount-rate-decimal [-] f            > 0.10
+    economic-life [y] i                           > 25
+    capex-initial [$] f                           > +1.50e+06
+    capex-terminal [$] f                          > -0.15e+06
+    current-age [y] i                             > 5
+
+      a negative capex-terminal indicates salvage revenues as
+      opposed to decommissioning cost
+
+    embedded-costs-financial [$] F                < 0.0 ..
+
+    header: b/teas02.h
+
+entity.cx-ambient-air-sim-03
+
+       ambient air context supplying synthetic wind
+
+    class                                         > CxAmbientAirSim
+
+      an ambient air context with wind speeds sampled from a
+      stateless Rayleigh distribution -- meaning that the
+      prior values do not influence the current values
+
+    builtin-remark s                              <
+
+    mean-wind-speed [m/s] f                       > 10.5
+    constant-air-temp [C] f                       > 15.0
+
+      mean-wind-speed is measured at 10m above ground
+
+      constant-air-temp allows this entity to provide
+      temperature data in line with the CxAmbientAir
+      interface
+
+    wind-speeds [m/s] F                           < 0.0 ..
+
+      the wind-speeds are duly calculated
+
+    header: e/cxamb01.h
+
+ ---------------------------------------------------- busbar
+
+entity.junc-demand-2-split-elec-e01
+
+      demand splitter
+
+    class                                         > JuncDemand2Split:Elec
+
+      a two cable demand splitting junction for given commodity
+
+      my sole socket label is 'sock-1'
+
+    builtin-remark s                              <
+
+    socket-1 l                                    > "teas-substation-e01.elec-1"
+    socket-2 l                                    > "teas-windfarm-e02.elec-1"
+
+      socket-1 and socket-2 are my two potential suppliers
+
+    junction-commodity l                          > "cm-electricity-04"
+
+      junction-commodity defines the underlying commodity
+
+    header: b/junc01.h
+
+ --------------------------------------- outgoing substation
+
+entity.teas-substation-e03
+
+      MV/LV substation
+
+    class                                         > TeasSubstation
+
+      substation asset used to step up or down line voltages,
+      which also forms losses and costs
+
+      my socket label is 'elec-1'
+
+    builtin-remark s                              <
+
+    socket-electricity l                          > "junc-demand-2-split-elec-e01.sock-1"
+    cable-electricity-commodity l                 > "cm-electricity-04"
+
+      the socket-electricity and cable-electricity-commodity
+      define my supplier and their socket label and our
+      common electricity commodity
+
+    socket-electricity-commodity l                > "cm-electricity-05"
+
+      the socket-electricity-commodity defines the common
+      electricity commodity shared with my demander
+
+    out-hi-bound [W] f                            > 400.0e+06
+    fixed-efficiency [-] f                        > 0.97
+    no-load-loss [W] f                            > 0.5e+06
+
+      the out-hi-bound sets the substation capacity on
+      output, the low capacity being zero, fixed-efficiency
+      and no-load-loss are self-explanatory
+
+    outputs [W] F                                 < 0.0 ..
+
+    nameplate-capacity [W] f                      > 400.0e+06
+    duty-specific-cost-financial [$/J] f          > 0.0
+    size-specific-cost-financial [$/W/s] f        > 0.0
+    standing-cost-financial [$/s] f               > 0.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    annual-discount-rate-decimal [-] f            > 0.10
+    economic-life [y] i                           > 25
+    capex-initial [$] f                           > 120e+03
+    capex-terminal [$] f                          > -10e+03
+    current-age [y] i                             > 2
+
+      a negative capex-terminal indicates salvage revenue as
+      opposed to decommissioning cost
+
+    embedded-costs-financial [$] F                < 0.0 ..
+
+      the embedded-costs-financial are calculated using the
+      DCF annuity method over the economic life of the entity
+      in question
+
+    header: b/teas01.h
+
+ -------------------------------------------------- selgates
+
+entity.gate-stated-tariff-efac-elec-e01
+
+      gateway to occupant subsystem
+
+    class                                         > GateStatedTariffEFac:Elec
+
+      gateway entity which uses stated (rather than
+      stochastic, unilaterally set, or negotiated) tariffs
+      and which supports an average emissions factor
+
+      time-of-use (TOU) tariffs can be explicitly given in
+      the tariffsets timeseries
+
+      the 'Cm*' qualifier (here * = Work) specifies the
+      relevant high-level commodity class
+
+      my socket label is 'sock-1'
+
+    builtin-remark s                              <
+
+    socket l                                      > "teas-substation-e03.elec-1"
+    common-commodity l                            > "cm-electricity-05"
+
+      the above fields define my supplier and their socket
+      label and our common commodity
+
+    tariffsets X                                  > "1.6e-06 * 400.0e+06 28.00e-09" ..
+
+      the optional leading term (1.6e-06) in the tariffsets
+      field represents a fixed charge [$/s] -- the remaining
+      star-separated pairs being not necessarily convex
+      quantity/price [J $] offers
+
+    ghg-unit-penalty [kg/J] f                     > 140.0e-09
+    nox-unit-penalty [kg/J] f                     > 0.0
+    dep-unit-penalty [J/J] f                      > 0.0
+    luc-unit-penalty [m2/J] f                     > 0.0
+
+      the ghg-unit-penalty is used to add a non-consolidating
+      CO2e penalty to the buy-side stream -- thereby allowing
+      electricity supply to include an average emissions factor
+
+    defined-capacitys [W] F                       > 400.0e+06 ..
+
+      data capture follows
+
+    quantitys [W] F                               < 0.0 ..
+    marginal-prices [$/J] F                       < 0.0 ..
+    total-costs [$] F                             < 0.0 ..
+    total-ghg-penaltys [kg] F                     < 0.0 ..
+
+      the total-ghg-penaltys are based on ghg-unit-penalty
+
+    header: b/gate01.h
+
+ ------------ DOMAIN F -------------------- occupants domain
+
+entity.domain-controller-f
+
+      urban subsystem domain controller
+
+    class                                         > DomainController
+
+      a domain controller entity (the only one provided)
+      which can take one of a number of commitment modes --
+      but REQUIRES that the managed entities support the
+      elected mode
+
+    builtin-remark s                              <
+
+    domain-role s                                 > "urban subsystem"
+
+    init-scale-problem b                          > 1
+    init-use-advanced-initial-basis b             > 1
+    init-use-simplex-presolver b                  > 1
+    init-use-mip-presolver b                      > 1
+    init-apply-numerical-zero b                   > 1
+
+    trip-kkt-report-level i                       > 1
+    trip-coeff-span-level i                       > 1
+
+      these four GLPK solver behavior settings should
+      normally be set to true unless run-time tests indicate
+      otherwise -- also coeffs means structural coefficients
+
+    commitment-mode s                             > "ghg"
+
+      supported commitment-mode values (lmp is nodal pricing):
+      fin | ghg | nox | dep | luc | lmp | merit | first
+
+    ranked-selgates L                             > ""
+
+      the ranked-selgates (bridging the right side) must be
+      null, one, or listed in DESCENDING priority
+
+    asset-operators L                             > "asop-internal-costs-f01 asop-occupant-param-f02 asop-admin-stated-f03 asop-inelastic-param-f04"
+
+      the asset-operators may be null, individual, or listed
+      in no particular order
+
+    demand-junctions L                            > "junc-demand-2-split-elec-f01 junc-demand-2-sym-elec-f02"
+
+      the demand-junctions, which split and join demand, may
+      be null, individual, or listed in no particular order
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+      the following are consolidations for the entire domain
+
+    subtotal-financial [$] f                      < 0.0
+    subtotal-greenhouse [kg] f                    < 0.0
+    subtotal-nox [kg] f                           < 0.0
+    subtotal-depletion [J] f                      < 0.0
+    subtotal-landuse [m2] f                       < 0.0
+
+    header: b/domcon.h
+
+ ------------------------- distributed PV supply and storage
+
+entity.asop-internal-costs-f01
+
+      operates the PV installation and NiCad bank
+
+    class                                         > AsopInternalCosts
+
+      basic asset operator with a null control objective and
+      with internal cost formation
+
+    builtin-remark s                              <
+
+    technical-assets L                            > "teas-pv-installation-f01 teas-simple-storage-elec-f03"
+
+      the order of the technical-assets is not significant
+
+    standing-cost-financial [$/s] f               > 0.0
+    standing-cost-greenhouse [kg/s] f             > 0.0
+    standing-cost-nox [kg/s] f                    > 0.0
+    standing-cost-depletion [J/s] f               > 0.0
+    standing-cost-landuse [m2/s] f                > 0.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    header: b/asop01.h
+
+entity.teas-pv-installation-f01
+
+      large PV installation rated at almost 1MW
+
+    class                                         > TeasPvInstallation
+
+      a photovoltaic installation comprising one or more
+      identical flat panels plus inverter and wiring -- and
+      based on the 2010 Sandia photovoltaic array performance
+      model
+
+      only Siemens Solar SM55 modules are currently supported
+      (but more characterizations can easily be added)
+
+      my socket label is 'elec-1'
+
+    builtin-remark s                              <
+
+    panel-model [s]                               > "Siemens Solar SM55"
+    count [-] i                                   > 18000
+    panel-zenith [degrees] f                      > 30.0
+    panel-azimuth [degrees] f                     > 10.0
+    system-loss-factor [-] f                      > 0.2
+    site-altitude [m] f                           > 100.0
+
+      the panel-model is the descriptor from the Sandia
+      database, the panel-zenith [0,90] is the tilt from
+      horizontal, the panel-azimuth [0,360] is the
+      orientation relative to north, the system-loss-factor
+      accounts for general losses including wiring and
+      electronics and is usually [0.1,0.2], and the
+      site-altitude need only be approximate
+
+      the site elevation from the solar context, if non-zero,
+      will trump the site-altitude
+
+    internal-dump-flag b                          > 1
+
+      if the internal-dump-flag is 1 (true) then internal
+      dumping is allowed, else if 0 (false) then the entire
+      supply must be taken
+
+    socket-electricity-commodity l                > "cm-electricity-05"
+
+      socket-electricity-commodity defines the shared
+      electricity commodity
+
+    ambient-solar-context l                       > "cx-ambient-solar-tmy-04"
+    ambient-air-context l                         > "cx-ambient-air-tmy-05"
+
+      the context entities must be sub-classes of
+      CxAmbientSolar and CxAmbientAir
+
+    potential-productions [W] F                   < 0.0 ..
+    actual-productions [W] F                      < 0.0 ..
+    discard [-] f                                 < 0.0
+
+      discard [0,1] is the ratio of discarded to potential
+      output
+
+    nameplate-capacity [W] f                      > 990e+03
+    duty-specific-cost-financial [$/J] f          > 2.8e-10
+    size-specific-cost-financial [$/W/s] f        > 0.0
+    standing-cost-financial [$/s] f               > 0.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    annual-discount-rate-decimal [-] f            > 0.10
+    economic-life [y] i                           > 25
+    capex-initial [$] f                           > 6.33e+06
+    capex-terminal [$] f                          > 0.0
+    current-age [y] i                             > 10
+
+      a negative capex-terminal indicates salvage revenues as
+      opposed to decommissioning cost
+
+    embedded-costs-financial [$] F                < 0.0 ..
+
+    header: b/teas06.h
+
+entity.junc-demand-2-split-elec-f01
+
+      demand splitter
+
+    class                                         > JuncDemand2Split:Elec
+
+      a two cable demand splitting junction for given commodity
+
+      my sole socket label is 'sock-1'
+
+    builtin-remark s                              <
+
+    socket-1 l                                    > "gate-stated-tariff-efac-elec-e01.sock-1"
+    socket-2 l                                    > "teas-pv-installation-f01.elec-1"
+
+      socket-1 and socket-2 are my two potential suppliers
+
+    junction-commodity l                          > "cm-electricity-05"
+
+      junction-commodity defines the underlying commodity
+
+    header: b/junc01.h
+
+entity.junc-demand-2-sym-elec-f02
+
+      demand bus for NiCad storage
+
+    class                                         > JuncDemand2Sym:Elec
+
+      a two socket demand joining junction for given commodity
+
+      my two socket labels are 'sock-1' and 'sock-2'
+
+    builtin-remark s                              <
+
+    socket-1 l                                    > "junc-demand-2-split-elec-f01.sock-1"
+    socket-2 l                                    > "teas-flow-inhibitor-elec-f04.sock-1"
+
+      socket-1 and socket-2 are my suppliers
+
+    junction-commodity l                          > "cm-electricity-05"
+
+      junction-commodity defines the underlying commodity
+
+    header: b/junc03.h
+
+entity.teas-simple-storage-elec-f03
+
+      experimental 40GJ NiCad bank, also very expensive
+
+    class                                         > TeasSimpleStorage:Elec
+
+      non-proactive storage asset which either recharges
+      without cost or discharges under some predefined
+      (perhaps zero) unit cost and which can 'spill' if full
+      and this feature is enabled
+
+      the associated sourcing entities may need to be set
+      their internal-dump-flag's to zero to drive recharging
+
+      if pass thru behavior is required then combine this
+      entity with a JuncDemand2Sym junction
+
+      my socket label is 'sock-1'
+
+    builtin-remark s                              <
+
+    socket l                                      > "junc-demand-2-sym-elec-f02.sock-2"
+
+      socket is my supplier (often an electricity busbar)
+
+    stored-commodity l                            > "cm-electricity-05"
+
+      stored-commodity defines the underlying commodity
+
+    round-trip-effy [-] f                         > 0.70
+    half-life [s] f                               > 2419200
+
+      the round-trip-effy accounts for instantaneous storage
+      losses and the half-life accounts for inventory decay,
+      where zero codes for no decay
+
+    capacity [J] f                                > 40.0e+09
+    opening-storage [-] f                         > 0.1
+    recharge-rate [J/s] f                         > -1.0
+    discharge-rate [J/s] f                        > -1.0
+
+      the capacity is self-explanatory, the two rates account
+      for flow rate restrictions, whereby -1.0 means omit
+
+    spill-flag b                                  > 1
+    discharge-unit-cost [$/J] f                   > 0.0
+
+      a spill-flag set to true (1) indicates spilling is
+      supported, the discharge-unit-cost (often zero) adds to
+      the financial cost for discharge but is not
+      consolidated into the final accounts
+
+    modes [-] i                                   < 0 ..
+    charges [J/s] F                               < 0 ..
+    closing-inventorys [J] F                      < 0.0 ..
+
+      the modes {-1,0,+1} indicates discharge, no-change, or
+      recharge and the closing-inventorys are self-explanatory
+
+    nameplate-capacity [J/s] f                    > 40.0e+09
+    duty-specific-cost-financial [$/J] f          > 0.0
+    size-specific-cost-financial [$/W] f          > 0.0
+    standing-cost-financial [$/s] f               > 0.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    annual-discount-rate-decimal [-] f            > 0.10
+    economic-life [y] i                           > 25
+    capex-initial [$] f                           > 40.0e+06
+    capex-terminal [$] f                          > 4.0e+06
+    current-age [y] i                             > 2
+
+      a negative capex-terminal indicates salvage revenue as
+      opposed to decommissioning cost
+
+    embedded-costs-financial [$] F                < 0.0 ..
+
+      the embedded-costs-financial are calculated using the
+      DCF annuity method over the economic life of the entity
+      in question
+
+    header: b/teas10.h
+
+entity.asop-admin-stated-f03
+
+      rule-based administrator
+
+      the valve opens once every 48 periods
+
+    class                                         > AsopAdminStated
+
+      an administered control operator, designed to be
+      coupled with flow inhibitor assets
+
+    builtin-remark s                              <
+
+    technical-assets L                            > "teas-flow-inhibitor-elec-f04"
+
+      technical-assets share the same administrative
+      parameters
+
+    relative-valve-settings [-] F                 > 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 1.0 ..
+    operational-penaltys [+/s]                    > 0.0 ..
+
+      the relative-valve-settings are self-explanatory,
+      the operational-penaltys are + in {$,J,kg,m2} as
+      determined by the commitment mode for the domain
+
+    standing-cost-financial [$/s] f               > 0.0
+    standing-cost-greenhouse [kg/s] f             > 0.0
+    standing-cost-nox [kg/s] f                    > 0.0
+    standing-cost-depletion [J/s] f               > 0.0
+    standing-cost-landuse [m2/s] f                > 0.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    header: b/asop05.h
+
+entity.teas-flow-inhibitor-elec-f04
+
+      valve (in this case) controlling the storage discharge
+
+    class                                         > TeasFlowInhibitor:Elec
+
+      flow inhibitor taking its valve and penalty settings
+      from an administrative operator
+
+      my socket label is 'sock-1'
+
+    builtin-remark s                              <
+
+    socket-1 l                                    > "teas-simple-storage-elec-f03.sock-1"
+
+      socket-1 is my upstream supplier
+
+    common-commodity l                            > "cm-electricity-05"
+
+      common-commodity defines the underlying commodity
+
+    valve-max-capacity [W] f                      > 3.0e+06
+    invert-valve-settings [-] b                   > 0
+
+      the valve-max-capacity and the relative valve setting
+      determine the valve capacity
+
+    valve-capacitys [W] F                         < 0.0 ..
+    valve-binds [-] b                             < 0 ..
+    operational-penaltys [+/s] F                  < 0.0 ..
+    maximum-duty [W] f                            < 0.0
+
+      the operational-penaltys unit is + in {$,kg,J,m2}
+
+    header: b/teas12.h
+
+ -------------------------------- thermal services provision
+
+entity.asop-occupant-param-f02
+
+      building occupant operator
+
+    class                                         > AsopOccupantParam
+
+      asset operator who acts as a building occupant and
+      provides set point and activity information based on
+      day and non-day parameters
+
+    builtin-remark s                              <
+
+    technical-assets L                            > "teas-building-elec-f02"
+
+      technical-assets in any order
+
+    occupant-count [-] i                          > 5
+
+      occupant-count is the number of people
+
+    day-start [h] i                               > 8
+    day-end [h] i                                 > 20
+
+      day-start and day-end on [0,24] at beginning of hour
+
+    temperature-set-point [C] f                   > 21.0
+    activity-load-day-person [W] f                > 140
+    activity-load-night-person [W] f              > 100
+    electricity-demand-day-base [W] f             > 1.0e+03
+    electricity-demand-night-base [W] f           > 0.5e+03
+    electricity-demand-day-person [W] f           > 0.5e+03
+    electricity-demand-night-person [W] f         > 0.0
+
+      the temperature-set-point is used to determine cooling
+      and heating loads, the activity_loads are the heating
+      contribution over and above the direct
+      electricity-demands and are per person
+
+    temperature-set-points [C] F                  < 0.0 ..
+    activity-loads [W] F                          < 0.0 ..
+    electricity-demands [W] F                     < 0.0 ..
+
+    header: b/asop04.h
+
+# entity.teas-building-elec-f02
+
+      good energy performance building stock
+
+      building stock entity providing housing and workplaces to
+      around 45 000 individuals
+
+    class                                         > TeasBuildingElec
+
+      a simple electricity cooled and heated building which
+      is coupled to an occupant operator for indoor
+      temperature set point and activity data
+
+      designed to be paired with AsopOccupant
+
+    builtin-remark s                              <
+
+    socket-1 l                                    > "junc-demand-2-sym-elec-f02.sock-1"
+
+      socket-1 is my supplier
+
+    cable-electricity-commodity l                 > "cm-electricity-05"
+
+      cable-electricity-commodity defines the underlying commodity
+
+    count [-] i                                   > 9000
+    demand-hi-bound [W] f                         > 30.0e+03
+
+    total-capacity [W] f                          < 0.0
+    demands [W] F                                 < 0.0 ..
+    hvac-dutys [W] F                              < 0.0 ..
+    floor-performance [W/m2] f                    < 0.0
+    chiller-max-duty [W] f                        < 0.0
+    heater-max-duty [W] f                         < 0.0
+
+      demand-hi-bound is the maximum electricity demand for
+      each count house -- demands are the actual metered
+      demands combined for all houses, floor-performance is
+      the annual average HVAC usage
+
+    ambient-air-context l                         > "cx-ambient-air-tmy-05"
+    ambient-solar-context l                       > "cx-ambient-solar-tmy-04"
+
+      these context entities must be a sub-class of
+      CxAmbientAir and CxAmbientSolar respectively
+
+    orientation [degrees] f                       > +30.0
+    floor-area [m2] f                             > 200
+    floor-aspect-ratio [-] f                      > 2.0
+    wall-height [m] f                             > 3.0
+    window-to-wall-ratio [-] f                    > 0.40
+
+      orientation [-90,90] refers to the short-axis of the
+      building, the floor-area is the footprint, the
+      floor-aspect-ratio, wall-height, and
+      window-to-wall-ratio are self-evident
+
+    construction-type s                           > "good"
+
+      the construction-type is used to generate
+      representative thermal characteristics in
+      average | good
+
+    chiller-thermal-capacity [W] f                > 15.0e+03
+    heater-thermal-capacity [W] f                 > 15.0e+03
+
+      chiller-thermal-capacity and heater-thermal-capacity
+      are self-evident, the chiller itself uses a Plank
+      refrigeration model with refrigerant R-134a, heating
+      uses electrical resistance
+
+    hvac-ops-start [h] i                          > 0
+    hvac-ops-end [h] i                            > 24
+    hvac-backlog-trip [-] f                       > 2.0
+
+      hvac-ops-start and hvac-ops-end [0,24] specify the HVAC
+      run schedule where always off is (0,0) and continuous
+      is (0,24), hvac-backlog-trip [0,inf] sets the level
+      beyond which unmet HVAC carryover provoke warnings
+
+      short-run building costs are included and these are on
+      a per-building basis and should not be pre-multiplied
+      by count
+
+    nameplate-capacity [W] f                      > 30.0e+03
+    duty-specific-cost-financial [$/J] f          > 0.0
+    size-specific-cost-financial [$/W/s] f        > 0.0
+    standing-cost-financial [$/s] f               > 0.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+      the following capex information represents total costs
+      and must be pre-multiplied by count
+
+    annual-discount-rate-decimal [-] f            > 0.10
+    economic-life [y] i                           > 15
+    capex-initial [$] f                           > 144e+06
+    capex-terminal [$] f                          > 0.0
+    current-age [y] i                             > 0
+
+      a negative capex-terminal indicates salvage revenue as
+      opposed to decommissioning cost
+
+    embedded-costs-financial [$] F                < 0.0 ..
+
+      the embedded-costs-financial are calculated using the
+      DCF annuity method over the economic life of the entity
+      in question
+
+    header: b/teas05.h
+
+entity.teas-building-elec-f02
+
+      poor energy performance building stock
+
+      building stock entity providing housing and workplaces to
+      around 45 000 individuals
+
+    class                                         > TeasBuildingElec
+
+      a simple electricity cooled and heated building which
+      is coupled to an occupant operator for indoor
+      temperature set point and activity data
+
+      designed to be paired with AsopOccupant
+
+    builtin-remark s                              <
+
+    socket-1 l                                    > "junc-demand-2-sym-elec-f02.sock-1"
+
+      socket-1 is my supplier
+
+    cable-electricity-commodity l                 > "cm-electricity-05"
+
+      cable-electricity-commodity defines the underlying commodity
+
+    count [-] i                                   > 9000
+    demand-hi-bound [W] f                         > 50.0e+03
+
+    total-capacity [W] f                          < 0.0
+    demands [W] F                                 < 0.0 ..
+    hvac-dutys [W] F                              < 0.0 ..
+    floor-performance [W/m2] f                    < 0.0
+    chiller-max-duty [W] f                        < 0.0
+    heater-max-duty [W] f                         < 0.0
+
+      demand-hi-bound is the maximum electricity demand for
+      each count house -- demands are the actual metered
+      demands combined for all houses, floor-performance is
+      the annual average HVAC usage
+
+    ambient-air-context l                         > "cx-ambient-air-tmy-05"
+    ambient-solar-context l                       > "cx-ambient-solar-tmy-04"
+
+      these context entities must be a sub-class of
+      CxAmbientAir and CxAmbientSolar respectively
+
+    orientation [degrees] f                       > +30.0
+    floor-area [m2] f                             > 200
+    floor-aspect-ratio [-] f                      > 2.0
+    wall-height [m] f                             > 3.0
+    window-to-wall-ratio [-] f                    > 0.40
+
+      orientation [-90,90] refers to the short-axis of the
+      building, the floor-area is the footprint, the
+      floor-aspect-ratio, wall-height, and
+      window-to-wall-ratio are self-evident
+
+    construction-type s                           > "average"
+
+      the construction-type is used to generate
+      representative thermal characteristics in
+      average | good
+
+    chiller-thermal-capacity [W] f                > 30.0e+03
+    heater-thermal-capacity [W] f                 > 30.0e+03
+
+      chiller-thermal-capacity and heater-thermal-capacity
+      are self-evident, the chiller itself uses a Plank
+      refrigeration model with refrigerant R-134a, heating
+      uses electrical resistance
+
+    hvac-ops-start [h] i                          > 0
+    hvac-ops-end [h] i                            > 24
+    hvac-backlog-trip [-] f                       > 2.0
+
+      hvac-ops-start and hvac-ops-end [0,24] specify the HVAC
+      run schedule where always off is (0,0) and continuous
+      is (0,24), hvac-backlog-trip [0,inf] sets the level
+      beyond which unmet HVAC carryover provoke warnings
+
+      short-run building costs are included and these are on
+      a per-building basis and should not be pre-multiplied
+      by count
+
+    nameplate-capacity [W] f                      > 50.0e+03
+    duty-specific-cost-financial [$/J] f          > 0.0
+    size-specific-cost-financial [$/W/s] f        > 0.0
+    standing-cost-financial [$/s] f               > 0.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+      the following capex information represents total costs
+      and must be pre-multiplied by count
+
+    annual-discount-rate-decimal [-] f            > 0.10
+    economic-life [y] i                           > 15
+    capex-initial [$] f                           > 0.0
+    capex-terminal [$] f                          > 0.0
+    current-age [y] i                             > 0
+
+      a negative capex-terminal indicates salvage revenue as
+      opposed to decommissioning cost
+
+    embedded-costs-financial [$] F                < 0.0 ..
+
+      the embedded-costs-financial are calculated using the
+      DCF annuity method over the economic life of the entity
+      in question
+
+    header: b/teas05.h
+
+ ------------------------------------------------ gas demand
+
+entity.asop-inelastic-param-f04
+
+      natural gas demander
+
+    class                                         > AsopInelasticParam
+
+      asset operator with generated diurnal demand and
+      thereby price-inelastic behavior
+
+    builtin-remark s                              <
+
+    technical-assets L                            > "teas-load-fin-natgas-f05"
+
+      the technical-assets should have the same quantifying
+      extensity
+
+    demand-mean [kg/s] f                          > 5.0
+    demand-amplitude [kg/s] f                     > 1.5
+    temporal-shift [h] i                          > 0
+    demand-randomness [-] f                       > 0.2
+
+      demand-mean is the mean value before noise,
+      demand-amplitude is peak-to-peak measure,
+      temporal-shift is relative to midnight,
+      demand-randomness is the maximum noise relative to the
+      amplitude, use zero to disable
+
+    header: b/asop03.h
+
+entity.teas-load-fin-natgas-f05
+
+      natural gas sink
+
+    class                                         > TeasLoadFin:OxidGas
+
+      a load entity which is operator coupled for load
+      definition, for example to AsopInelasticTs, and with
+      support for financial costs
+
+    builtin-remark s                              <
+
+    socket-1 l                                    > "gate-stated-tariff-efac-natgas-d02.sock-1"
+
+      socket-1 is my supplier
+
+    cable-commodity l                             > "cm-natural-gas-02"
+
+      cable-commodity defines the underlying commodity
+
+    demand-hi-bound [kg/s] f                      > 10.0
+
+    loads [kg/s] F                                < 0.0 ..
+
+      demand-hi-bound is the maximum load, loads are the
+      actual loads
+
+    nameplate-capacity [kg/s] f                   > 20.0
+    duty-specific-cost-financial [$/kg] f         > 0.0
+    size-specific-cost-financial [$/W/s] f        > 0.0
+    standing-cost-financial [$/s] f               > 0.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    annual-discount-rate-decimal [-] f            > 0.10
+    economic-life [y] i                           > 25
+    capex-initial [$] f                           > 0.0
+    capex-terminal [$] f                          > 0.0
+    current-age [y] i                             > 2
+
+      a negative capex-terminal indicates salvage revenue as
+      opposed to decommissioning cost
+
+    embedded-costs-financial [$] F                < 0.0 ..
+
+      the embedded-costs-financial are calculated using the
+      DCF annuity method over the economic life of the entity
+      in question
+
+    header: b/teas04.h
+
+ -------------------------------------------------- contexts
+
+entity.cx-ambient-solar-tmy-04
+
+      solar context
+
+    class                                         > CxAmbientSolarTMY
+
+      ambient solar context which serves the NIWA TMY
+      (typical meteorological year) dataset for Otago, New
+      Zealand
+
+      as currently code, the interval length must be 3600s
+      (but adding resampling would be straightforward)
+
+    builtin-remark s                              <
+
+    latitude [deg] f                              < 0
+    longitude [deg] f                             < 0
+    elevation [m] f                               < 0
+
+    solar-direct [W/m2] F                         < 0.0 ..
+    solar-diffuse [W/m2] F                        < 0.0 ..
+    sun-zenith [degrees] F                        < 0.0 ..
+    sun-azimuth [degrees] F                       < 0.0 ..
+
+      solar-direct and solar-diffuse are the solar
+      irradiation components, time-based to UTC
+
+    hours-offset [-] i                            > 0
+    days-offset [-] i                             > 0
+
+      hours-offset and days-offset are used to vary the
+      starting point
+
+    header: e/cxamb02.h
+
+entity.cx-ambient-air-tmy-05
+
+      typical meteorological year (TMY) ambient air context
+
+    class                                         > CxAmbientAirTMY
+
+      ambient air context which serves the NIWA TMY (typical
+      meteorological year) dataset for Otago, New Zealand
+
+      as currently code, the interval length must be 3600s
+      (but adding resampling would be straightforward)
+
+    builtin-remark s                              <
+
+    latitude [deg] f                              < 0
+    longitude [deg] f                             < 0
+    elevation [m] f                               < 0
+
+    hours-offset [-] i                            > 0
+    days-offset [-] i                             > 0
+    wind-speed-scale [-] f                        > 1.0
+    temperature-shift [C] f                       > 0.0
+
+      hours-offset and days-offset are used to vary the
+      starting point
+
+    wind-speeds [m/s] F                           < 0.0 ..
+    air-temps [C] F                               < 0.0 ..
+
+    header: e/cxamb01.h
+
+ ------------ COMMON 1 ------------------ common commodities
+
+entity.cm-electricity-01
+
+      HV grid electricity
+
+    class                                         > CmElectricity
+
+      J-quantified electricity commodity
+
+      technical assets using electricity adopt a DC-power
+      flow model and thereby ignore shunt losses -- this
+      commodity provides suitable support
+
+    builtin-remark s                              <
+
+    voltage [V] f                                 > 220.0e+03
+
+      for fixed-frequency AC power, use the RMS (root-mean-
+      square) voltage (as opposed to the peak-to-peak value)
+
+    header: b/commods.h
+
+entity.cm-natural-gas-02
+
+      natural gas
+
+    class                                         > CmOxidNaturalGas
+
+      fossil natural gas as CmOxidGas specialization with
+      added data range checking
+
+    builtin-remark s                              <
+
+    spec-combustion-enthalpy [J/kg] f             > 54.0e+06
+    spec-carbon-dioxide [kg/kg] f                 > 2.74
+    spec-co2-equiv [kg/kg] f                      > 2.71
+    spec-gwp [kg/kg] f                            > 25.0
+
+      the spec-combustion-enthalpy given here is a typical
+      the AR (as received) HHV (higher heating value) for
+      natural gas -- the modeler can use other protocols but
+      the chosen protocol must be consistent with the
+      associated technical assets
+
+      spec-carbon-dioxide describes the post-combustion
+      stoichiometry for CCS usage, the spec-co2-equiv
+      covers combustion products, and the spec-gwp
+      (global warming potential) covers unburnt leakage
+
+    header: b/commods01.h
+
+entity.cm-carbon-seq-03
+
+      supercritical carbon dioxide
+
+    class                                         > CmCarbonSeq
+
+      kg-quantified pressure state-changeable carbon dioxide
+      sequestration-service commodity
+
+      demand flow is antiparallel to physical flow, similar
+      in behavior to that of a conventional fuel (like coal)
+
+    builtin-remark s                              <
+
+    pressures [Pa] F                              < 0.0 ..
+
+      the carriage pressure is normally supercritical, around
+      10.0e+03 kPa
+
+    header: b/commods.h
+
+entity.cm-electricity-04
+
+       MV electricity
+
+    class                                         > CmElectricity
+
+      J-quantified electricity commodity
+
+      technical assets using electricity adopt a DC-power
+      flow model and thereby ignore shunt losses -- this
+      commodity provides suitable support
+
+    builtin-remark s                              <
+
+    voltage [V] f                                 > 11.0e+03
+
+      for fixed-frequency AC power, use the RMS (root-mean-
+      square) voltage (as opposed to the peak-to-peak value)
+
+    header: b/commods.h
+
+entity.cm-electricity-05
+
+       LV electricity
+
+    class                                         > CmElectricity
+
+      J-quantified electricity commodity
+
+      technical assets using electricity adopt a DC-power
+      flow model and thereby ignore shunt losses -- this
+      commodity provides suitable support
+
+    builtin-remark s                              <
+
+    voltage [V] f                                 > 230
+
+      for fixed-frequency AC power, use the RMS (root-mean-
+      square) voltage (as opposed to the peak-to-peak value)
+
+    header: b/commods.h
+
+ ------------------------------------------------------ tail
+
+note
+
+    $Id: poc.008.guard.xem 9217 2012-04-03 15:38:18Z robbie $
+
+note
+
+    useful emacs text editor settings
+    local variables:
+      mode: xem
+      tab-stop-list: (04 50 52)
+      truncate-lines: t
+    end:
+
+model-end
+

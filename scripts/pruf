@@ -1,0 +1,452 @@
+#! /bin/bash
+
+#  file-purpose     : run unit tests and main file test in current directory
+#  file-initiator   : Robbie Morrison <robbie@actrix.co.nz>
+#  file-create-date : Fri 25-May-2007 21:11 UTC
+#  file-status      : working
+#  file-keywords    : xeona
+
+#  $Revision: 5972 $
+#  $Date: 2011-02-23 10:23:24 +0100 (Wed, 23 Feb 2011) $
+#  $Author: robbie $
+#  $URL: file:///home/robbie/svn-root/xeona/futz/trunk/scripts/pruf $
+
+# ---------------------------------
+#  settings
+# ---------------------------------
+
+MACH="mach"                             # build script name
+host=$(hostname --short)
+case "$host" in
+    hinau) DEFAULT_ARGS="-f4mpveo"   ;; # arguments to be passed to 'mach'
+#   hinau) DEFAULT_ARGS="-fF34mpveo" ;; # arguments to be passed to 'mach' for Boost 1.44 and 1.45
+    sojus) DEFAULT_ARGS="-fmpveo"    ;; # arguments to be passed to 'mach'
+    *)     DEFAULT_ARGS="-fmpveo"    ;; # arguments to be passed to 'mach'
+esac
+UTEST="ut"                              # filename tag for unit-tester
+MAIN="main"                             # main function file stub (without .cc)
+
+XEONADIR="xeona-mach"                   # subdirectory to clean out
+XEONADIR_PATTERNS="*.html *.prob *.soln *~ vgcore* core"   # CAUTION: raw spaces unacceptable
+
+# -------------------------
+#  preamble
+# -------------------------
+
+SCRIPT=$(basename "$0")
+
+E_SUCCESS=100                           # the mach exits aggregate is normally returned
+E_USAGE=102
+E_NO_MAKEFILE=201
+E_FAIL=202
+E_FIREFOX_TOO_NICE=203
+
+E_MAINFILE_NOT_FOUND=204
+E_XEONADIR_NOT_FOUND=205
+
+# ---------------------------------
+#  display_help()
+# ---------------------------------
+
+function display_help
+{
+echo
+echo "       usage: $SCRIPT [--ask|--fox|--slo]          build units using: $MACH $DEFAULT_ARGS"
+echo "              $SCRIPT [--ask|--fox|--slo] --       build units using: $MACH --"
+echo "              $SCRIPT [--ask|--fox|--slo] -<opts>  build units using: $MACH -<opts>"
+echo "              $SCRIPT  --clean  -c           clean current dir: $MACH -c"
+echo "              $SCRIPT  --xclean -x           clean subdir '$XEONADIR' of $XEONADIR_PATTERNS"
+echo "              $SCRIPT  --help                this message"
+echo "      option: --ask -A : seek user response after each failed '$MACH' call"
+echo "              --fox -F : require a non-niced 'firefox' web-browser process if appropriate"
+echo "              --slo -S : do not scrub the '-f' option, if any, after the first unit test pass"
+echo "     purpose: run unit tests and main file test in current directory"
+echo "      alerts: none ('$MACH' is monotone)"
+echo "    examples: quick check (but 'main' may fail )  : \$ $SCRIPT --"
+echo "              more thorough and interactive       : \$ $SCRIPT -A"
+echo "              everything                          : \$ $SCRIPT -A -tfmpva"
+echo
+}
+
+# ---------------------------------
+#  report()
+# ---------------------------------
+
+function report
+{
+    local tab=-30                       # the "-" means left justify
+    case "$#" in                        # argument count
+        0)  printf "\n"                                   ;;
+        1)  printf "$SCRIPT: %s\n" "$1"                   ;;
+        2)  printf "$SCRIPT: %${tab}s : %s\n" "$1" "$2"   ;;
+        *)
+            report "CODING ERROR" "more than two arguments given for report()"
+            exit $E_FAIL
+            ;;
+    esac
+    return 0
+}
+
+# ---------------------------------
+#  clean_branch()
+# ---------------------------------
+
+function clean_branch
+{
+    local cmd="$1"                      # clean command to use
+
+    local call="find -P . -maxdepth 1 -type d -name \"[a-z]\" -printf \"%P\n\" | sort"
+    local sdirs="$(eval "$call")"
+    for sdir in $sdirs
+      do
+      $cmd "$sdir"
+    done
+    $cmd                                # root directory last
+    # return with mach exit
+}
+
+# ---------------------------------
+#  clean_xeonadir()
+# ---------------------------------
+
+function clean_xeonadir
+{
+    local subdir="$1"
+
+    # local settings
+    local TAB=10                        # reporting alignment
+
+    # integrity
+    local main="$MAIN.cc"
+    test -f "$main" || {
+        echo "$SCRIPT: error: formative main file not found: $main"
+        return $E_MAINFILE_NOT_FOUND
+    }
+    test -d "$subdir" || {
+        echo "$SCRIPT: error: subdirectory not found: $subdir"
+        return $E_XEONADIR_NOT_FOUND
+    }
+
+    # action
+    local call
+    local pattern                       # individual pattern
+    local count                         # count of files
+    local total=0                       # total count
+    printf "  %-*s  %s\n" $TAB "" "deleted"                                # title line
+    for pattern in $XEONADIR_PATTERNS
+      do
+      call="find -P $subdir -maxdepth 1 -type f -name \"${pattern}\""      # basic 'find' call
+      count=$( eval $call "-ls | wc --lines" )                             # count files
+      printf "  %-*s   %3d\n" $TAB "\"$pattern\"" $count                   # report
+      let "total += count"
+      eval $call "-execdir rm --force -- {} \;"                            # action!
+    done
+
+    # additional reporting
+    echo    "---"
+    echo    "$SCRIPT: subdirectory    : $subdir"
+    echo    "$SCRIPT: total deleted   : $total"
+    echo -n "$SCRIPT: remaining files : "
+    ls $subdir
+
+    # return value
+    return 0
+}
+
+# ---------------------------------
+#  confirm_firefox()
+# ---------------------------------
+#
+# delay: if firefox is running, use a 1s delay, else longer
+
+function confirm_firefox
+{
+    local short=1                       # delay if firefox is running
+    local long=15                       # delay after invoking firefox
+    local niceness=999                  # nonsensical value
+
+    report
+    report "checking for 'firefox-bin' processes"
+    ps --no-headers -C "firefox-bin"
+    ret=$?
+    case $ret in
+        0)                              # firefox present
+            report "'firefox' is running"
+            sleep "$short"
+            ;;
+        1)                              # firefox not present
+            niceness=$(nice)            # +20 (nice) to -19 (greedy)
+            report "current niceness: $niceness"
+            if [ $niceness -gt 0 ]
+                then
+                report "must start firefox before running this script under nice, quitting without action"
+                report
+                exit $E_FIREFOX_TOO_NICE
+            fi
+            report "about to invoke 'firefox' in background"
+            firefox &
+            report "about to sleep $long"
+            sleep "$long"
+            ;;
+        *)
+            report "ERROR: unexpected return value from 'ps': $ret"
+            ;;
+    esac
+}
+
+# ---------------------------------
+#  screen command-line
+# ---------------------------------
+
+# FIRST HIT
+
+user_confirm_flag="false"
+slo_flag="false"
+
+case "$1" in
+    --ask|-A)
+        user_confirm_flag="true"
+        shift
+        ;;
+    --fox|-F)
+        shift
+
+        # note the usage of 'test' and 'find' in this
+        # context -- because the return value of 'find'
+        # relates only to processing problems and not
+        # to match failure/success
+
+        test -n "$(find -L . -name 'glpkviz.h' -type f -print)" && confirm_firefox
+        ;;
+    --slow|--slo|-S)
+        shift
+        slo_flag="true"
+        ;;
+esac
+
+# SECOND HIT
+
+case "$1" in
+    --help|--hel|--he|--h|-help|-hel|-he|-h|"-?")
+        display_help "$2"
+        exit $E_SUCCESS
+        ;;
+    -)                                  # - is not a valid option
+        echo "$SCRIPT: incorrect usage, try --help"
+        exit $E_USAGE
+        ;;
+    --)                                 # -- is a valid option
+        ARGS="--"                       # perhaps -a (alert) is useful in this context
+        ;;
+    --clean|-c)                         # intercept -c (clean only)
+        clean_branch "$MACH -c"         # with call to use
+        exit $?
+        ;;
+    --xclean|-x)
+        clean_xeonadir "$XEONADIR"
+        exit $?
+        ;;
+    -[a-z]*|-[A-Z]*)                    # -* is a valid option
+        ARGS="$*"                       # grab the entire argument string
+        ;;
+    "")                                 # use default if nothing given
+        ARGS="$DEFAULT_ARGS"
+        ;;
+    *)                                  # everything else
+        echo "$SCRIPT: incorrect usage, try --help"
+        exit $E_USAGE
+        ;;
+esac
+
+# ---------------------------------
+#  hhmmss()
+# ---------------------------------
+
+# transform [-]x.xx seconds to a [-]hh:mm:ss string
+# for example: -345.678 yields -00:05:45.678
+
+hhmmss_str="(not set)"                  # results string
+
+function hhmmss
+{
+    local val="$1"                      # time argument
+
+    local i                             # integer part
+    local d=""                          # decimal part
+    if [ $(expr index "$val" ".") -ne 0 ]  # search for "."
+        then
+        i=${val%\.*}                    # integer part
+        d=${val#*\.}                    # decimal part
+        d=".$d"                         # add back decimal separator
+    else
+        i=$val
+    fi
+
+    local hours=0
+    local mins=0
+    local secs=0
+    local sign=""
+    if [ $i -lt 0 ]
+        then
+        sign="-"
+        let "i *= -1"
+    fi
+    let "hours = i / 3600"              # integer division
+    let "i -= $hours * 3600"
+    let  "mins = i / 60"
+    let "i -= $mins * 60"
+    let "secs = i"
+    printf -v hhmmss_str "%s%02d:%02d:%02d%s" "$sign" $hours $mins $secs $d
+
+    return 0
+}
+
+# ---------------------------------
+#  controlled_exit()
+# ---------------------------------
+
+function controlled_exit
+{
+    # first calculate time
+
+    secs=$SECONDS                       # grab elapsed time
+    hhmmss $secs                        # function call
+
+    case "$slo_flag" in
+        true)  speed_msg="not applied"  ;;
+        false) speed_msg="applied"      ;;
+    esac
+
+    echo "$SCRIPT: elapsed time          : $secs seconds / $hhmmss_str"
+    echo "$SCRIPT: units checked using   : $MACH $ARGS"
+    echo "$SCRIPT: speed up process      : $speed_msg"
+
+    echo
+    echo "$units"                       # CAUTION: soft-quotes essential
+
+    if [ $rets -ne 0 ]
+        then
+        tag=$(echo -e "\033[01;35maggregate\033[00m")
+        echo "$SCRIPT: $tag             : nonzero aggregate return status: $rets"
+        echo
+    fi
+    exit $rets
+}
+
+# ---------------------------------
+#  user_confirm()
+# ---------------------------------
+
+function user_confirm
+{
+    test "$user_confirm_flag" == "true" || return 1
+
+    # no beep because mach should never be silent
+    response="n"
+    while [ "$response" != "y" ]
+      do
+      echo -n "  $SCRIPT: enter 'y' to continue or 'q' to quit script"
+      echo -n " (or ctrl-c to abandon all): "
+      read response
+      case "$response" in
+          q)
+              report
+              report "quiting on request"
+              controlled_exit
+              ;;
+      esac
+    done
+    report
+    return 0
+}
+
+# ---------------------------------
+#  check for makefile
+# ---------------------------------
+
+report
+
+makefile=$(ls -1 [Mm]akefile 2>/dev/null)
+makefile=$(echo $makefile)              # strip newlines and surplus white-space
+
+if [ -z "$makefile" ]
+    then
+    report "ERROR" "no makefile found: [Mm]akefile"
+    report
+    exit $E_NO_MAKEFILE
+fi
+
+# ---------------------------------
+#  identify units
+# ---------------------------------
+
+# note the test hierarchy: *.$UTEST[0-9].cc, each alphabetical, then $MAIN.cc
+# files example: a/alphabet.t0.cc register.t0.cc a/alphabet.t1.cc register.t1.cc main.cc
+# previous code: printf -v files "${files}$(ls -1 *.$UTEST$i.cc 2>/dev/null)\n"
+
+MAXDEPTH=2
+
+files=""                                # space-separated list of unit files
+for i in $(seq 0 9)
+  do
+   call="find -P . -maxdepth $MAXDEPTH -type f -name \"*.$UTEST$i.cc\" -printf \"%P\n\" | sort"
+   buff="$(eval $call)"
+   test -z "$buff" || printf -v files "${files}$buff\n"
+done
+test -f "$MAIN.cc" && printf -v files "${files}$MAIN.cc"    # no trailing newline
+
+files=$(echo $files)                    # strip newlines and surplus white-space
+
+# for testing: echo "----"; echo "$files"; echo "----"; exit 255
+
+# ---------------------------------
+#  test units or build main
+# ---------------------------------
+
+rets=0                                  # sum of returns
+units=""                                # formatted list of units for reporting purposes
+skip="true"                             # skip toggle
+for file in $files
+  do
+  STEM="$file"
+  STEM=${STEM%".cc"}                    # strip trailing ".cc" if supplied
+  STEM=${STEM%\.${UTEST}[0-9]}          # strip tailing ".test-extn" if present
+  report "unit testing" "$STEM"
+  case "$STEM" in
+      main)                             # main.cc is a special case
+          args="$ARGS"                  # refresh
+          $MACH $args
+          ret=$?
+          ;;
+      *)                                # being here indicates a unit test
+          args="$ARGS"                  # refresh
+          if [ "$skip" == "false" ] && [ "$slo_flag" == "false" ]
+              then
+              # remove any and all the "f" and replace "-" with "--" if that is all that remains
+              test -n "$args" && args="${args//f/}" && test $args = "-" && args="--"
+          else
+              skip="false"
+          fi
+          $MACH $args $STEM
+          ret=$?
+          ;;
+  esac
+  let "rets += $ret"
+  printf -v units "%s    %-10s  %22s       %04d       %3d\n" \
+    "$units" "$(basename "$STEM")" "$file" "$(cat machcountfile)" "$ret"
+  test $ret -ne 0 && user_confirm
+done
+
+controlled_exit
+
+# -------------------------
+#  housekeeping
+# -------------------------
+
+report "CODING ERROR" "at end of script"
+
+exit 255                                # should never get here
+
+#  $Id: pruf 5972 2011-02-23 09:23:24Z robbie $
+#  end of file
+

@@ -1,0 +1,2225 @@
+#! /bin/bash
+
+#  file-purpose     : interface for xeona makefile with local redefines
+#  file-initiator   : Robbie Morrison <robbie@actrix.co.nz>
+#  file-create-date : Thu 12-Apr-2007 21:25 UTC
+#  file-status      : working
+#  file-keywords    : xeona
+
+#  $Author: robbie $
+#  $URL: file:///home/robbie/svn-root/xeona/futz/trunk/scripts/mach $
+
+#  TODO: update xeona exit codes as these become known
+#        perhaps: valgrind --tool=massif ./binary
+#        will mach take multiple macros from option -D ?
+#
+#  work on 'set' versus 'shopt' versus PIPESTATUS
+#  do 0-32 return code tricks
+
+#  ---------------------------------------------------------
+#  Motivation
+#
+#      The principal motivation behind this script is
+#      the desire to avoid:
+#
+#        * a large number of unit-test makefiles
+#        * the continual hand editing of makefiles
+#
+#      Now just this script and the project makefile
+#      are all that are necessary.  And only the source
+#      file list in the project makefile needs updating
+#      as new *.cc files are added to the application
+#      build.  Header dependencies are handled
+#      automatically by the 'fastdep' utility.  While
+#      preprocessor and compiler flags can be pumped in
+#      using the various command-line options provided
+#      in this script.
+#
+#  Roles
+#
+#      This file can be used either to:
+#
+#        * build the primary application
+#        * unit-test an individual source file
+#
+#      The choice is made based on the filename
+#      supplied as the command-line argument.  See
+#      '--help' for details.
+#
+#      It is assumed that 'common.h' and 'logger.h' are
+#      always hash-included in the source file under
+#      unit-testing.
+#
+#  Script test option
+#
+#      Note the '-t' option prevents exiting on error.
+#      This, of course, is likely to lead to an
+#      avalanche of further errors.
+#
+#  Additional scripts
+#
+#      This script is the lowest script in the
+#      following script call chain:
+#
+#          mach < pruf < jede < ganz
+#
+#      See "ganz --help" for more details.
+#
+#      After reverting to a single codebase in mid-2008,
+#      'jede' and 'ganz' are now obsolete.
+#
+#  References
+#
+#      Robbins, Arnold.  2005.  GDB pocket reference.
+#        O'Reilly Media, Sebastopol, CA, USA.  ISBN
+#        0-596-10027-2.
+#
+#  ---------------------------------------------------------
+
+# -------------------------
+#  preamble
+# -------------------------
+
+TESTSDIR="xeona-mach"                   # subdirectory for testing binaries
+
+host=$(hostname --short)
+case "$host" in
+    hinau) SVN_BASE="$HOME/synk/xeona/svn2/futz/trunk"  ;;  # svn version base for the purposes of this script
+    sojus) SVN_BASE="$HOME/synk/xeona/svn/futz"         ;;  # svn version base for the purposes of this script
+    *)     SVN_BASE="$HOME/synk/xeona/svn/futz"         ;;  # svn version base for the purposes of this script
+esac
+
+REPOS="$HOME/svn-root/xeona/futz"       # repository path (for comment in final reporting only)
+PRUF="pruf"                             # additional script (for comment in '--help' message only)
+
+UNIT_TEST_LOCAL="machunits"             # local branch-specific unit-test lists (separate file for ease of maintenance)
+UNIT_TEST_LISTS="mach.units.sh"         # universal unit-test lists (used if local file not present)
+
+DEFAULT_BINARY="xeona.mach"             # default application name if none given
+APP_ARGS=""                             # arguments to be passed to the binary
+APP_ARGS="--report 5"                   # increase reporting
+APP_ARGS="--report 5 --inbuilt 6 --exittrip 2"    # plus generate and use default 'inbuilt.xem' at 'exittrip' 2
+
+SPECIAL_MAKEFILE=""                     # if a nonstandard makefile name is to be used
+UTEST="ut"                              # tester tag in form: unitname.${UTEST}[0-9].cc
+COMMON="common"                         # stem for common header: $COMMON.cc
+MAINCC="main.cc"                        # name of main file
+
+CXXDEBUG="-g"                           # the most basic and portable compiler debug option
+CXXDEBUG="-g3 -gdwarf-2"                # suggested by Robbins (2005 p4) when debugging with GDB
+CXXDEBUG="-ggdb3"
+
+CXXLDPROF="-p"                          # the most basic and portable compiler profile info option
+CXXLDPROF="-pg"                         # for the GNU profiler 'gprof'
+
+VALGRIND="valgrind"                     # memory check utility
+VALGRIND_OPTS1="--leak-check=full --show-reachable=yes" # extra options, '--verbose' is very loud
+
+XEDOC="xedoc"                           # script generating xedoc string
+XEDOC_OUTPUT="a/xedocs.txt"             # as per 'common.cc'
+XEDOC_ASUSED="a/xedocs.as-used.txt"     # primarily for bug hunting
+
+XMOK="xmok"
+XMOK_ARGS="--"
+
+CTRLC=130                               # system-dependent return for ctrl-c interrupt
+ABORT=134                               # system-dependent return for terminate (uncaught throw)
+SEGFAULT=139                            # system-dependent return for segmentation fault
+
+SCRIPT=$(basename "$0")                 # this file
+COUNTFILE="${SCRIPT}countfile"          # used to count calls for display in console
+SVNVERFILE="lastbuild"                  # used to record svn details for last build
+
+TEMPSTUB=$(mktemp -u _XXXXXXXX)         # filename stub for safe temporary filenames
+
+# ---------------------------------
+#  default overrides as needed
+# ---------------------------------
+
+#SPECIAL_MAKEFILE="makefile_1.33.1"     # if a nonstandard makefile name is to be used
+
+# ---------------------------------
+#  exit statii
+# ---------------------------------
+
+# normal exit is 0-31, trivial exit is 100+, abnormal exit is 200+
+
+X_SUCCESS=0
+X_COMPILE_FAIL=1
+X_COMPILE_WARN=2
+X_RUN_FAIL=4
+X_MEMORY_ERROR=8
+X_MEMORY_LEAK=16
+X_XMOK_FAIL=32
+X_XEDOCS_FAIL=64
+
+E_SUCCESS=100
+E_USAGE=102
+
+E_MISSING_FILES=201
+E_RELEASE_ISSUES=202
+E_UPDATE_ISSUES=203
+E_MAKE_FAIL=204
+E_CODING_ERROR=205
+E_REFUSING_COMMON=206
+E_RM_FAIL=207
+E_MISSING_SUBDIR=208
+
+# ---------------------------------
+#  initialization
+# ---------------------------------
+
+xstat=$X_SUCCESS    # overall status
+
+gccfail=0           # else compile failure (not used)
+gccwarn=0           # else compile warnings
+runret=0            # else execute failure
+valerror=0          # else memory errors
+valleak=0           # else memory leakage
+
+nobin=0             # else no binary
+emptybin=0          # else zero-byte binary
+
+# ---------------------------------
+#  display_help()
+# ---------------------------------
+
+function display_help
+{
+local release="xeona.r000"              # set default
+local custom="xeona.custom"             # set default
+local unit="unit"                       # set default
+
+local core=""                           # default
+local host=$(hostname --short)
+case "$host" in
+    hinau) core="4";                    # four core processor
+esac
+
+case "$1" in
+    "")      :            ;;            # blank, do nothing
+    xeona.)  :            ;;            # unacceptable, do nothing
+    xeona.*) custom="$1"  ;;            # overwrite
+    *.*)     :            ;;            # unacceptable, do nothing
+    *)       unit="$1"    ;;            # overwrite
+esac
+
+local xtra="$2"                         # optional second argument
+local extra=""
+test -n "$xtra" && extra=" (note -H removes -${xtra} from some examples)"
+
+#  local fs3=""                            # Boost.Filesystem 1.43 and earlier (F could also be used)
+#  local fs3=""                            # Boost.Filesystem 1.45 and beyond  (F could also be used)
+#  local fs3="F3"                          # Boost.Filesystem 1.44 (the F is optional, the 3 is not)
+local fs3=""                               # Boost.Filesystem 1.46 and beyond
+
+local opts="[-D MACRO] [-a -b -d -f -K|k -m -n -P -p -q -r -S|s -T -t -u -V|v -x]"
+local lin1="a prior clean svn"
+local lin2="valgrind memory checker"
+local lin3="build and check using built-in defaults"
+local lin4="keep temporary files, add script debug reporting, sometimes refuse to die"
+local lin5="exclude unit test friendships and similar"
+local lin6="best with -fx, compiler may still complain"
+local lin7="use -f (fresh compile) if the preprocessor or compiler flags are changed or different files are called"
+
+echo
+echo "       usage: $SCRIPT  $opts  [binary-name]  (assumes xeona*)"
+echo "              $SCRIPT  $opts   unit-name     (assumes *.${UTEST}[0-9].cc)"
+echo "              $SCRIPT   --                         $lin3 (including $DEFAULT_BINARY)"
+echo "              $SCRIPT   -c          [subdir-name]  clean only (in subdir if given)"
+echo "              $SCRIPT   -h  --help  [file-name]    this message (duly modified)"
+echo "     options:  -a     alert               enable compile and final beeps (but -b takes precedence)"
+echo "               -b     no beep             kill beep including double beep on failed make and run calls"
+echo "               -c     clean only          prompt to clean up relevant 'subversion safe' files and quit"
+echo "               -D     MACRO               apply _MACRO preprocessor macro (can only use once)"
+echo "               -d     not debug           omit _XDEBUG preprocessor macro (mostly to report less)"
+echo "               -e     ensure xedocs       write out and run xedocs suite"
+echo "               -f     fresh compile       delete all object files and build afresh"
+echo "               -F     Boost.Filesystem    define BOOST_FILESYSTEM_NO_DEPRECATED for <boost/filesystem>"
+echo "               -g     no GNU              apply g++ -std=c++98 to exclude GNU extensions"
+echo "               -G     gnuplot             display timeseries in gnuplot windows via --tout (q to close)"
+echo "               -h     help                display usage message and quit (takes precedence)$extra"
+echo "               -K     klean all           clean up all created files including binary (will also build)"
+echo "               -k     klean some          clean up all created files except binary (will also build)"
+echo "               -m     meyers              apply g++ -Weffc++ for Scott Meyers' style guides (note -z|Z)"
+echo "               -n     dry run             print compiler calls and quit ($lin6)"
+echo "               -o     okay                call $XMOK but only if binary built anew this time"
+echo "               -P     profiling info      apply $CXXLDPROF to support profiling (non-release only) (leaks memory too)"
+echo "               -p     pedantic            apply g++ -pedantic for more fussy warnings (note -Z)"
+echo "               -q     no -Wall            suppress normal warnings"
+echo "               -r     release build       optimize code and use special name (also requires -df and $lin1)"
+echo "               -S     logger only         redirect stdout stream to /dev/null (except -V|v)"
+echo "               -s     screen only         redirect logger and stderr streams to /dev/null (except -V|v)"
+echo "               -T     utest less          omit _XUTEST preprocessor macro ($lin5)"
+echo "               -t     test                $lin4"
+echo "               -u     undeclared okay     apply g++ -fpermissive to warn, rather than error, on undeclared names"
+echo "               -V     valgrind less       use $lin2 (but -x takes precedence)"
+echo "               -v     valgrind more       use $lin2 with extra options (but -x takes precedence)"
+echo "               -w     use -Wextra         use -Wextra (not normally used)"
+echo "               -x     no execute          do not run binary"
+echo "               -Z     no filter           omit all warning screens (under -m and -p)"
+echo "               -z     some filter         omit \"instantiated from\" screen (under -m)"
+echo "               -3     Boost.Filesystem 3  define BOOST_FILESYSTEM_VERSION 3 for <boost/filesystem>"
+echo "               -4     multicore           apply make option --jobs=4 (faster but can interleave output)"
+echo "     purpose: interface xeona project makefile with local redefines"
+echo "     caution: $lin7"
+echo "  versioning: embedding   : subversion release number embedded in binary if the given svn is clean"
+echo "              svn basis   : $SVN_BASE"
+echo "              current dir : $( pwd -P )"
+echo "              version     : run \$ svnversion $SVN_BASE"
+echo "    settings: default binary name           : $DEFAULT_BINARY"
+echo "              default application args      : $APP_ARGS"
+echo "              release binary name pattern   : xeona.r000"
+echo "              test subdirectory             : $TESTSDIR/"
+echo "              count file name (can delete)  : $COUNTFILE"
+echo "              unit-test tag                 : $UTEST"
+echo "              common header                 : $COMMON.h"
+echo "              valgrind extra options (-v)   : $VALGRIND_OPTS1"
+echo "              local unit-test lists         : $UNIT_TEST_LOCAL"
+echo "    examples: clean up current dir safely (uses svn info)       : \$ $SCRIPT -c"
+echo "              clean up current branch safely (based on above)   : \$ $PRUF -c"
+echo "              basic build and run                               : \$ $SCRIPT --"
+echo "              basic build but run with --opt                    : \$ $SCRIPT -x${fs3} $custom && $custom --opt"
+echo "              release build (requires a prior clean svn)        : \$ $SCRIPT -${xtra}${fs3}${core}drx"
+echo "              fresh with full warn, memtest, xedoc, okay, alert : \$ $SCRIPT -${xtra}${fs3}${core}mpveoa"
+echo "              style police with no output filtering (noisy!)    : \$ $SCRIPT -${xtra}${fs3}${core}mpZ"
+echo "              unit-test with audible notification               : \$ $SCRIPT -${xtra}${fs3}${core}a    $unit"
+echo "              unit-test with everything (although not -t)       : \$ $SCRIPT -${xtra}${fs3}${core}mpva $unit"
+echo
+
+return 0
+}
+
+# ---------------------------------
+#  screen command-line
+# ---------------------------------
+
+cline="$*"                              # grab original command-line for reporting
+
+# the strings "--", "-", and "" (no options or arguments) are also caught as required
+
+case "$1" in
+    --help|--hel|--he|--h|-help|-hel|-he|-h|"-?")
+        display_help "$2" "f"
+        exit $E_SUCCESS
+        ;;
+    --H|-H)
+        display_help "$2"
+        exit $E_SUCCESS
+        ;;
+    help|-|"")
+        echo "$SCRIPT: incorrect usage, try --help"
+        exit $E_USAGE
+        ;;
+    --)                                 # fall thru
+        :
+        ;;
+esac
+
+# ------------------------------
+#  process options
+# ------------------------------
+
+# set defaults
+
+alert_flag=0          # -a
+nobeep_flag=0         # -b
+clean_only_flag=0     # -c
+CPPMACRO=""           # -DMACRO
+debug_omit_flag=0     # -d (same effect as 'removing' -D_XDEBUG)
+xedocs_flag=0         # -e
+fresh_flag=0          # -f
+filesys_flag=0        # -F
+no_gnu_flag=0         # -g
+tout_flag=0           # -G
+klean_flag=0          # -k
+Klean_flag=0          # -K
+meyers_flag=0         # -m
+dryrun_flag=0         # -n
+xmok_flag=0           # -o
+profile_flag=0        # -P
+pedantic_flag=0       # -p
+quiet_flag=0          # -q
+release_flag=0        # -r
+logger_only_flag=0    # -S
+screen_only_flag=0    # -s
+test_flag=0           # -t
+utest_omit_flag=0     # -T
+permissive_flag=0     # -u
+valgrind_extd_flag=0  # -V
+valgrind_flag=0       # -v
+wextra_flag=0         # -w
+no_execute_flag=0     # -x
+nofilter_flag=0       # -Z
+lessfilter_flag=0     # -z
+filesys_v3_flag=0     # -3
+fourcore_flag=0       # -4
+
+# process options
+
+while getopts ":abcD:defFgGKkmnoPpqrSsTtuVvwxZz34" option  # CAUTION: the leading : should be correct
+do
+    case "$option" in
+        a)  alert_flag=1                ;;
+        b)  nobeep_flag=1               ;;
+        c)  clean_only_flag=1           ;;
+
+    #  note that this next option must have an associated argument,
+    #  otherwise it falls through to the default.
+
+        D)  CPPMACRO="$OPTARG"          ;;
+        d)  debug_omit_flag=1           ;;
+        e)  xedocs_flag=1               ;;
+        f)  fresh_flag=1                ;;
+        F)  filesys_flag=1              ;;
+        g)  no_gnu_flag=1               ;;
+        G)  tout_flag=1                 ;;
+        K)  Klean_flag=1; klean_flag=1  ;;
+        k)  klean_flag=1                ;;
+        m)  meyers_flag=1               ;;
+        n)  dryrun_flag=1               ;;
+        o)  xmok_flag=1                 ;;
+        P)  profile_flag=1              ;;
+        p)  pedantic_flag=1             ;;
+        q)  quiet_flag=1                ;;
+        r)  release_flag=1              ;;
+        S)  logger_only_flag=1          ;;
+        s)  screen_only_flag=1          ;;
+        T)  utest_omit_flag=1           ;;
+        t)  test_flag=1                 ;;
+        u)  permissive_flag=1           ;;
+        V)  valgrind_flag=1             ;;
+        v)  valgrind_extd_flag=1        ;;
+        w)  wextra_flag=1               ;;
+        x)  no_execute_flag=1           ;;
+        Z)  nofilter_flag=1             ;;
+        z)  lessfilter_flag=1           ;;
+        3)  filesys_v3_flag=1           ;;
+        4)  fourcore_flag=1             ;;
+        *)
+            echo "$SCRIPT: incorrect usage, try --help"
+            exit $E_USAGE
+            ;;
+    esac
+done
+shift $(($OPTIND - 1))
+
+#  the above decrements the argument pointer so it points to next
+#  argument, hence $1 now references the first non-option supplied
+#  on the command-line, in the event that substantive arguments
+#  were given
+
+SUBSTANTIVE_ARG="$1"
+
+# ---------------------------------
+#  alert()
+# ---------------------------------
+
+function alert
+{
+    local count=$1
+
+    test $nobeep_flag -eq 1 && return 1 # -b (no beep) always takes precedence
+
+    test $alert_flag -eq 1 && sleep 1   # to provide a gap between consecutive calls
+    if [ $(which beep) ]                # CAUTION: for test, no -n and no soft-quotes
+        then
+        if [ $count -gt 0 ]             # if positive .. beep normal
+            then
+            beep -r $count
+        elif [ $count -lt 0 ]           # if negative .. beep low
+            then
+            let "count *= -1"           # positive argument required
+            beep -r $count -f 261.6
+        else
+            :                           # count is zero, do nothing
+        fi
+    else
+        echo -ne "\a"                   # fall back beep
+    fi
+    return 0
+}
+
+# ------------------------------
+#  report()
+# ------------------------------
+
+function report
+{
+    local tab=-18                       # the "-" means left justify
+    case "$#" in                        # argument count
+        0) printf "\n"                                      ;;
+        1) printf "$SCRIPT: %s\n" "$1"                      ;;
+        2)
+           # coloration
+           if [[ "$1" == "PROBLEM" && "$TERM" != "dumb" ]]
+               then
+               local tag=$(echo -e "\033[01;35mproblem\033[00m")
+               printf "$SCRIPT: $tag            : %s\n" "$2"
+           else
+               printf "$SCRIPT: %${tab}s : %s\n" "$1" "$2"
+           fi
+           ;;
+        *)
+            report "CODING ERROR" "more than two arguments given for report()"
+            exit $E_CODING_ERROR
+            ;;
+    esac
+    return 0
+}
+
+# ---------------------------------
+#  deport()
+# ---------------------------------
+
+# debug reporting as interface to 'report'
+
+function deport
+{
+    test $test_flag -eq 0 && return 1   # skip if -t (test) option not set
+
+    case "$#" in                        # argument count
+        0) report            ;;
+        1) report "$1"       ;;
+        2) report "$1" "$2"  ;;
+    esac
+}
+
+# -------------------------
+#  check_for_utility()
+# -------------------------
+
+function check_for_utility
+{
+    local utility="$1"
+    if [ -z $(which "$utility") ]       # soft-quotes around shell call not needed
+    then
+        report "ERROR" "$utility utility not found"
+        missing_flag=1
+        return 1
+    fi
+    return 0
+}
+
+# ---------------------------------
+#  foreign_machine()
+# ---------------------------------
+
+function foreign_machine
+{
+    local BOOST_CPATH="/usr/local/include/boost-1_39"  # hardcoded here
+    local BOOST_CPATH="/usr/local/include/boost-1_38"  # hardcoded here
+    local BOOST_CPATH=""                               # hardcoded here
+
+    local ORIGINAL_NODE="sojus"                        # original development machine
+    local ORIGINAL_NODE="hinau"                        # original development machine
+
+    local node=$(uname --nodename)
+    test "$node" == "$ORIGINAL_NODE" && return 0
+
+    report "foreign node" "$node"                      # foreign machine name
+
+    test -f "$MAINCC" ||                               # main file (probably main.cc) exits and is local
+    {
+        report "PROBLEM"  "abandoning foreign_machine settings as not in main file ($MAINCC) directory"
+        report
+        return 1
+    }
+
+    report "CAUTION" "the following settings and exports are local to this script"
+
+    SVN_BASE=$(pwd -P)
+    report "svn base thus" "$SVN_BASE"
+
+    local cpath="$BOOST_CPATH"
+    test -n "$CPATH" && CPATH="$CPATH:"
+    export CPATH="$CPATH$cpath"
+    report "CPATH now contains" "$cpath"
+
+    local path="$(pwd -P)/../scripts"                  # arguably better
+    local path="$(dirname $(pwd -P))/scripts"          # a bit rough but works
+    export PATH="$PATH:$path"
+    report "PATH now contains" "$path"
+    deport "PATH comprises" "$PATH"
+
+    report
+    return 0
+}
+
+# ------------------------------
+#  final_line()
+# ------------------------------
+
+# standardized final line with coloration
+
+function final_line
+{
+    # prepare exit status
+
+    local retstr=""
+    retstr="-- okay ---"                  # alternative reportage
+    retstr="-----------"
+    local fill="+"
+    local C=$fill; test ${xreduce[0]} -ne 0 && C="C"  # Compile
+    local W=$fill; test ${xreduce[1]} -ne 0 && W="W"  # Warn
+    local X=$fill; test ${xreduce[2]} -ne 0 && X="X"  # eXecute
+    local E=$fill; test ${xreduce[3]} -ne 0 && E="E"  # memErrors
+    local L=$fill; test ${xreduce[4]} -ne 0 && L="L"  # Leakage
+    test $xstat -ne 0 && retstr=" $C$W$X$E$L "
+
+    # prepare binary name
+
+    local binstr=" $BINARY "
+    test $clean_only_flag -ne 0 && binstr="$cleanstr" # for -c (clean only) option
+    while [ ${#binstr} -lt 30 ]; do binstr="-$binstr"; done # pad with leading '-'
+
+    # prepare directory name
+
+    local locdir=$(basename $(pwd -P))
+    test -n "$dir" && locdir="$dir"     # overwrite when cleaning (can comment out)
+    dirstr=" $locdir "
+    while [ ${#dirstr} -lt 30 ]; do dirstr="$dirstr-"; done # pad with trailing '-'
+
+    # counter string
+    local cntstr=" $countstr "
+
+    # create final line
+    # CAUTION: printf requires the '--' option because the format string starts with a '-'
+
+    local line=""
+    printf -v line -- "---%s---------------------------%s----------%s----------%s------" \
+                      "$dirstr" "$binstr" "$retstr" "$cntstr"
+
+    # colorize line
+    # attributes 00=normal 01=bold / color 30=black 31=red 35=magenta 36=cyan
+
+    test "$TERM" != "dumb" && line=$(echo -e "\033[00;36m${line}\033[00m")
+
+    # report
+
+    report
+    report "$line"
+    report
+}
+
+# ---------------------------------
+#  call_xedoc()
+# ---------------------------------
+
+# view output with: $ echo -e "$(cat a/xedocs.as-used.txt)" | less
+
+function call_xedoc
+{
+    local mode="$1"
+
+    case "$mode" in
+        refresh)
+            test -f "$XEDOC_OUTPUT" && rm -f "$XEDOC_OUTPUT"   # remove existing file, probably just ""
+            test -f "$XEDOC_ASUSED" && rm -f "$XEDOC_ASUSED"   # remove existing file, probably full
+            $XEDOC --include > "$XEDOC_OUTPUT"                 # create new file in correct format
+            cp "$XEDOC_OUTPUT" "$XEDOC_ASUSED"                 # primarily for bug hunting
+            report "$XEDOC_OUTPUT" "xedocs file refreshed"     # report
+            return 0
+            ;;
+        nullify)
+            test -f "$XEDOC_OUTPUT" && rm -f "$XEDOC_OUTPUT"   # remove existing file
+            echo "\"\"" > "$XEDOC_OUTPUT"                      # create new file in null format
+            report "$XEDOC_OUTPUT" "xedocs file nullified"     # report
+            return 0
+            ;;
+        *)
+            report "CODING ERROR" "unsupported argument given for call_xedoc(): $mode"
+            return 1
+            ;;
+    esac
+}
+
+# ---------------------------------
+#  delete_binary()
+# ---------------------------------
+
+function delete_binary
+{
+    rm --force "$BINARY"
+    report "binary deleted" "$BINARY"
+}
+
+# ---------------------------------
+#  reduce()
+# ---------------------------------
+
+# for instance '27' reduces to '1 2 0 8 16'
+
+declare -a xreduce                      # -a is array
+declare xsum
+
+function reduce
+{
+    num="$1"                            # integer being operated on
+
+    xsum=                               # reset summation
+    xreduce=()                          # reset results array
+
+    local base                          # power of two divisor
+    let "base = 2 ** $reduce_exp"
+
+    let "max = 2 * $base"
+
+    test $num -ge $max && return 1      # too large an integer
+    test $num -lt 0    && return 1      # a negative-definite integer
+
+    local index=$reduce_exp
+    while [ $base -gt 0 ]
+      do
+      if [ $num -ge $base ]
+          then
+          let "num = $num % $base"      # note % remainder operator
+          xreduce[$index]=$base
+      else
+          xreduce[$index]=0
+      fi
+      let "base /= 2"
+      let "xsum += ${xreduce[$index]}"
+      let "index -= 1"
+    done
+
+    return 0
+}
+
+# ---------------------------------
+#  controlled_exit()
+# ---------------------------------
+
+function controlled_exit
+{
+    case "$release_flag" in
+        1) helpful_dump_calls ;;
+    esac
+
+    exit_code=$1
+
+    reduce_exp=6                        # reduce base exponent, 6 means 0 thru 127 valid
+    reduce $xstat                       # function call
+    test $xstat -eq $xsum || report "CODING ERROR" "xstat and xsum differ: $xstat $xsum"
+
+    let "warn = $xstat + nobin + emptybin"
+
+    deport
+    deport "xstat"   "$xstat"
+    deport "xreduce" "${xreduce[*]}"    # soft-quoting okay in this case
+
+    test $warn         -ne 0 && report
+    test ${xreduce[0]} -ne 0 && report "PROBLEM" "compile failure    [${xreduce[0]}]"
+    test ${xreduce[1]} -ne 0 && report "PROBLEM" "compile warnings   [${xreduce[1]}]"
+    test $nobin        -ne 0 && report "PROBLEM" "no binary file     [-]"
+    test $emptybin     -ne 0 && report "PROBLEM" "empty binary file  [-]"
+    test ${xreduce[2]} -ne 0 && report "PROBLEM" "execute failure    [${xreduce[2]}]"
+    test ${xreduce[3]} -ne 0 && report "PROBLEM" "memory errors      [${xreduce[3]}]"
+    test ${xreduce[4]} -ne 0 && report "PROBLEM" "memory leakage    [${xreduce[4]}]" # alignment is okay
+    test ${xreduce[5]} -ne 0 && report "PROBLEM" "test suite issues [${xreduce[5]}]" # alignment is okay
+    test $warn         -ne 0 && alert 2
+
+    case "$exit_code" in
+        $E_SUCCESS)               meaning="script success"                     ;;
+        $E_USAGE)                 meaning="script usage issue"                 ;;
+        $E_MISSING_FILES)         meaning="files missing"                      ;;
+        $E_RELEASE_ISSUE)         meaning="release build issues"               ;;
+        $E_UPDATE_ISSUE)          meaning="update issues"                      ;;
+        $E_MAKE_FAIL)             meaning="make returned fail"                 ;;
+        $E_CODING_ERROR)          meaning="coding error -- check $SCRIPT"      ;;
+        $E_REFUSING_COMMON)       meaning="unwilling to unit test common"      ;;
+        $E_MISSING_SUBDIR)        meaning="subdirectory not found"             ;;
+        0)                        meaning="clean run"                          ;;
+        1|2|4|8|16|32|64)         meaning="single problem"                     ;;
+        [1-9]|[1-9][0-9]|1[0-1][0-9]|12[0-7])     # 1-127, note prior capture
+                                  meaning="multiple problems"                  ;;
+        203)                      meaning="stale svn status on release build"  ;;
+        *)                        meaning="undocumented script return"         ;;
+    esac
+
+    report
+    report "old/new svns" "$svnver / $(svnversion $SVN_BASE)"
+    report "command-line" "\$ $SCRIPT $cline"
+    report "binary" "$BINARY"
+    local seconds=$SECONDS
+    test $seconds -ne 1 && plural="s"
+    report "elapsed time" "$seconds second$plural"
+    local elapsed=$SECONDS
+    test $(which hms) && elapsed=$(hms $elapsed)  # 'hms' is a my (user-local) utility
+    report "elapsed time" "$elapsed"
+    report "complete"     "script exit $exit_code ($meaning)"
+    [[ $alertflag -eq 1 && $warn -eq 0 ]] && alert 1 # beep if -a (alert) and no warnings
+    final_line $exit_code               # print final line
+    exit $exit_code
+}
+
+# ------------------------------
+#  countfile()
+# ------------------------------
+
+# update run counting with COUNTFILE
+
+function countfile
+{
+    test -f "$COUNTFILE" || echo "0" > "$COUNTFILE"
+    count=$(cat "$COUNTFILE")
+    test $count -ge 9999 && count=0     # rollover as required
+    let "count++"
+    echo "$count" >| "$COUNTFILE"       # force clobber
+    printf -v countstr "%04d" $count    # create four-char zero-padded string
+}
+
+# ---------------------------------
+#  svn_ver_and_state()
+# ---------------------------------
+
+svnver=""
+svn_flag=""
+
+function svn_ver_and_state
+{
+    # svnver=$(svnversion $SVN_BASE 2>/dev/null)
+    svnver=0
+
+    # if svnver contains : then an update is needed
+    # if svnver contains M then a commit and update is needed
+
+    svn_flag="clean"
+    test $(expr index "$svnver" ":") -ne 0 && mess="update"
+    test $(expr index "$svnver" "M") -ne 0 && mess="commit and update"
+    test -n "$mess" && svn_flag="stale"
+}
+
+# ---------------------------------
+#  check_maincc()
+# ---------------------------------
+
+function check_maincc
+{
+    test -f "$MAINCC" && return 0       # main file (probably main.cc) exits and is local
+    report "PROBLEM" "an app build requires a main file but none found: $MAINCC"
+    report "check" "is this directory correct or should you be testing units instead?"
+    test $test_flag -eq 0 && controlled_exit $E_MISSING_FILES       # exit gracefully
+    report "note" "carrying on irrespective under option -t (test)"
+    report
+    return 1
+}
+
+# ---------------------------------
+#  helpful_dump_calls()
+# ---------------------------------
+
+# $ svnadmin dump ~/svn-root/xeona/futz/ -r 2499 > xeona-2499.svndump
+# $ tar -cvf xeona-2499.svndump.tar xeona-2499.svndump
+# CAUTION: 'svnadmin' utility does not take URLs
+
+function helpful_dump_calls
+{
+    local dumpfile="xeona-$svnver.svndump"
+    local cpopts="--preserve=mode,ownership,timestamps,link"
+    local rbindir="xeona-rbin"
+    if [ -d "$REPOS" ]
+        then
+        report
+        report "dump call 1" "\$ svnadmin dump $REPOS -r $svnver > $dumpfile"
+        report "dump call 2" "\$ tar -cvf $dumpfile.tar $dumpfile"
+        if [ -d "$rbindir" ]
+            then
+            report "copy call 3" "\$ cp $cpopts $BINARY $rbindir"
+        fi
+    else
+        report
+        report "dump call PROBLEM"   "directory not found: $REPOS"
+    fi
+    return 0
+}
+
+# -------------------------
+#  confirm utilities
+# -------------------------
+
+report
+report "script commencing"
+report
+
+missing_flag=0                          # reset in check_for_utility() if utility not found
+check_for_utility "fastdep"             # used in the makefile
+check_for_utility "svnversion"          # used in this file
+check_for_utility "valgrind"            # used in this file
+check_for_utility "gawk"                # used in this file
+check_for_utility "$XEDOC"              # used to create 'xedocs' file
+check_for_utility "$XMOK"               # used to run various binary tests
+test $missing_flag -ne 0 && report      # nothing further happens
+
+# ---------------------------------
+#  active code
+# ---------------------------------
+
+foreign_machine                         # if non-original development machine
+countfile                               # increment countfile
+svn_ver_and_state                       # set 'svnver' and 'svn_flag'
+
+# ---------------------------------
+#  test status reporting
+# ---------------------------------
+
+deport "TEST" "option -t (test) set"
+if [ $clean_only_flag -eq 1 ]           # disable -t (test) under -c (clean only) option
+    then
+    deport "note" "nothing useful to be reported under -c (clean only)"
+    deport
+    test_flag=0                         # reset test flag
+fi
+deport "note" "temporary files kept, debug reporting added"
+deport
+
+# ---------------------------------
+#  screen MACRO definition
+# ---------------------------------
+
+# MACRO means macro arguments to be passed to the compiler
+
+note1="check command-line"              # just used here
+
+if [ $(expr index "$CPPMACRO" "-") -ne 0 ]   # one-based indexing, has a - somewhere
+    then
+    report "ERROR" "macro '-D $CPPMACRO' cannot be successfully passed to g++ ($note1)"
+    controlled_exit $E_USAGE
+fi
+
+if [ "${CPPMACRO:0:5}" == "xeona" ]     # cannot use xeona* as a preprocessor macro
+    then
+    report "ERROR" "will not accept macro '-D $CPPMACRO' starting 'xeona' ($note1)"
+    controlled_exit $E_USAGE
+fi
+
+#  the following code is commented out because the
+#  usage rule requiring an explicit binary name is now
+#  deemed unnecessary
+#
+#  if [[ -n "$CPPMACRO" && -z "$1" ]]      # must supply an explicit filename
+#      then
+#      note2="without an explicit binary name"
+#      report "ERROR" "will not accept macro '-D $CPPMACRO' $note2 ($note1)"
+#      controlled_exit $E_USAGE
+#  fi
+
+# -------------------------
+#  process filenames
+# -------------------------
+
+STEM="$SUBSTANTIVE_ARG"                 # substantive command-line argument, may be empty
+
+test -z "$STEM" && STEM="$DEFAULT_BINARY"    # use default name (xeona.mach)
+
+STEM=${STEM%".cc"}                      # strip trailing ".cc" if supplied
+STEM=${STEM%.${UTEST}[0-9]}             # strip trailing unit test extension ".ut[0-9]" if present
+
+case "$release_flag" in                 # special naming convention for release builds
+    1)
+        svnver=$(svnversion $SVN_BASE 2>/dev/null)     # should be an integer string
+        BINARY="xeona.r$svnver"
+        ;;
+    *)
+        BINARY=$STEM
+        ;;
+esac
+
+case "$BINARY" in
+    xeona*)
+        type="app"                      # use full sources list as per makefile
+        test $clean_only_flag -eq 0 && check_maincc  # check for main file
+        ;;
+    *)
+        type="unit"                     # use unit-test conventions
+        ;;
+esac
+
+# ---------------------------------
+#  clean only option
+# ---------------------------------
+
+case "$clean_only_flag" in
+    1)
+        svnver=$(svnversion $SVN_BASE 2>/dev/null)     # for end-of-script reporting
+
+        dir=$(basename $(pwd -P))       # for reporting purposes only
+
+        if [ -n "$1" ]                  # subdir argument given (may be "." "./" "sdir" "sdir/")
+            then
+            SDIR=$(basename "$1")       # subdirectory to be cleaned, remove any trailing slash
+            if [ "$SDIR" != "." ]       # no need to further process a "."
+                then
+                test -d "$SDIR" || controlled_exit $E_MISSING_SUBDIR
+                dir=$dir/$SDIR          # add the root directory for reporting purposes
+                cd "$SDIR"              # change to selected directory
+            fi
+        fi
+
+        report "$dir" \
+          "cleaning up '*.o' (object), 'svn ?' (not ignored), and some _*.txt ($SCRIPT temp) files"
+
+        # generate file list in three parts
+
+        list1=$(ls -1 *.o 2>/dev/null)
+        list2=$(svn status --verbose --no-ignore --non-recursive \
+            | grep '?' \
+            | sed 's/^? *//' \
+            | sort)
+        list3=$(ls -1 _????????-???.txt 2>/dev/null)
+
+        # concatenate using printf
+
+        list=""
+        test -n "$list1" && printf -v list "${list}%s\n\n" "$list1"
+        test -n "$list2" && printf -v list "${list}%s\n\n" "$list2"
+        test -n "$list3" && printf -v list "${list}%s\n\n" "$list3"
+
+        # report and exit if required
+
+        echo
+        if [ -n "$list" ]
+            then
+            echo -n "$list"             # -n means one less final newline
+        else
+            echo "(no matches)"
+            controlled_exit $E_SUCCESS
+        fi
+
+        # seek confirmation
+
+        echo -n "  $SCRIPT: enter 'y' to delete: "
+        read response
+        if [ "$response" != "y" ]
+            then
+            report
+            report "abandoning clean up"
+            cleanstr=""                 # used in final_line reporting
+            controlled_exit $E_SUCCESS
+        fi
+
+        # delete
+
+        list=$(echo $list)
+
+        cleanexit=$E_SUCCESS
+        rmcount=0                       # file removal counter
+        for file in $list
+          do
+          rm --force "$file"
+          ret=$?
+          if [ $ret -ne 0 ]
+              then
+              report "PROBLEM" "rm returned $ret for file: $file"
+              cleanexit=$E_RM_FAIL      # reset script return
+          fi
+          let "rmcount++"
+        done
+
+        # create reporting string for final_line
+
+        rmplural=""
+        test $rmcount -gt 1 && rmplural="s"  # plural form
+        printf -v cleanstr " %d file%s deleted " $rmcount "$rmplural"
+
+        controlled_exit $cleanexit
+        ;;
+esac
+
+# ---------------------------------
+#  set pipefail
+# ---------------------------------
+
+# TOFIX: pipefail: test and either comment full or
+# remove not unequivocal as grep returns 1 on no match,
+# but might help
+#
+# causes a pipeline to return the exit status of the
+# last command in the pipe that returned a non-zero
+# return value
+
+set -o pipefail  # was shopt with -q to suppress output
+                 # report
+
+# seems useful where no boost is concerned
+
+# -------------------------
+#  report date and svn
+# -------------------------
+
+date=$(date '+%a %d-%b-%Y %H:%M:%S %Z %z')
+report "date" "$date"
+report "svn" "$svnver"
+calldir=$(pwd -P)
+calldir=${calldir#/home/robbie/synk/xeona/}  # prune for readability
+report "current branch" "$calldir"
+report "command-line" "\$ $SCRIPT $cline"
+test "$svn_flag" == "stale" && report "CAUTION" "svn $mess needed"
+
+# -------------------------
+#  confirm makefile
+# -------------------------
+
+makefile=$(ls -1 [Mm]akefile 2>/dev/null)
+makefile=$(echo $makefile)              # strip newlines and surplus white-space
+
+if [ -z "$makefile" ]
+    then
+    report
+    report "ERROR" "no makefile found: [Mm]akefile"
+    report
+    exit $E_MISSING_FILES
+fi
+
+report "makefile name" "$makefile"
+
+# ---------------------------------
+#  test_simple_name()
+# ---------------------------------
+
+function test_simple_name
+{
+    local NAME="$1"
+    local name="$2"
+
+    test "$NAME" == "$name" || report "PROBLEM" "name mismatch assumption: $NAME != $name"
+}
+
+# ---------------------------------
+#  source the unit-test lists
+# ---------------------------------
+
+# CAUTION: unit-test lists: these are no longer kept in
+# this file for reasons of maintainability -- see
+# instead "UNIT_TEST_LISTS".  Note also the execute
+# permissions on the "source" file need not be set.
+
+case "$type" in
+    unit)
+        utsource1="./$UNIT_TEST_LOCAL"       # concatenate to produce filename
+
+        script=$(which "$SCRIPT")            # script path in full
+        path=$(dirname $script)              # directory part without trailing slash
+        utsource2="$path/$UNIT_TEST_LISTS"   # concatenate to produce filename
+
+        # hunt for local then universal variants
+
+        if   [ -f "$utsource1" ]             # regular file found
+            then
+            utsource="$utsource1"            # local variant
+        elif [ -f "$utsource2" ]             # regular file found
+            then
+            utsource="$utsource2"            # universal variant
+        else
+            report "PROBLEM" "unit-test lists not found, tried: $utsource1 $utsource2"
+        fi
+
+        # process that file
+
+        if   [ ! -s "$utsource" ]            # regular file found but zero bytes
+            then
+            report "PROBLEM" "unit-test lists found but zero-bytes: $utsource"
+        else                                 # success
+            report "unit-test lists" "$utsource"
+            source "$utsource"               # bash 'source' command, same as "."
+        fi
+
+        # remove multiple blanks
+
+        SOURCES=$(echo $SOURCES)             # cheap way of stripping surplus white-space, beware leading -neE
+
+        # check sources list
+
+        test -z "$SOURCES" && report "WARNING" "empty sources list"
+        ;;
+esac
+
+# ---------------------------------
+#  find_role()
+# ---------------------------------
+
+# CAUTION: the UNIX utility "expr" is NOT intuitive -- pay
+# attention to the following:
+#
+#     "expr match" attempts to match the 'regex' pattern,
+#     looks from the BEGINNING of host string, and
+#     returns the number of matching characters
+#
+#     "expr match \(\)" is similar but attempts to extract
+#     the 'regex' match, it also looks from the BEGINNING
+#     of the host string
+#
+#     "express index" reports the one-based position of
+#     the first CHARACTER in the substring list that
+#     hits
+#
+#     strong quotes (') for the 'regex' or char-list are
+#     suggested by Cooper (2007) (Advanced bash-scripting
+#     guide), but weak quotes (") also seem to work fine
+#     in the following contexts
+
+function find_role
+{
+    local unittest=""                   # unit test file
+
+    # hunt for the "*.ut[0-9]*" file, stated in terms of glob syntax
+    for file in $SOURCES
+      do
+      test $(expr match "$file" '.*\.ut[[:digit:]]') -ne 0 && unittest="$file"
+    done
+
+    # now grab the value, the '/' demarcate a 'regex' which identifies the "file-role" key
+    role=$(gawk 'BEGIN { FS = " : " } / file-role *:/ { print $2 }' "$unittest")   # could also use 'awk'
+
+    # strip any trailing " / unit test" and similar text
+    role=${role%/*}                                     # strip final (or only) trailing "/" and remainder
+
+    # strip any trailing 'space' and 'tab' chars, note the "complemented character alternative" char '^'
+    role=$(expr match "$role" '\(.*[^[:space:]]\)')     # applies to beginning of string
+}
+
+# ---------------------------------
+#  find_level()
+# ---------------------------------
+
+# find digit in "name.ut[1-9].cc" from SOURCES
+
+function find_level
+{
+    local file=""
+    for file in $SOURCES                # CAUTION: no soft-quotes on 'SOURCES'
+      do
+      file="${file%.cc}"                # strip trailing ".cc" as 'bash' parameter substitution
+      level="${file#[[:alpha:]]*\.ut}"  # strip leading part "abcde.ut" as 'regex'
+      case "$level" in
+          [0-9]) break ;;               # break on single digit
+          *) level="(not found)" ;;     # should not get here
+      esac
+    done
+}
+
+# ---------------------------------
+#  get role and level
+# ---------------------------------
+
+case "$type" in
+    app)
+        :
+        ;;
+    unit)
+        find_role                       # try to obtain "file-role" value
+        find_level                      # obtain test level 0 thru 9, only reported for units
+        ;;
+esac
+
+# ---------------------------------
+#  report output and sources
+# ---------------------------------
+
+case "$type" in
+    app)
+        report "output name" "$BINARY"
+        report "make source names"      # can add a second "" for :
+        make ccs                        # NOTE: as reported by make
+        ;;
+    unit)
+        report "unit level"    "$level"
+        report "unit role "    "$role"
+        report "output name"   "$BINARY"
+        report "source names"  "$SOURCES"
+        report
+        ;;
+esac
+
+# -------------------------
+#  make_ret_test()
+# -------------------------
+
+function make_ret_test
+{
+    make_ret=$?                         # CAUTION: must be first line
+
+    report
+    if [ $make_ret -ne 0 ]
+        then
+        test $test_flag -eq 0 && rm --force "$maktemp" # file no longer needed
+        local meaning=""
+        case "$make_ret" in
+            0)      meaning="success"          ;;      # not strictly required
+            $CTRLC) meaning="probable ctrl-c"  ;;
+            *)      meaning="fail"             ;;
+        esac
+        report "warning" "compiler exit $make_ret ($meaning)"
+        let "xstat += $X_COMPILE_FAIL"
+        controlled_exit $xstat
+    fi
+    return 0
+}
+
+# -------------------------
+#  extra screening
+# -------------------------
+
+# check settings in relation to release builds
+
+release_error_flag=0
+update_error_flag=0
+
+rstring="option -r (release build)"
+
+case "$release_flag" in
+    1)
+        case "$svn_flag" in
+            stale)
+                string="must svn commit and update prior to $rstring"
+                report "ERROR" "$string"
+                update_error_flag=1
+                ;;
+        esac
+        case "$debug_omit_flag" in
+            0)
+                string="must use option -d (omit _XDEBUG macro) with $rstring"
+                report "ERROR" "$string"
+                release_error_flag=1
+                ;;
+        esac
+        case "$fresh_flag" in
+            0)
+                string="must use option -f (fresh compile) with $rstring"
+                report "ERROR" "$string"
+                release_error_flag=1
+                ;;
+        esac
+        ;;
+esac
+
+# override the usual protections for release builds,
+# only for developing scripts and such
+
+override=0
+case "$override" in
+    1)
+        echo "** $SCRIPT: CAUTION: override in force, resetting error flags: $override **"
+        update_error_flag=0
+        release_error_flag=0
+        echo
+        ;;
+esac
+# end of override code
+
+test $update_error_flag  -ne 0 && controlled_exit $E_UPDATE_ISSUES
+test $release_error_flag -ne 0 && controlled_exit $E_RELEASE_ISSUES
+
+# ---------------------------------
+#  process make options
+# ---------------------------------
+
+mops=""                                 # make options
+case "$fourcore_flag" in
+    1) mops="--jobs=4" ;;
+esac
+
+# -------------------------
+#  process compiler options
+# -------------------------
+
+# at the time of writing, few if any assumptions were
+# made about the actual compiler flag settings in the
+# project makefile
+
+cpp=""                                  # makefile variable : CPPFLAGS
+cxx=""                                  # makefile variable : CXXFLAGS
+ldd=""                                  # makefile variable : LDFLAGS
+bin=""                                  # makefile variable : binary
+src=""                                  # makefile variable : sources
+targets=""
+
+# cpp : 'CPPFLAGS=' preprocessor flags
+
+node=$(uname --nodename)
+case "$node" in
+    sojus) termcols="-D_XTCOLS=142"               ;;   # [1]
+    gogol) termcols="-D_XTCOLS=171"               ;;   # [2]
+    hinau) termcols="-D_XTCOLS=166"               ;;   # [3]
+    *)     termcols="-D_XTCOLS=122"               ;;   # recommended minimum
+esac
+
+# _XTCOLS sets the compiled-in terminal output width -- the recommened minimum being 122
+# to check  : $ stty --all # refer to columns value OR $ stty size # take second value
+# to obtain : cols = $(stty size | awk '{ print $2 }')
+# to test   : $ for i in $(seq 150); do printf "%${i}d\n" $i; done
+#
+# [1] 'sojus' with a small font, Gnome full screen (f11), and scroll bar, supports 143 chars
+#             hardware Toshiba Tecra A2 330 : 1024 x 768
+# [2] 'gogol' with a small font, Gnome full screen (fll), and scroll bar, supports 172 chars
+#             hardware Toshiba Satellite Pro 6100 : 1400 x 1050
+# [2] 'hinau' with a normal font, Gnome full screen (fll), and scroll bar, supports 167 chars
+#             hardware Toshiba Tecra A11 11H : 1366x768
+
+case "$debug_omit_flag" in
+    0) debug="-D_XDEBUG"                          ;;
+    1) debug=""                                   ;;   # override makefile default of -D_XDEBUG
+esac
+
+case "$svn_flag" in
+    clean) svv="-D_XSVNREV=$svnver"               ;;   # update whenever acceptable
+    *)     svv=""                                 ;;
+esac
+
+case "$release_flag" in
+    0)
+        release=""
+        ;;
+    1)                                                # release build signaled
+        release="-D_XRELEASE -DNDEBUG"                # NDEBUG is official
+        ;;
+esac
+
+case "$CPPMACRO" in
+    "") macro=""                                  ;;
+    *)  macro="-D_$CPPMACRO"                      ;;
+esac
+
+case "$type" in
+    unit) unittest="-D_XUTEST"                    ;;   # unit test detected
+    *)    unittest=""                             ;;
+esac
+
+case "$utest_omit_flag" in
+    0)                                            ;;
+    1) unittest=""                                ;;   # override default behavior
+esac
+
+case "$filesys_flag" in
+    0) filesys=""                                 ;;
+    1) filesys="-DBOOST_FILESYSTEM_NO_DEPRECATED" ;;
+esac
+
+case "$filesys_v3_flag" in
+    0) filesys_v3=""                              ;;
+    1) filesys_v3="-DBOOST_FILESYSTEM_VERSION=3"  ;;
+esac
+
+cppbuff="$termcols $debug $unittest $svv $release $macro $filesys $filesys_v3"
+cppbuff=$(echo $cppbuff)
+
+case "$cppbuff" in
+    "") cpp="CPPFLAGS="                           ;;
+    *)  cpp="CPPFLAGS=\"$cppbuff\""               ;;
+esac
+
+# cxx : 'CXXFLAGS=' compiler flags
+
+case "$dryrun_flag" in
+    0) dryrun=""                                  ;;
+    1) dryrun="-###"                              ;;
+esac
+
+case "$quiet_flag" in
+    0) quiet="-Wall"                              ;;
+    1) quiet=""                                   ;;
+esac
+
+case "$wextra_flag" in
+    0) wextra=""                                  ;;
+    1) wextra="-Wextra"                           ;;
+esac
+
+case "$release_flag" in
+    0)
+        release="$CXXDEBUG -O0 -fno-inline"            # 'CXXDEBUG' debug options set in preamble
+        case "$profile_flag" in
+            1) release="$release $CXXLDPROF"      ;;   # 'CXXLDPROF' profiling option set in preamble
+        esac
+        ;;
+    1)                                                 # release build signaled
+        release="-O3 -fno-strict-aliasing"             # possibly prompted by old 'xeona::almostEqual' implementation?
+        release="-O3"                                  # current practice from r5507 [1]
+        ;;
+esac
+
+# [1] when tested on 08-Apr-2011 with r6343, r6344,
+# r6345, options -O3 -O2 -O1 all caused "below main"
+# valgrind memory errors -- it is duly assumed, but not
+# proven, that these errors do not relate to bad
+# 'xeona' code and can be safely ignored
+
+screenbuf=""
+
+# note the new screen for the boost headers, which was:
+# | grep --invert-match '/usr/local/include/boost-1_34_1/boost'"
+
+case "$pedantic_flag" in
+    0) pedantic=""                                ;;
+    1)
+        pedantic="-pedantic"                 # acceptable for Boost 1.34.1
+        pedantic="$pedantic -Wno-long-long"  # added for Boost 1.35 (but useful earlier)
+        pedantic="-pedantic"                 # added at Boost 1.44 after removing 'long long' types
+        screenbuf="\
+| grep --invert-match '/usr/local/include/boost'"
+        ;;
+esac
+
+case "$permissive_flag" in
+    0) permissive=""                              ;;
+    1) permissive="-fpermissive"                  ;;
+esac
+
+case "$no_gnu_flag" in
+    0) ansi=""                                    ;;
+    1) ansi="-std=c++98"                          ;;
+esac
+
+# the pedantic screen is a subset of the meyers screen so
+# that it can just be simply overwritten and not merged
+
+case "$meyers_flag" in
+    0) meyers=""                                  ;;
+    1)
+        meyers="-Weffc++"
+
+        # this filter variously used 'std::tr1::enable_shared_from_this'
+        # and 'boost::enable_shared_from_this' but now just the common
+        # pattern '::enable_shared_from_this'
+
+        screenbuf="\
+| grep --invert-match '/usr/local/include/boost' \
+| grep --invert-match '/usr/lib/gcc' \
+| grep --invert-match '::enable_shared_from_this' \
+| grep --invert-match 'boost::noncopyable' \
+| grep --invert-match 'boost::static_visitor'"
+
+        # extend the screen if the lessfilter flag is NOT set
+
+        case "$lessfilter_flag" in
+            0)
+                screenbuf="$screenbuf \
+| grep --invert-match 'instantiated from' \
+| grep --invert-match 'At global scope' \
+| grep --invert-match '.. .... ........ from '"   # "In file included from "
+                ;;
+        esac
+        ;;
+esac
+
+# simple screen based on namespaces
+#      screenbuf="\
+# | grep --invert-match 'boost::' \
+# | grep --invert-match 'std::tr1::'"
+#
+# screen based on namespaces, entities, and messages (the last is for -pedantic)
+#      screenbuf="\
+# | grep --invert-match 'boost::' \
+# | grep --invert-match 'std::tr1::' \
+# | grep --invert-match 'mpl_::' \
+# | grep --invert-match 'std::locale::_M_impl' \
+# | grep --invert-match 'has a non-virtual destructor' \
+# | grep --invert-match 'use of C99 long long integer constant'"
+#
+# screen based on file paths mostly
+#      (see above)
+
+cxxbuff="$dryrun $quiet $wextra $release $permissive $pedantic $ansi $meyers"
+cxxbuff=$(echo $cxxbuff)
+
+case "$cxxbuff" in
+    "") cxx="CXXFLAGS="                 ;;
+    *)  cxx="CXXFLAGS=\"$cxxbuff\""     ;;
+esac
+
+# ldd : 'LDFLAGS=' linker flags
+
+# GLPK run-time library hack
+#
+#  LIBDIR="/usr/local/lib"
+#  glpk430="-Wl,-rpath -Wl,$LIBDIR" # note '--rpath' also works
+
+glpk430=""                              # empty
+
+case "$dryrun_flag" in
+    0) dryrun=""                        ;;
+    1) dryrun="-###"                    ;;
+esac
+
+case "$release_flag" in
+    0)
+        case "$profile_flag" in
+            0) profile=""               ;;
+            1) profile="$CXXLDPROF"     ;;   # option must be same as the compile calls
+        esac
+        ;;
+    1) profile=""                       ;;
+esac
+
+# static linking in general: see Stephens etal (2006
+# sec1.23 p92-95) on specifying run-time library
+# variants and also (p92) on the Boost libraries option
+# "runtime-link=static" (but confirm currency)
+
+# STATIC LINKING AND VALGRIND: the use of '-static'
+# plus "valgrind" causes an avalanche of "Conditional
+# jump or move depends on uninitialised value(s)"
+# errors -- in the order of 80,000 or perhaps double,
+# it seems, if more optimizations are applied.  The
+# first message is as follows (edited, the xeona paths
+# were full) -- it starts well before any xeona code:
+#
+#    Conditional jump or move depends on uninitialised value(s)
+#       at 0x85639F5: __register_atfork (in ./xeona.r4287)
+#       by 0x854F331: ptmalloc_init (in ./xeona.r4287)
+#       by 0x8552AA5: malloc_hook_ini (in ./xeona.r4287)
+#       by 0x8552307: malloc (in ./xeona.r4287)
+#       by 0x8580E3B: _dl_init_paths (in ./xeona.r4287)
+#       by 0x85641CB: _dl_non_dynamic_init (in ./xeona.r4287)
+#       by 0x85648B5: __libc_init_first (in ./xeona.r4287)
+#       by 0x853599D: (below main) (in ./xeona.r4287)
+#
+# No memory leaks occur.  A search of the 3.5.0
+# documentation using "-static" revealed nothing (3.2.0
+# is installed). Removing '-static' fixed the problem
+# completely.  Note that the use of '-static' causes
+# 'makefile' to link to '-lpthread'.
+#
+# Closure: I provisionally concluded this was not an
+# application programming issue and decided to ignore
+# 'valgrind' on this occasion.
+
+case "$release_flag" in
+    0)
+        static=""                       # dynamic linking where possible
+        ;;
+    1)
+        static=""                       # dynamic linking where possible
+        static="-static"                # static linking in every case (see story above)
+        ;;
+esac
+
+lddbuff="$glpk430 $dryrun $profile $static"
+lddbuff=$(echo $lddbuff)
+
+case "$lddbuff" in
+    "") ldd="LDFLAGS="                  ;;
+    *)  ldd="LDFLAGS=\"$lddbuff\""      ;;
+esac
+
+# bin : 'binary=' filename
+
+bin="binary=\"$BINARY\""                # no manipulation required
+
+# src : 'source=' list of sources
+
+case "$type" in
+    app)
+        src=""                              # use full sources list as per makefile
+        sources="(using makefile default)"  # for reporting purposes
+        ;;
+    unit)
+        src="sources=\"$SOURCES\""      # use unit-test sources list as defined here
+        sources=$SOURCES                # for reporting purposes
+        ;;
+esac
+
+# targets : make target list, which can include controls like cleaning directories
+
+case "$fresh_flag" in
+    1) targets="$targets clean"         ;;
+esac
+
+       targets="$targets all"
+
+case "$klean_flag" in
+    1) targets="$targets tidy"          ;;
+esac
+
+targets=$(echo $targets)
+
+case "$nofilter_flag" in
+    0) screen="2>&1 $screenbuf"         ;;  # add leading redirection
+    1) screen=""                        ;;  # nullify (after possibly setting earlier)
+esac
+
+# -------------------------
+#  report environment
+# -------------------------
+
+# process header and library search path information
+
+sepn=""
+inc_search=""
+lib_search=""
+test -n "$CPATH"        && inc_search="CPATH=\"$CPATH\""
+test -n "$LIBRARY_PATH" && lib_search="LIBRARY_PATH=\"$LIBRARY_PATH\""
+test -n "$CPATH" -a -n "$LIBRARY_PATH" && sepn="  "
+gccenv="$inc_search$sepn$lib_search"
+
+report "shell environment" "${gccenv:-(not set)}"
+
+# ---------------------------------
+#  process special makefile name
+# ---------------------------------
+
+case "$SPECIAL_MAKEFILE" in
+    "")                                 # SPECIAL_MAKEFILE not set
+        spmakf=""
+        ;;
+    *)
+        spmakf="--file=\"$SPECIAL_MAKEFILE\""
+        ;;
+esac
+
+report "special makefile" "${SPECIAL_MAKEFILE:-(not set)}"
+
+# -------------------------
+#  report make options
+# -------------------------
+
+report "make options"       "${mops:-(none)}"
+report "preprocessor flags" "${cppbuff:-(none)}"
+report "compiler flags"     "${cxxbuff:-(none)}"
+report "linker flags"       "${lddbuff:-(none)}"
+report "sources"            "$sources"
+report "output name"        "$BINARY"
+report "make targets"       "$targets"
+report "output screen"      "${screen:-(no screen)}"
+
+# ---------------------------------
+#  testfile()
+# ---------------------------------
+
+testfile_error_flag=0
+
+function testfile
+{
+    test -f "$1" && return 0
+    testfile_error_flag=1
+    return 1
+}
+
+# ---------------------------------
+#  check for unit-test files
+# ---------------------------------
+
+report
+
+case "$type" in
+    unit)
+        for file in $SOURCES
+          do
+          testfile "$file" || report "ERROR" "file not found: $file"
+        done
+        ;;
+esac
+
+case "$testfile_error_flag" in
+    1)
+        report "ERROR" "quiting without action"
+        controlled_exit $E_MISSING_FILES
+        ;;
+esac
+
+# ---------------------------------
+#  common.cc alignment
+# ---------------------------------
+
+# this code ensures that the xeona::DBUG variable, in
+# turn set by the _XDEBUG preprocessor macro, will
+# propagate properly through the app at link-time (this
+# is also enforced by a touch command contained in the
+# makefile) [prior to r1238 this code trivially
+# modified 'common.cc' to give update the revision date
+# as well]
+
+# touch file and report
+touch "$COMMON.cc"                      # also undertaken in makefile
+report "$COMMON.cc" "file touched to ensure current xeona::DBUG"
+
+# ---------------------------------
+#  refresh xedoc file
+# ---------------------------------
+
+case "$type" in
+    app)
+        call_xedoc "refresh"            # function call, also reports
+        ;;
+esac
+
+# -------------------------
+#  compiler calls
+# -------------------------
+
+# CAUTION: the LDLIBS are defined in the makefile and
+# no attempt is made to influence their setting here
+
+for target in $targets
+  do
+  case "$target" in
+      tidy|clean)
+          call="make $spmakf $bin $target"
+          call=$(echo $call)            # strip newlines and surplus white-space
+          report "make call" "$call"
+          report
+          eval "$call"
+          make_ret_test
+          ;;
+      all)
+          call="make $spmakf $mops $cpp $cxx $ldd $bin $src $target $screen"
+          call=$(echo $call)            # strip newlines and surplus white-space
+          callreport=$call              # to be copied into SVNVERFILE
+          report "make call" "$call"
+          report
+          maktemp="$TEMPSTUB-mak.txt"   # safe temporary filename
+          eval "$call 2>&1 | tee $maktemp"
+          make_ret_test                 # control branches here under error
+
+          grep --quiet "warning" "$maktemp"       # NOTE: search term
+          makgrepret=$?
+          test $test_flag -eq 0 && rm --force "$maktemp"    # no longer needed
+          case "$makgrepret" in
+              0) gccwarn=1;  makmsg="compiler warnings issued" ;;
+              1) gccwarn=0;  makmsg="no compile warnings"      ;;
+              *) gccwarn=99; makmsg="unknown grep return"      ;;
+          esac
+
+          test $gccwarn -eq 1 && let "xstat += $X_COMPILE_WARN"
+
+          gccrep="grep signal $gccwarn ($makmsg)"
+          report "gcc status" "$gccrep"
+          report
+
+          # make binary read-only
+          test -f $BINARY && chmod a-w $BINARY
+          ;;
+      *)
+          report "ERROR" "unsupported compiler target: $target"
+          ;;
+  esac
+
+# -->  # TOFIX: incorporate pipeline mods or remove
+#
+#    # $screen creates a pipeline with grep
+#    function retmet { return $1; }        # ensure correct return
+#    screen = "'boost::'"                  # add earlier
+#    if [ -n "$screen" ]
+#        then
+#        make "$cpp $cxx $bin $src $target" 2>&1 | grep --invert-match 'boost::'
+#       #make "$cpp $cxx $bin $src $target" 2>&1 | grep --invert-match "$screen"
+#        retmet ${PIPESTATUS[0]}            # must follow call chain, PIPESTATUS is built-in
+#        make_ret_test
+#    else
+#        make "$cpp $cxx $bin $src $target"
+#        make_ret_test
+#    fi
+#
+# <--
+
+done
+
+# ---------------------------------
+#  nullify xedoc file
+# ---------------------------------
+
+case "$type" in
+    app) call_xedoc "nullify" ;;        # function call, also reports
+esac
+
+# ---------------------------------
+#  write out run details
+# ---------------------------------
+
+# pause for a moment in some cases and perhaps also beep
+
+#  let "sum = $pedantic_flag + $meyers_flag + $meyers_filter_flag"
+#  if [ $sum -gt 0 ]
+
+if [ $alert_flag -gt 0 ]
+    then
+    alert -1
+    sleep  3
+fi
+
+# report
+
+report "$SVNVERFILE" "overwriting file"
+
+svnverfile=$(svnversion $SVN_BASE 2>/dev/null)
+
+rm --force "$SVNVERFILE"
+
+{
+    echo
+    echo "last build details under $SCRIPT (as opposed to make)"
+    echo
+    echo "binary    : $BINARY"
+    echo "type      : $type"
+    echo "script    : $SCRIPT $cline"
+    echo "machcount : $countstr"
+    echo "local-svn : $svnverfile"
+    echo "date      : $date"
+    echo "make-call : $callreport"
+    echo
+} >> "$SVNVERFILE"
+
+test $test_flag -ne 0 && cp "$SVNVERFILE" "$TEMPSTUB-cal.txt"
+
+# -------------------------
+#  report binary info
+# -------------------------
+
+report "binary name" "$BINARY"
+
+BYTES=$(stat -c %s "$BINARY" 2>/dev/null)    # -c %s is total size in bytes
+if test -z $BYTES
+    then
+    report "binary size" "file not present"
+    nobin=1
+    controlled_exit $xstat
+else
+    report "binary size" "$BYTES bytes"
+    if [ $BYTES -eq 0 ]
+        then
+        emptybin=1
+        controlled_exit $xstat
+    fi
+    binperms="(stat call not made)"
+    test -f "$BINARY" && binperms=$(stat --format=%A $BINARY)
+    report "binary perms" "$binperms"
+fi
+
+# ---------------------------------
+#  abandon execution as needed
+# ---------------------------------
+
+case "$no_execute_flag" in
+    1)
+        report "note" "option -x (do not run binary) is in effect"
+        controlled_exit $xstat
+        ;;
+esac
+
+# ---------------------------------
+#  binexit_means()
+# ---------------------------------
+
+# the previous hardcoded values are in r2769
+
+binexit_meaning=""
+
+function binexit_means
+{
+    local binexit="$1"
+    deport "binexit" "$binexit"
+
+    case "$type" in
+        app)
+            # try to recover interpretation from xeona
+            binexit_meaning=$( ./$BINARY --output $binexit 2>/dev/null )   # can be empty string
+            deport "--output result" "$binexit_meaning"
+
+            # overwrite special cases
+            local abortmsg="probable terminate on uncaught throw OR glibc detects invalid pointer during free call"
+            case "$binexit" in
+                0)         binexit_meaning="success"                      ;;    # shorter version
+                $CTRLC)    binexit_meaning="possible ctrl-c"              ;;
+                $ABORT)    binexit_meaning="$abortmsg"                    ;;
+                $SEGFAULT) binexit_meaning="probable segmentation fault"  ;;
+            esac
+
+            # offer default message if above code fails
+            test -z "$binexit_meaning" && binexit_meaning="undocumented application return"
+            deport "binexit_meaning" "$binexit_meaning"
+            ;;
+        unit)
+            # units are NOT typically code to return non-zero when run-time problems are encountered
+            case "$binexit" in
+                0) binexit_meaning="success"                              ;;
+                1) binexit_meaning="uncharacteristic failure"             ;;
+                *) binexit_meaning="undocumented unit test return"        ;;
+            esac
+            ;;
+    esac
+}
+
+# ---------------------------------
+#  run binary (unit or app)
+# ---------------------------------
+
+redirect=""
+
+case "$logger_only_flag" in
+    1) redirect="$redirect 1>/dev/null" ;;
+esac
+
+case "$screen_only_flag" in
+    1) redirect="$redirect 2>/dev/null" ;;
+esac
+
+timing=""                               # null command
+timing="time -p"                        # shell keyword (v3.1.17)
+timing="/usr/bin/time --portability"    # GNU utility (v1.7)
+
+lead="."                                # on binary name
+test -d "$TESTSDIR" && lead=".."        # assume test subdirectory is just one deep
+
+case "$tout_flag" in
+    0) :                           ;;
+    1) APP_ARGS="$APP_ARGS --tout" ;;   # new option from commit r6878
+esac
+
+case "$type" in
+    app)
+        run="$timing $lead/$BINARY $APP_ARGS $redirect"
+        report "type"              "application"
+        report "application args" "$APP_ARGS"
+        ;;
+    unit)
+        run="$timing $lead/$BINARY $redirect"
+        report "type" "unit test"
+        ;;
+    *)
+        :                               # dummy statement needed
+        ;;
+esac
+
+run=$(echo $run)
+report "run call" "$run"
+
+echo
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+
+test "$lead" = ".." && cd $TESTSDIR     # cd up as required
+
+eval "$run"
+runret=$?                               # grab exit status
+
+test "$lead" = ".." && cd $lead         # cd down as required
+
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+echo
+
+binexit_means $runret                   # sets 'binexit_meaning'
+
+binexit="$BINARY exit $runret ($binexit_meaning)"  # for later reporting
+report "run status" "$binexit"
+
+test $runret -ne 0 && let "xstat += $X_RUN_FAIL"
+test $runret -ne 0 && report "warning" "run-time failure"
+
+# ---------------------------------
+#  valgrind binary
+# ---------------------------------
+
+# define basic valgrind options
+#
+#     --tool=memcheck     default in any case
+#     --error-exitcode=1  return 1 on non-success (default of 0 returns process exit)
+
+VALGRIND_OPTS0="--tool=memcheck --error-exitcode=1"
+
+valcmd="$VALGRIND $VALGRIND_OPTS0"
+
+case "$valgrind_extd_flag" in
+    1)
+        valgrind_flag=1                 # -v need not have been set
+        valcmd="$VALGRIND $VALGRIND_OPTS0 $VALGRIND_OPTS1"
+        ;;
+esac
+
+case "$valgrind_flag" in
+    1)
+        valtemp="$TEMPSTUB-val.txt"     # safe temporary filename
+        report
+        report "valgrind" "about to memory check binary"
+
+        lead="."                             # on binary name
+        test -d "$TESTSDIR" && lead=".."     # assume test subdirectory is just one deep
+
+        case "$type" in
+            app)
+                valcall="$valcmd $lead/$BINARY $APP_ARGS"
+                ;;
+            unit)
+                valcall="$valcmd $lead/$BINARY"
+                ;;
+            *)
+                :                       # dummy statement needed
+                ;;
+        esac
+
+        valcall=$(echo $valcall)
+        report "valgrind call" "$valcall"
+        report
+
+        test "$lead" = ".." && cd $TESTSDIR  # cd up as required
+
+        eval "$valcall 2>&1 | tee $lead/$valtemp" # CAUTION: stderr redirection is required
+        valcmdexit=$?
+
+        test "$lead" = ".." && cd $lead      # cd down as required
+
+        case "$valcmdexit" in
+            0)         valerror=0;  valerrormsg="no memory errors"                                      ;;
+            1)         valerror=1;  valerrormsg="memory errors occurred"; let "xstat += X_MEMORY_ERROR" ;;
+            $CTRLC)    valerror=99; valerrormsg="possible ctrl-c"                                       ;;
+            $SEGFAULT) valerror=99; valerrormsg="possible segmentation fault"                           ;;
+            155)       valerror=99; valerrormsg="perhaps profile-enabled binary leaking memory (gmon)"  ;;
+            *)         valerror=99; valerrormsg="unknown valgrind return"                               ;;
+        esac
+
+        grep --quiet "LEAK" "$valtemp"
+        valgrepret=$?
+        test $test_flag -eq 0 && rm --force "$valtemp"
+        case "$valgrepret" in
+            0) valleak=1;  valleakmsg="memory leaks occurred"; let "xstat += X_MEMORY_LEAK" ;;
+            1) valleak=0;  valleakmsg="no memory leaks"                                     ;;
+            *) valleak=99; valleakmsg="unknown grep return"                                 ;;
+        esac
+
+        report
+        report "gcc status (again)" "$gccrep"     # repeat from earlier
+        report "run status (again)" "$binexit"    # repeat from earlier
+        report "memory status"      "valgrind exit $valcmdexit ($valerrormsg)"
+        report "leak status"        "grep signal $valleak ($valleakmsg)"
+
+        let "valstat = $valerror + $valleak"
+        ;;
+    0)
+        :
+        ;;
+esac
+
+# ---------------------------------
+# xedocs_call()
+# ---------------------------------
+
+function xedocs_call
+{
+    local binary="./$BINARY"                 # for convenience
+    local subdir="$TESTSDIR"                 # for convenience
+
+    local xemtemp="$subdir/$TEMPSTUB.xem"    # safe temporary filename
+    local logtemp="$subdir/$TEMPSTUB.xog"    # 'xeona' log file
+
+    # create the xedocs model file
+    {
+        $binary --xem head
+        echo "-------------------------------------------- test entities"
+        $binary --class .                    # note the dot
+        $binary --xem tail
+    } 2>/dev/null | cat --squeeze-blank > $xemtemp
+
+    # run the model
+    local call="$binary --report ${report:=2} --mode 4 --file $xemtemp"
+    eval "$call > $logtemp 2>&1"
+    ret=$?
+
+    # interpret the return
+    case $ret in
+        0)
+            report "xedocs suite" "run exit $ret (xedocs valid)"
+            test $test_flag -eq 0 && rm --force "$xemtemp"  # file no longer needed
+            test $test_flag -eq 0 && rm --force "$logtemp"  # file no longer needed
+            ;;
+        *)
+            reason=$( $binary --output $ret 2>/dev/null )
+            report
+            report "xedocs suite" "run exit $ret = $reason"
+            report "xedocs suite" "call: $call"
+            report "xedocs suite" "allied files: $xemtemp  $xemtemp~  $logtemp"
+            report
+            ;;
+    esac
+
+    return $ret
+}
+
+# ---------------------------------
+#  run xedocs as required
+# ---------------------------------
+
+case "$xedocs_flag" in
+    1)
+        case "$type" in
+            app)  xedocs_call || let "xstat += $X_XEDOCS_FAIL"                            ;;
+            unit) deport "xedocs test" "option -e (ensure) not relevant for a unit test"  ;;
+        esac
+        ;;
+esac
+
+# ---------------------------------
+#  xmok_call()
+# ---------------------------------
+
+function xmok_call
+{
+    local xmktemp="$TEMPSTUB-xmk.txt"   # safe temporary filename
+
+    local call="$XMOK $XMOK_ARGS ./$BINARY"
+    eval "$call > $xmktemp 2>&1"
+    local ret=$?
+
+    function xmok_report
+    {
+        echo
+        cat "$xmktemp" | grep "^$XMOK:   call "
+        echo
+        $XMOK --aggret                  # report sought aggregate return
+    }
+
+    case $ret in
+        0)
+            report "xem tests" "xmok exit $ret (test suite passed)"
+            ;;
+        1)
+            report "xem tests" "xmok exit $ret (test suite issues)"
+            xmok_report
+            ;;
+        *)
+            report "xem tests" "xmok exit $ret (xmok failure)"
+            ;;
+    esac
+
+    test $test_flag -eq 0 && rm --force "$xmktemp"     # no longer needed
+
+    return $ret
+}
+
+# ---------------------------------
+#  call xmok as required
+# ---------------------------------
+
+case "$xmok_flag" in
+    1)
+        case "$type" in
+            app)  xmok_call || let "xstat += $X_XMOK_FAIL"                            ;;
+            unit) deport "xem tests" "option -o (okay) not relevant for a unit test"  ;;
+        esac
+        ;;
+esac
+
+# -------------------------
+#  delete binary as needed
+# -------------------------
+
+case "$Klean_flag" in
+    1) delete_binary  ;;
+esac
+
+# -------------------------
+#  housekeeping
+# -------------------------
+
+controlled_exit $xstat
+
+report
+report "CODING ERROR" "at end of script, perhaps controlled_exit() is faulty"
+report
+
+exit 255                                # should never get here
+
+# ---------------------------------
+#  junk code
+# ---------------------------------
+
+# printenv CPATH | gawk 'BEGIN { RS = ":" } { if ($0 == "/usr/local/include/boost-1_38") exit 1 }' && export CPATH="$CPATH:$cpath"
+
+#  end of file

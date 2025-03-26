@@ -1,0 +1,362 @@
+
+note
+
+    $Revision: 8635 $
+    $Date: 2011-12-25 18:28:45 +0100 (Sun, 25 Dec 2011) $
+    $Author: robbie $
+    $URL: file:///home/robbie/svn-root/xeona/futz/trunk/xeona1/xeona-xmoks/test.teas-pv-installation.guard.xem $
+
+  -------------------------------------------- program admin
+
+program.last-run
+
+    process-id                                    <
+    run-kind                                      <
+    used-svn                                      <
+    timestamp-start (UTC)                         <
+    simulate-time (hh:mm:ss or s)                 <
+    simulate-return                               <
+
+program.data-format
+
+    minimum-svn                                   > 6745
+
+program.run-script-settings
+
+    script-model-status s                         > "okay"
+    script-run-me b                               > 1
+    script-option-exittrip i                      > 1
+    script-option-nodata b                        > 0
+
+program.r-processing
+
+    r-policy i                                    > 31
+    r-title s                                     > "photovoltaic test"
+    r-plot-list s                                 > ""
+
+  --------------------------------------- mandatory entities
+
+entity.time-horizon
+
+    class                                         > TimeHorizon
+
+      the TimeHorizon entity is REQUIRED and the
+      "time-horizon" identifier is MANDATORY
+
+    builtin-remark s                              <
+
+    steps [-] i                                   > 6
+    interval [s] i                                > 3600
+    start-hour [-] i                              > 0
+    start-day [-] i                               > 1
+    leap-year [-] b                               > 0
+
+      the start-hour begins midnight local time and ranges
+      [0,23] and the start-day begins 01-Jan and ranges [1,365]
+
+      when leap-year is true then 29 February is presumed to
+      exist (although not all entities will support this)
+
+    hemisphere s                                  > "N"
+
+      the hemisphere is {N,S} for north and south
+
+      the modeler should ensuring that timeseries data given
+      elsewhere aligns with the specification given here
+
+      header: b/builtins.h
+
+entity.overseer
+
+    class                                         > Overseer
+
+      the Overseer entity is REQUIRED and the "overseer"
+      identifier is MANDATORY
+
+      the overseer does little more that invoke the various
+      originating domains in nominated order at each new
+      interval
+
+    builtin-remark s                              <
+
+    captrans-algorithm s                          > "simple"
+
+      captrans-algorithm takes "fixed" | "simple" | "hop-relit"
+      but only "simple" is currently implemented (this call
+      contains experimental macro-controlled hop-relit code)
+
+    ranked-orig-domains L                         > "domain-controller-1"
+
+      the originating domain controllers must be given in
+      order of DESCENDING priority, any unannounced domains
+      will be discovered naturally during the various
+      traversals
+
+    total-financial [$] f                         < 0.0
+    total-greenhouse [kg] f                       < 0.0
+    total-nox [kg] f                              < 0.0
+    total-depletion [J] f                         < 0.0
+    total-landuse [m^2] f                         < 0.0
+
+    total-shortrun-financial [$] f                < 0.0
+    total-shortrun-greenhouse [kg] f              < 0.0
+    total-shortrun-nox [kg] f                     < 0.0
+    total-shortrun-depletion [J] f                < 0.0
+    total-shortrun-landuse [m2] f                 < 0.0
+
+      the cost-type totals cover the entire horizon, with
+      first step truncation given by program.last-run.run-kind
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+    embedded-costs-financial [$] F                < 0.0 ..
+    variable-costs-greenhouse [kg] F              < 0.0 ..
+    fixed-costs-greenhouse [kg] F                 < 0.0 ..
+    embedded-costs-greenhouse [kg] F              < 0.0 ..
+    variable-costs-nox [kg] F                     < 0.0 ..
+    fixed-costs-nox [kg] F                        < 0.0 ..
+    embedded-costs-nox [kg] F                     < 0.0 ..
+    variable-costs-depletion [J] F                < 0.0 ..
+    fixed-costs-depletion [J] F                   < 0.0 ..
+    embedded-costs-depletion [J] F                < 0.0 ..
+    variable-costs-landuse [m^2] F                < 0.0 ..
+    fixed-costs-landuse [m^2] F                   < 0.0 ..
+    embedded-costs-landuse [m^2] F                < 0.0 ..
+
+    header: b/overseer.h
+
+  ------------------------------------------- chain entities
+
+entity.domain-controller-1
+
+    class                                         > DomainController
+
+      a domain controller entity (the only one provided)
+      which can take one of a number of commitment modes --
+      but REQUIRES that the managed entities support the
+      elected mode
+
+    builtin-remark s                              <
+
+    domain-role s                                 > "role"
+
+    init-scale-problem b                          > 1
+    init-use-advanced-initial-basis b             > 1
+    init-use-simplex-presolver b                  > 1
+    init-use-mip-presolver b                      > 1
+    init-apply-numerical-zero b                   > 1
+
+    trip-kkt-report-level i                       > 1
+    trip-coeff-span-level i                       > 1
+
+      these four GLPK solver behavior settings should
+      normally be set to true unless run-time tests indicate
+      otherwise -- also coeffs means structural coefficients
+
+    commitment-mode s                             > "fin"
+
+      supported commitment-mode values (lmp is nodal pricing):
+      fin | ghg | nox | dep | luc | lmp | merit | first
+
+    ranked-selgates L                             > ""
+
+      the ranked-selgates (bridging the right side) must be
+      null, one, or listed in DESCENDING priority
+
+    asset-operators L                             > ""
+
+      the asset-operators may be null, individual, or listed
+      in no particular order
+
+    demand-junctions L                            > ""
+
+      the demand-junctions, which split and join demand, may
+      be null, individual, or listed in no particular order
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+      the following are consolidations for the entire domain
+
+    subtotal-financial [$] f                      < 0.0
+    subtotal-greenhouse [kg] f                    < 0.0
+    subtotal-nox [kg] f                           < 0.0
+    subtotal-depletion [J] f                      < 0.0
+    subtotal-landuse [m2] f                       < 0.0
+
+    header: b/domcon.h
+
+  -------------------------------------------- test entities
+
+entity.teas-pv-installation-1
+
+    class                                         > TeasPvInstallation
+
+      a photovoltaic installation comprising one or more
+      identical panels plus inverter and wiring
+
+      only Siemens SM55 photovoltaic modules are supported
+      (but more datasets can easily be added)
+
+    builtin-remark s                              <
+
+    panel-model [s]                               > "Siemens Solar SM55"
+    count [-] i                                   > 5
+    panel-zenith [degrees] f                      > 30.0
+    panel-azimuth [degrees] f                     > 180.0
+    system-loss-factor [-] f                      > 0.2
+    site-altitude [m] f                           > 100.0
+
+      the panel-model is the descriptor from the Sandia
+      database, the panel-zenith is the tilt from horizontal,
+      the panel-azimuth is the orientation relative to north,
+      the system-loss-factor accounts for general losses
+      including wiring and electronics, and the site-altitude
+      need only be approximate
+
+    internal-dump-flag b                          > 0
+
+      if the internal-dump-flag is 1 (true) then internal
+      dumping is allowed, else if 0 (false) then the entire
+      supply must be taken
+
+    socket-electricity-commodity l                > "cm-elec-0"
+
+      socket-electricity-commodity defines the shared
+      electricity commodity
+
+    ambient-solar-context l                       > "cx-ambient-solar-ts-1"
+    ambient-air-context l                         > "cx-ambient-air-ts-1"
+  # ambient-air-context l                         > "cx-ambient-air-sim-1"
+
+      the context entities must be sub-classes of
+      CxAmbientSolar and CxAmbientAir
+
+    potential-productions [W] F                   < 0.0 ..
+    actual-productions [W] F                      < 0.0 ..
+    discard [-] f                                 < 0.0
+
+      discard [0,1] is the ratio of discarded to potential
+      output
+
+    nameplate-capacity [W] f                      > 5000e+03
+    duty-specific-cost-financial [$/J] f          > 100.0
+    size-specific-cost-financial [$/W/s] f        > 200.0
+    standing-cost-financial [$/s] f               > 300.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    annual-discount-rate-decimal [-] f            > 0.10
+    economic-life [y] i                           > 25
+    capex-initial [$] f                           > +120e+03
+    capex-terminal [$] f                          > -10e+03
+    current-age [y] i                             > 2
+
+      a negative capex-terminal indicates salvage revenues as
+      opposed to decommissioning cost
+
+    embedded-costs-financial [$] F                < 0.0 ..
+
+    header: b/teas06.h
+
+  ------------------------------------------------- contexts
+
+entity.cx-ambient-solar-ts-1
+
+    class                                         > CxAmbientSolarTs
+
+      ambient solar context with exogenous timeseries and
+      which can also calculate zenith and azimuth angles --
+      thereby allowing assets to calculate the total solar
+      irradiation on surfaces of known orientation
+
+    builtin-remark s                              <
+
+    latitude [deg] f                              > 52.5
+    longitude [deg] f                             > 13.4
+    elevation [m] f                               > 50.0
+    year [-] i                                    > 2010
+
+      latitude [-90,+90] and longitude [-180,+180] define
+      location and the timeseries start year is required for
+      sun angle calculations
+
+    has-feb-29 [-] b                              > 0
+    is-loopable [-] b                             > 0
+
+      has-feb-29 and is-loopable provide metadata
+
+    solar-direct [W/m^2] F                        > 500.0 ..
+    solar-diffuse [W/m^2] F                       > 500.0 ..
+    clearness-index [-] F                         > 1.0 ..
+
+      solar-direct and solar-diffuse are the solar
+      irradiation components, time-based to UTC
+
+      if the clearness-index [0,1] is set to unity, the
+      direct and diffuse values should include the effects of
+      cloudiness
+
+    header: e/cxamb02.h
+
+entity.cx-ambient-air-ts-1
+
+    class                                         > CxAmbientAirTs
+
+      ambient air context based on exogenous timeseries
+
+    builtin-remark s                              <
+
+    has-feb-29 [-] b                              > 0
+    is-loopable [-] b                             > 0
+
+      has-feb-29 and is-loopable provide metadata
+
+    wind-speeds [m/s] F                           > 13.0 14.0 ..
+    air-temps [C] F                               > 10.0 11.0 ..
+    temperature-shift [C] f                       > 0.0
+
+    header: e/cxamb01.h
+
+entity.cx-ambient-air-sim-1
+
+    class                                         > CxAmbientAirSim
+
+      an ambient air context with wind speeds sampled from a
+      stateless Rayleigh distribution -- meaning that the
+      prior values do not influence the current values
+
+    builtin-remark s                              <
+
+    mean-wind-speed [m/s] f                       > 10.5
+    constant-air-temp [C] f                       > 15.0
+
+      mean-wind-speed is measured at 10m above ground
+
+      constant-air-temp allows this entity to provide
+      temperature data in line with the CxAmbientAir
+      interface
+
+    wind-speeds [m/s] F                           < 0.0 ..
+
+      the wind-speeds are duly calculated
+
+    header: e/cxamb01.h
+
+  ----------------------------------------------------- tail
+
+note
+
+    $Id: test.teas-pv-installation.guard.xem 8635 2011-12-25 17:28:45Z robbie $
+
+note
+
+    useful emacs text editor settings
+    local variables:
+      tab-stop-list: (04 50 52)
+      truncate-lines: t
+    end:
+
+model-end
+

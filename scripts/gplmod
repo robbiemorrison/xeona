@@ -1,0 +1,168 @@
+#! /bin/bash
+
+#  file-purpose     : sed entire suite of xeona files
+#  file-initiator   : Robbie Morrison <robbie@actrix.co.nz>
+#  file-create-date : Tue 10-Jul-2007 08:10 UTC
+#  file-status      : working (but needs custom modification)
+#  file-keywords    : xeona
+
+#  $Revision: 5973 $
+#  $Date: 2011-02-23 10:38:22 +0100 (Wed, 23 Feb 2011) $
+#  $Author: robbie $
+#  $URL: file:///home/robbie/svn-root/xeona/futz/trunk/scripts/gplmod $
+
+#  "//  XEONA ENERGY SYSTEMS MODELING ENVIRONMENT"
+#  "License version 2, a copy of which is provided in the text"
+#  "file LICENSE_GPLv2"
+
+# ---------------------------------
+#  preamble
+# ---------------------------------
+
+TAG="//  XEONA ENERGY SYSTEMS MODELING ENVIRONMENT"    # id string for source files
+
+host=$(hostname --short)
+case "$host" in
+    hinau) BASEDIR="$HOME/$SYNK/xeona/svn2/futz/trunk"  ;;  # svn version base for the purposes of this script
+    sojus) BASEDIR="$HOME/$SYNK/xeona/svn/futz"         ;;  # svn version base for the purposes of this script
+    *)     BASEDIR="$HOME/$SYNK/xeona/svn/futz"         ;;  # svn version base for the purposes of this script
+esac
+
+SCRIPT=$(basename "$0")
+
+E_SUCCESS=0
+E_DRY=2
+
+# ---------------------------------
+#  process command-line
+# ---------------------------------
+
+case "$*" in
+    --help|--hel|--he|--h|-help|-hel|-he|-h|"-?")
+        echo
+        echo "        usage: $SCRIPT [--dry]      dry run using current directory"
+        echo "               $SCRIPT  --run       action using base directory"
+        echo "               $SCRIPT  --help      display this message and exit"
+        echo "      purpose: run 'sed' calls on a filtered set of files to tweak the license"
+        echo "         note: the actual call is hardcoded, previous calls are commented out for reference"
+        echo "    hardcodes: base directory: $BASEDIR"
+        echo "               sought tag: \"$TAG\""
+        echo "  limitations: does NOT update elisp, R, bash code"
+        echo
+        exit $E_SUCCESS
+        ;;
+    --run)
+        RUN="run"
+        ;;
+    *)
+        RUN="dry"
+        BASEDIR="."
+        ;;
+esac
+
+# ---------------------------------
+#  end_report()
+# ---------------------------------
+
+function end_report
+{
+    echo "  ---"
+    case "$RUN" in
+        run) echo "  run type     : real"    ;;
+        *)   echo "  run type     : dry"     ;;
+    esac
+    echo "  file count   : $count"
+    echo "  elapsed time : $SECONDS (seconds)"
+    echo
+}
+
+# ---------------------------------
+#  build file list
+# ---------------------------------
+
+# omit any paths with the following substrings: emacs-backups/ .svn/ .bak .txt
+# omit this script!
+
+cd "$BASEDIR"
+files=$(grep --recursive --files-with-matches "$TAG" * \
+    | grep --invert-match "emacs-backups/" \
+    | grep --invert-match "\.svn/" \
+    | grep --invert-match "\.bak$" \
+    | grep --invert-match "\.txt$" \
+    | grep --invert-match "$SCRIPT")
+
+case "$RUN" in
+    run)
+        :                               # fall thru
+        ;;
+    *)                                  # dry run
+        echo
+        echo "$files"
+        declare -a Files
+        Files=($files)                  # CAUTION: omit soft-quotes
+        echo
+        echo "count  : ${#Files[*]}"
+        end_report
+        exit $E_DRY                     # CAUTION: must exit here under dry run
+        ;;
+esac
+
+# ---------------------------------
+#  main code
+# ---------------------------------
+
+echo
+count=0                                 # file counter
+for file in $files                      # CAUTION: omit soft-quotes
+  do
+  let "count++"
+  printf "  %3d   %-30s" $count "$file"
+  tmpfile="$file.tmp"
+  rm --force "$tmpfile"
+  bakfile="$file.bak"
+  cp --preserve=mode,ownership,timestamps,link --no-dereference --force "$file" "$bakfile"
+  case "$?" in
+      0) printf "%-12s" "backed"        ;;
+      *) printf "%-12s" "cp fail"       ;;
+  esac
+
+#    GPLv2 to GPLv3
+#
+#    sed -e 's/License version 2, a copy of which is/License version 3, a copy of which is/' \
+#        -e 's/file LICENSE_GPLv2/file LICENSE_GPLv3/' \
+#        "$file" > "$tmpfile"
+
+#    Copyright notice correction
+#
+#    sed -e 's/This software is copyright of Robbie Morrison (c) 2007./  WARNING: newline added later
+#            This software is copyright (c) 2007 Robbie Morrison./' \
+#        "$file" > "$tmpfile"
+
+  case "$?" in
+      0) printf "%-12s" "sedded"        ;;
+      *) printf "%-12s" "sed fail"      ;;
+  esac
+  mv --force "$tmpfile" "$file"
+  case "$?" in
+      0) printf "%-12s" "moved"         ;;
+      *) printf "%-12s" "mv fail"       ;;
+  esac
+  rm --force "$bakfile"
+  case "$?" in
+      0) printf "%s" "unbacked"         ;;
+      *) printf "%s" "rm fail"          ;;
+  esac
+  printf "\n"
+done
+
+end_report
+
+# ---------------------------------
+#  housekeeping
+# ---------------------------------
+
+exit $E_SUCCESS
+
+#  $Id: gplmod 5973 2011-02-23 09:38:22Z robbie $
+#  end of file
+

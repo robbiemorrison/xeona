@@ -1,0 +1,34 @@
+* using log directory '/home/robbie/synk/xeona/svn2/futz/trunk/rpacks/robbie.Rcheck'
+* using R version 2.10.1 (2009-12-14)
+* using session charset: ASCII
+* checking for file 'robbie/DESCRIPTION' ... OK
+* checking extension type ... Package
+* this is package 'robbie' version '0.1'
+* checking package dependencies ... OK
+* checking if this is a source package ... OK
+* checking for executable files ... OK
+* checking whether package 'robbie' can be installed ... OK
+* checking package directory ... OK
+* checking for portable file names ... OK
+* checking for sufficient/correct file permissions ... OK
+* checking DESCRIPTION meta-information ... OK
+* checking top-level files ... OK
+* checking index information ... OK
+* checking package subdirectories ... OK
+* checking R files for non-ASCII characters ... OK
+* checking R files for syntax errors ... OK
+* checking whether the package can be loaded ... OK
+* checking whether the package can be loaded with stated dependencies ... OK
+* checking for unstated dependencies in R code ... OK
+* checking S3 generic/method consistency ... OK
+* checking replacement functions ... OK
+* checking foreign function calls ... OK
+* checking R code for possible problems ... OK
+* checking Rd files ... OK
+* checking Rd metadata ... OK
+* checking Rd cross-references ... OK
+* checking for missing documentation entries ... OK
+* checking for code/documentation mismatches ... OK
+* checking Rd \usage sections ... OK
+* checking examples ... OK
+* checking PDF version of manual ... OK

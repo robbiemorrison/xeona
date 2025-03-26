@@ -1,0 +1,124 @@
+--- poc.008.guard.xem	2012-04-07 18:35:26.568409879 +0200
++++ sen.07.xem	2012-04-07 18:35:46.528358927 +0200
+@@ -33,18 +33,18 @@
+     script-option-jumpy b                         > 0
+ 
+ program.study-description
+ 
+     study-name s                                  > "phd"
+-    scenario-name s                               > "reference energy system"
++    scenario-name s                               > "large high-voltage windfarm removed"
+     scenario-author s                             > "robbie"
+-    scenario-leta s (+,a-z)                       > "+"
++    scenario-leta s (+,a-z)                       > "g"
+ 
+ program.r-processing
+ 
+     r-policy i                                    > 31
+-    r-title s                                     > "mainline model"
++    r-title s                                     > "scenario g"
+     r-plot-list s                                 > ""
+     r-highlight-output s                          > ""
+ 
+ program.post-processing
+ 
+@@ -197,11 +197,11 @@
+     ranked-selgates L                             > "gate-stated-tariff-elec-a01 gate-stated-tariff-elec-a02"
+ 
+       the ranked-selgates (bridging the right side) must be
+       null, one, or listed in DESCENDING priority
+ 
+-    asset-operators L                             > "asop-grid-a01 asop-lmp-bid-adaptive1-a02 asop-lmp-bid-stated-ts1-a03 asop-lmp-bid-hydro1-a04 asop-lmp-bid-param-a05"
++    asset-operators L                             > "asop-grid-a01 asop-lmp-bid-adaptive1-a02 asop-lmp-bid-hydro1-a04 asop-lmp-bid-param-a05"
+ 
+       the asset-operators may be null, individual, or listed
+       in no particular order
+ 
+     demand-junctions L                            > "junc-demand-2-split-elec-a01 junc-demand-2-join-oxidgas-a02"
+@@ -233,11 +233,11 @@
+       asset operator who controls LMP nodes and transmission
+       assets
+ 
+     builtin-remark s                              <
+ 
+-    lmp-nodes L                                   > "node-2-xit-elec-a01 node-2-inj-elec-a02 node-2-xit-elec-a03 node-2-inj-elec-a04 node-3-nla-elec-a05 node-2-inj-elec-a06 node-1-xib-elec-a07"
++    lmp-nodes L                                   > "node-2-xit-elec-a01 node-2-inj-elec-a02 node-2-xit-elec-a03 node-2-nul-elec-a04 node-3-nla-elec-a05 node-2-inj-elec-a06 node-1-xib-elec-a07"
+     technical-assets L                            > "teas-hv-transmission-a01 teas-hv-transmission-a02 teas-hv-transmission-a03 teas-hv-transmission-a04 teas-hv-transmission-a05 teas-hv-transmission-a06"
+     voltage-angle-reference [degree] f            > 0.0
+ 
+       the technical-assets should be limited to transmission
+       assets and node caps, iff AC transmission is being
+@@ -334,28 +334,25 @@
+       to convert to the more usual [$/MWh], multiply the
+       given nodal-prices by 278
+ 
+     header: b/node05.h
+ 
+-entity.node-2-inj-elec-a04
++entity.node-2-nul-elec-a04
+ 
+-      grid injection from windfarm
++      E point of network diamond, was grid injection from windfarm
+ 
+-    class                                         > NodeAc2Inj:Elec
++    class                                         > NodeAc2Nul:Elec
+ 
+-      AC grid node with injection and support for two grid
+-      assets
++      AC grid node to connect two grid assets
+ 
+       my sole bidirectional socket label is 'grid-1'
+ 
+     builtin-remark s                              <
+ 
+-    socket-1 l                                    > "teas-windfarm-a09.elec-1"
+-    socket-2 l                                    > "teas-hv-transmission-a04.grid-1"
++    socket-1 l                                    > "teas-hv-transmission-a04.grid-1"
+ 
+-      socket-1 is my normal supplier (injector), socket-2 is
+-      my associated bidirectional grid asset
++      socket-1 is my associated bidirectional grid asset
+ 
+     node-commodity l                              > "cm-electricity-01"
+ 
+       node-commodity defines the underlying commodity
+ 
+@@ -612,11 +609,11 @@
+ 
+       my socket label is 'grid-1'
+ 
+     builtin-remark s                              <
+ 
+-    socket-1 l                                    > "node-2-inj-elec-a04.grid-1"
++    socket-1 l                                    > "node-2-nul-elec-a04.grid-1"
+ 
+       socket-1 is my node entity
+ 
+     grid-commodity l                              > "cm-electricity-01"
+ 
+@@ -1435,11 +1432,11 @@
+ 
+     header: b/junc02.h
+ 
+  -------------------------------------------------- windfarm
+ 
+-entity.asop-lmp-bid-stated-ts1-a03
++# entity.asop-lmp-bid-stated-ts1-a03
+ 
+       nodal operator for grid-connected windfarm
+ 
+     class                                         > AsopLmpBidStatedTs1
+ 
+@@ -1471,11 +1468,11 @@
+     variable-costs-financial [$] F                < 0.0 ..
+     fixed-costs-financial [$] F                   < 0.0 ..
+ 
+     header: b/asop02.h
+ 
+-entity.teas-windfarm-a09
++# entity.teas-windfarm-a09
+ 
+       grid-connected 50 x 3MW windfarm
+ 
+     class                                         > TeasWindfarm
+ 

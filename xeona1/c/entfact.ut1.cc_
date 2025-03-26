@@ -1,0 +1,293 @@
+//  XEONA ENERGY SYSTEMS MODELING ENVIRONMENT
+//
+//  file-create-name : entityfactory.test.cc
+//  file-create-date : Wed 20-Jun-2007 09:00 UTC
+//  file-initiator   : Robbie Morrison <robbie@actrix.co.nz>
+//
+//  file-role        : entity factory (using proper 'createEntityBind' member)
+//  file-status      : set-aside
+//  file-release-tag :
+//
+//  LEGAL NOTICE
+//
+//  Software  : This file is part of the source code for the xeona energy
+//              systems modeling environment.
+//  License   : This software is distributed under the GNU General Public
+//              License version 3, a copy of which is provided in the text
+//              file LICENSE_GPLv3.
+//  Warranty  : There is no warranty for this software, to the extent permitted
+//              by applicable law.  Refer to the license for further details.
+//  Copyright : This software is copyright (c) 2007 - 2012 Robbie Morrison.
+//  Request   : The software is distributed with the request that you forward
+//              any modifications you make to the xeona project for possible
+//              inclusion in the main codebase.
+//
+//  PROJECT CONTACT
+//
+//  Robbie Morrison
+//  Institute for Energy Engineering
+//  Technical University of Berlin
+//  Marchstrasse 18, D-10587 Berlin, Germany
+//  Email: robbie@actrix.co.nz
+//
+//  SVN VERSION CONTROL
+//
+//  $Author: robbie $
+//  $URL: file:///home/robbie/svn-root/xeona/futz/trunk/xeona1/c/entfact.ut1.cc_ $
+//
+//  GENERAL NOTES FOR THIS FILE
+//
+//  This is a unit test file and hence not essential to the
+//  application proper.
+//
+//  This file has been disabled because it can no longer be this
+//  simple.  The change was caused with the inclusion of a
+//  'Record' object in the subentity constructor.
+
+//  LOCAL AND SYSTEM INCLUDES
+
+#include "../b/subents_.h"    // generic test subentities (place early)
+#include "../c/factory.h"     // entity factory (place early)
+
+#include "../b/register.h"    // entity subclass registration
+#include "../a/logger.h"      // standard logging functionality (as required)
+#include "../c/smart_ptr.h"   // toggle between TR1 and Boost smart pointers
+#include ".././common.h"      // common definitions for project (place last)
+
+#include <algorithm>          // STL copying, searching, and sorting
+#include <sstream>            // string-streams
+#include <string>             // C++ strings
+
+//  CODE
+
+// -->
+
+//  *** WARNING: the following Datfact_UT class definitions for this unit test only
+
+class Record;                                // forward declaration (also "register.h")
+
+class Datfact_UT :
+  public Entity
+{
+
+public:
+
+  // CREATORS
+
+  Datfact_UT
+  (const std::string assetID,                // enforced unique identifier
+   Record&           record) :               // associated record
+     Entity(assetID, record)
+  {
+    logga::spLogger logger = logga::ptrLogStream();
+    logger->repx(logga::info, "constructor call", "FAKE");
+  }
+
+}; // class Datfact_UT
+
+// <--
+
+//  *** WARNING: this Record class is for unit testing only
+
+// ---------------------------------------------------------
+//  CLASS           : Record (fake for this unit only)
+// ---------------------------------------------------------
+//
+// this class definition exists to save adding 'recset.cc' and
+// dependencies to the SOURCES list
+
+class Record
+{
+public:
+  Record()                                   // genuine Record is zero-argument too
+  {
+    logga::spLogger logger = logga::ptrLogStream();
+    logger->repx(logga::kill, "constructor call", "FAKE class");
+  }
+
+  ~Record()
+  {
+    logga::spLogger logger = logga::ptrLogStream();
+    logger->repx(logga::dbug, "destructor call", "FAKE class");
+  }
+};
+
+// ---------------------------------------------------------
+//  CLASS (FUNCTOR) : ::SpSubEntity1Ops
+// ---------------------------------------------------------
+//  Description  : print address and identifier for spSubEntity1 objects
+//  Role         : used in std::for_each call
+//  Techniques   : function object
+//  Note         : exclusive to this unit test file
+//  Status       : working
+// ---------------------------------------------------------
+
+namespace
+{
+  class SpSubEntity1Ops
+  {
+  public:
+
+    void
+    operator()
+    (const SubEntity1* one)
+    {
+      static logga::spLogger logger = logga::ptrLogStream();
+      std::ostringstream put;
+      put << "    operator()(const shared_ptr<SubEntity1>) : "
+          << one
+          << " : "
+          << one->identifier()
+          << "\n";
+      logger->putx(logga::dbug, put);
+    }
+
+  };
+} // unnamed namespace
+
+// ---------------------------------------------------------
+//  MAIN FUNCTION   : main
+// ---------------------------------------------------------
+
+int
+main(int argc, char* argv[])
+{
+  logga::spLogger logger = logga::ptrLogStream();      // main function logger
+  logger->repx(logga::info, "beginning of main", "~~~~~~~~~~");
+  logger->addSmartBlank();
+  logger->setReportLevel(logga::adhc);       // maximum reporting
+
+  // PRELIMINARY
+
+  std::ostringstream put;
+  Record r;                                  // generally available fake record
+
+  xeona::registerEntyCreators();             // one-off call
+
+  // ---------------------------------------------------------
+  // test ONE         : request some SubEntity1's
+  // ---------------------------------------------------------
+
+  logger->test(1);
+
+  // note the smart pointer is of type 'Entity' but that it now
+  // holds a specialization, namely 'SubEntity1'
+
+  shared_ptr<Entity> one1
+    = EntityFactory::interface()
+    ->createEntityBind(xeona::e_SubEntity1, "genuine-id", r);
+
+  // shared_ptr<SubEntity1> one2
+  //   = EntityFactory::interface()
+  //   ->createEntityBind(e_SubEntity1, "second-id", r);
+  // error: invalid conversion from 'Entity* const' to 'SubEntity1*'
+
+  // note kill logged for "non-unique id" (as expected)
+  shared_ptr<Entity> one3
+    = EntityFactory::interface()
+    ->createEntityBind(xeona::e_SubEntity1, "genuine-id", r);
+
+  put << "    identifier (genuine-id)   : " << one1->identifier()     << "\n";
+  put << "    census (should be two)    : " << SubEntity1::popnSize() << "\n";
+  put << one1->traversePopulation();
+  logger->putx(logga::dbug, put);
+
+  // ---------------------------------------------------------
+  // test TWO         : request some SubEntity2's
+  // ---------------------------------------------------------
+
+  logger->test(2);
+
+  shared_ptr<Entity> two1
+    = EntityFactory::interface()
+    ->createEntityBind(xeona::e_SubEntity2, "two-1", r);
+  put << "    identifier (derived2-one) : " << two1->identifier()     << "\n";
+  put << "    census (should be one)    : " << SubEntity2::popnSize() << "\n";
+  logger->putx(logga::dbug, put);
+
+  // ---------------------------------------------------------
+  //  test THREE      : perform traversal of SubEntity1's
+  // ---------------------------------------------------------
+
+  logger->test(3);
+
+  typedef std::list<const SubEntity1*> DList;
+  DList dlist;
+  DList::iterator dlist_it;
+  dlist = SubEntity1::getCensus();           // obtain reference to SubEntity1 census
+  put << "    derives :";
+  for (dlist_it = dlist.begin();
+       dlist_it != dlist.end();
+       ++dlist_it)
+    {
+      put
+        << " "
+        << (*dlist_it)->identifier();        // dereference the iterator first
+    }
+  put << "\n";                               // final newline
+  logger->putx(logga::dbug, put);
+
+  put << "    popn    : " << SubEntity1::popnSize() << "\n";
+  logger->putx(logga::dbug, put);
+
+  // repeat above, more or less, using a for_each call
+  // CAUTION: functor trailing '()' needed but no address-of operator '&'
+
+  std::for_each
+    (dlist.begin(),
+     dlist.end(),
+     ::SpSubEntity1Ops());                   // function object defined in this file
+
+  // ---------------------------------------------------------
+  //  test FOUR       : name string to xeona::EntityType
+  // ---------------------------------------------------------
+
+  logger->test(4);
+
+  ClassStrToEntityType classStrToEntityType;
+
+  std::string name;
+  xeona::EntityType xet = xeona::e_NotSet;
+
+  name = "SubEntity1";
+  xet = classStrToEntityType(name);
+  put << "    name       : " << name << "\n";
+  put << "    xet        : " << xet  << "\n";
+  logger->putx(logga::dbug, put);
+
+  name = "BadString";
+  xet = classStrToEntityType(name);
+  put << "    name       : " << name << "\n";
+  put << "    xet        : " << xet  << "\n";
+  logger->putx(logga::dbug, put);
+
+  // ---------------------------------------------------------
+  // UNRELATED test   : mach SCRIPT valgrind SECTION
+  // ---------------------------------------------------------
+
+#if 0 // 0 = safe, 1 = create memory error (as distinct from memory leak)
+
+  logger->test(5);
+
+  {
+    put << "UNRELATED TEST COMMENCING" << "\n";
+    logger->putx(logga::dbug, put);
+    int* bad_pointer = new int;  // (1) omit trailing () to prevent initialization
+    put << "bad_pointer : " << *bad_pointer << "\n";
+    logger->putx(logga::dbug, put);
+    // delete bad_pointer;  // (2) memory leak too
+  }
+
+#endif
+
+  // HOUSEKEEPING
+
+  logger->test(0);                           // test end
+
+  logger->repx(logga::info, "end of main", "~~~~~~~~~~");
+  return xeona::exit_success;
+
+} // main function
+
+//  end of file
+

@@ -1,0 +1,10 @@
+Package: robbie
+Type: Package
+Title: General support functions
+Version: 0.1
+Date: 2011-12-21
+Author: Robbie Morrison <robbie@actrix.co.nz>
+Maintainer: Robbie Morrison <robbie@actrix.co.nz>
+Description: Set of functions for general scripting support.
+License: GPL-3
+LazyLoad: yes

@@ -1,0 +1,294 @@
+
+note
+
+    $Revision: 7468 $
+    $Date: 2011-10-10 17:38:49 +0200 (Mon, 10 Oct 2011) $
+    $Author: robbie $
+    $URL: file:///home/robbie/svn-root/xeona/futz/trunk/xeona1/xeona-xmoks/submodel.32.guard.xem $
+
+    xem-role: submodel testing
+    author: Robbie Morrison <robbie@actrix.co.nz>
+
+  -------------------------------------------- program admin
+
+program.last-run
+
+    process-id                                    < 4907
+    run-kind                                      < "full simulation - deep overwrite (7)"
+    used-svn                                      < 7872
+    timestamp-start (UTC)                         < 2011-11-04 14:17:21
+    simulate-time (hh:mm:ss or s)                 < 0.018
+    simulate-return                               < "success (1)"
+
+program.data-format
+
+    minimum-svn                                   > 6745
+
+program.run-script-settings
+
+    script-model-status s                         > "okay"
+    script-run-me b                               > 1
+    script-option-exittrip i                      > 2
+    script-option-nodata b                        > 0
+    script-option-jumpy b                         > 0
+
+program.r-processing
+
+    r-policy i                                    > 31
+    r-title s                                     > "node caps trial"
+    r-plot-list s                                 > ""
+    r-highlight-output s                          > ""
+
+  ---------------------------------------------- model notes
+
+      simple two cap/one node model using a 'Node2Nul' node
+
+  --------------------------------------- mandatory entities
+
+entity.time-horizon
+
+    class                                         > TimeHorizon
+
+    builtin-remark s                              < "mandatory entity"
+
+    steps [-] i                                   > 6
+    interval [s] i                                > 3600
+    start-hour [-] i                              > 0
+    start-day [-] i                               > 1
+    leap-year [-] b                               > 0
+    hemisphere s                                  > "N"
+
+      the TimeHorizon entity is REQUIRED and the
+      "time-horizon" identifier is MANDATORY
+
+      the interval [300,86400] is further restricted to
+      common multiples of one hour ranging 5 mins to 24 hours
+
+      the start-hour begins midnight local time and ranges
+      [0,23] and the start-day begins 01-Jan and ranges
+      [1,365] -- used to align internal and model timeseries
+      when the latter commences after 00:00 on 01 January
+
+      when leap-year is true then 29 February is presumed to
+      exist (although not all entities will support this)
+
+      the hemisphere is {N,S} for north and south
+
+      the modeler should ensuring that timeseries data given
+      elsewhere aligns with the specification given here
+
+      header: b/builtins.h
+
+entity.overseer
+
+    class                                         > Overseer
+
+    builtin-remark s                              < "mandatory entity"
+
+    captrans-algorithm s                          > "simple"
+    ranked-orig-domains L                         > "domain-controller-1"
+
+    total-financial [$] f                         < +0.00e+00
+    total-greenhouse [kg] f                       < +0.00e+00
+    total-nox [kg] f                              < +0.00e+00
+    total-depletion [J] f                         < +0.00e+00
+    total-landuse [m^2] f                         < +0.00e+00
+    variable-costs-financial [$] F                < +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00
+    fixed-costs-financial [$] F                   < +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00
+    embedded-costs-financial [$] F                < +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00
+    variable-costs-greenhouse [kg] F              < +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00
+    fixed-costs-greenhouse [kg] F                 < +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00
+    embedded-costs-greenhouse [kg] F              < +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00
+    variable-costs-nox [kg] F                     < +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00
+    fixed-costs-nox [kg] F                        < +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00
+    embedded-costs-nox [kg] F                     < +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00
+    variable-costs-depletion [J] F                < +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00
+    fixed-costs-depletion [J] F                   < +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00
+    embedded-costs-depletion [J] F                < +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00
+    variable-costs-landuse [m^2] F                < +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00
+    fixed-costs-landuse [m^2] F                   < +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00
+    embedded-costs-landuse [m^2] F                < +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00
+
+      the Overseer entity is REQUIRED and the "overseer"
+      identifier is MANDATORY
+
+      the overseer does little more that invoke the various
+      originating domains in nominated order at each new
+      interval
+
+      captrans-algorithm takes "fixed" | "simple" | "hop-relit"
+      but only "simple" is currently implemented (this call
+      contains experimental macro-controlled hop-relit code)
+
+      the originating domain controllers must be given in
+      order of DESCENDING priority, any unannounced domains
+      will be discovered naturally during the various
+      traversals
+
+      the cost-type totals cover the entire horizon, with
+      first step truncation given by program.last-run.run-kind
+
+      header: b/overseer.h
+
+  ---------------------------------------------------- model
+
+entity.domain-controller-1
+
+    class                                         > DomainController
+
+    builtin-remark s                              < "beta"
+
+    init-scale-problem b                          > 1
+    init-use-advanced-initial-basis b             > 1
+    init-use-simplex-presolver b                  > 1
+    init-use-mip-presolver b                      > 1
+    init-apply-numerical-zero b                   > 1
+    trip-kkt-report-level i                       > 1
+    trip-coeff-span-level i                       > 1
+    commitment-mode s                             > "lmp"
+    ranked-selgates L                             > ""
+    asset-operators L                             > "asop-grid-1"
+    demand-junctions L                            > ""
+
+    variable-costs-financial [$] F                < +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00
+    fixed-costs-financial [$] F                   < +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00
+
+      a domain controller entity (the only one provided)
+      which can take one of a number of commitment modes --
+      but REQUIRES that the managed entities support the
+      elected mode
+
+      these four GLPK solver behavior settings should
+      normally be set to true unless run-time tests indicate
+      otherwise -- also coeffs means structural coefficients
+
+      supported commitment-mode values (lmp is nodal pricing):
+      fin | ghg | nox | dep | luc | lmp | merit | first
+
+      the ranked-selgates (bridging the right side) must be
+      null, one, or listed in DESCENDING priority
+
+      the asset-operators may be null, individual, or listed
+      in no particular order
+
+      the demand-junctions, which split and join demand, may
+      be null, individual, or listed in no particular order
+
+    header: b/domcon.h
+
+entity.asop-grid-1
+
+    class                                         > AsopGrid
+
+    builtin-remark s                              < "beta"
+
+    lmp-nodes L                                   > "node-2-nul-elec-1"
+    technical-assets L                            > "teas-cap-a-elec-1 teas-cap-b-elec-2"
+
+      asset operator who controls LMP nodes and transmission
+      assets
+
+      the technical-assets should be limited to transmission
+      assets
+
+    header: b/asop02.h
+
+entity.node-2-nul-elec-1
+
+    class                                         > Node2Nul:Elec
+
+    builtin-remark s                              < "beta"
+
+    socket-1 l                                    > "teas-cap-b-elec-2.grid-1"
+    node-commodity l                              > "cm-electricity-1"
+
+    nodal-prices [$/J] F                          < +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00 +0.00e+00
+
+      base commodity in {Cert,Cseq,Elec,Fund,Heat,Oxid,Thrm,Work}
+
+      grid node to connect two grid assets
+
+      my sole bidirectional socket label is 'grid-1'
+
+      socket-1 is my associated bidirectional grid asset
+
+      node-commodity defines the underlying commodity
+
+      to convert to the more usual [$/MWh], multiply the
+      given nodal-prices by 278
+
+    header: b/node02.h
+
+entity.teas-cap-a-elec-1
+
+    class                                         > TeasCapA:Elec
+
+    builtin-remark s                              < "beta"
+
+    socket-1 l                                    > "node-2-nul-elec-1.grid-1"
+    cable-commodity l                             > "cm-electricity-1"
+
+      base commodity in {Cert,Cseq,Elec,Fund,Heat,Oxid,Thrm,Work}
+
+      type A node cap entity with one bidirectional cable
+
+      socket-1 is my associated node
+
+      cable-commodity defines the underlying commodity
+
+    header: b/teas10.h
+
+entity.teas-cap-b-elec-2
+
+    class                                         > TeasCapB:Elec
+
+    builtin-remark s                              < "beta"
+
+    socket-commodity l                            > "cm-electricity-1"
+
+      base commodity in {Cert,Cseq,Elec,Fund,Heat,Oxid,Thrm,Work}
+
+      type B node cap entity with one bidirectional socket
+
+      my bidirectional socket label is 'grid-l'
+
+      socket-commodity defines the underlying commodity
+
+    header: b/teas10.h
+
+entity.cm-electricity-1
+
+    class                                         > CmElectricity
+
+    builtin-remark s                              < "beta"
+
+    voltage [V] f                                 > +2.20e+08
+
+      J-quantified electricity commodity
+
+      technical assets using electricity adopt a DC-power
+      flow model and thereby ignore shunt losses -- this
+      commodity provides suitable support
+
+      for fixed-frequency AC power, use the RMS (root-mean-
+      square) voltage (as opposed to the peak-to-peak value)
+
+    header: b/commods.h
+
+  ----------------------------------------------------- tail
+
+note
+
+    $Id: submodel.32.guard.xem 7468 2011-10-10 15:38:49Z robbie $
+
+note
+
+    useful emacs text editor settings
+    local variables:
+      mode: xem
+      tab-stop-list: (04 50 52)
+      truncate-lines: t
+    end:
+
+model-end
+

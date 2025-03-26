@@ -1,0 +1,453 @@
+#! /bin/bash
+
+#  file-purpose     : scan xem files for meta and entity class information / script
+#  file-initiator   : Robbie Morrison <robbie@actrix.co.nz>
+#  file-create-date : Tue 19-May-2009 08:05 UTC
+#  file-status      : ongoing
+#  file-keywords    : xeona
+
+#  $Revision: 7450 $
+#  $Date: 2011-10-10 11:17:56 +0200 (Mon, 10 Oct 2011) $
+#  $Author: robbie $
+#  $URL: file:///home/robbie/svn-root/xeona/futz/trunk/scripts/xmole $
+
+# ---------------------------------
+#  settings
+# ---------------------------------
+
+XEM="xem"                               # XEM extension
+GUARD="guard"                           # XEM guard tag
+
+GVTAG=".viz"                            # extra 'graphviz' tag as set in 'tag' string in 'graphviz.R'
+
+T1=26                                   # alignment for class name, adjust 'head2' as well
+T2=30                                   # alignment for model name
+
+# ---------------------------------
+#  preamble
+# ---------------------------------
+
+SCRIPT=$(basename "$0")
+
+LESSOUT="r-highlight-output"
+
+E_SUCCESS=0
+E_FAILURE=1
+E_USAGE=2
+E_MKTEMP_FAIL=64
+
+# ---------------------------------
+#  display_help()
+# ---------------------------------
+
+function display_help
+{
+local msg1="(special case of above)"
+local msg2="(the + is interpreted)"
+local msg3="and search on '$LESSOUT' value if present"
+
+echo
+cat <<EOM
+         summarize: $SCRIPT                                summarize xem guard files and include entity counts
+                    $SCRIPT --sort                         as above but by modification time (and not alphabetical)
+          entities: $SCRIPT [--file] <class-regex>         show xem guard files containing regex <class> entities
+                    $SCRIPT [--file] .                     show xem guard files containing any entity $msg1
+            models: $SCRIPT [--viz] <model[.guard][.xem]>  list entities in xem <model> guard file
+                    $SCRIPT [--viz] +                      list entities for all xem guard files $msg2
+            census: $SCRIPT --census                       output a census of all *.$GUARD.$XEM files
+        quick-view: $SCRIPT --less <model[.guard][.xem]>   less xem <model> run file $msg3
+              help: $SCRIPT --help                         display this message and exit
+           options:   --file                                sort by file (not class)
+                      --viz                                 open any <model.gv.png> files present using 'display'
+           purpose: collate entity information in xem guard files in various ways
+          cautions: script only scans guard files, even if "guard" tag is omitted
+                    script does NOT honor entity disabling
+  case-sensitivity: respect case iff <class> regex contains uppercase chars
+       terminology: "class" indicates type, "entity" indicates instance
+                    run = +      is run from the 'xmok' script set via 'script-run-me'
+                    trip         is the '--exittrip' argument set via 'script-option-exittrip'
+                    last         is the last svn revision (and not the 'minimum-svn')
+                    status = -   means okay
+                    ents         is the entity count
+         note also: $ killall display
+                    $ gthumb --fullscreen *$GVTAG.png &
+          statuses: mode 3 thru 5 | okay | wip (work-in-process) | etc
+          examples: $ $SCRIPT | grep <term>  summarize xem guard files and then screen
+                    $ $SCRIPT ^Cm            report on all commodity classes (leading \"Cm\") present
+                    $ $SCRIPT test-me.xem    list classes for file 'test-me.guard.xem'
+                    $ $SCRIPT *              ERROR: multiple arguments not valid'
+                    $ svn status *.guard.xem    show subversion status for non-currents (add --verbose for all)
+EOM
+echo
+return 0
+}
+
+# ---------------------------------
+#  process command-line
+# ---------------------------------
+
+sort="alphabet"
+viz="no"
+less="no"
+modelsort="no"
+
+case "$1" in
+    --help|--hel|--he|--h|-help|-hel|-he|-h|"-?")
+        shift
+        display_help
+        exit $E_SUCCESS
+        ;;
+    --sort|--s|-s)
+        shift
+        sort="lastmod"
+        ;;
+    --viz|--v|-v)
+        shift
+        viz="yes"
+        ;;
+    --less|--l|-l)
+        shift
+        less="yes"
+        ;;
+    --file|--f|-f)
+        shift
+        modelsort="yes"
+        ;;
+    --census|-c)
+        shift
+        pattern="*.$GUARD.$XEM"
+        census=$(find -P . -maxdepth 1 -name "$pattern" -type f -printf "%P\n" | sort)
+        ret=$?
+        for file in $census
+        do
+            $SCRIPT "$file"
+        done
+        echo "$SCRIPT: census: "$census
+        echo
+        exit $ret
+        ;;
+    --*|-*)
+        echo "$SCRIPT: unsupported option (try --help for usage): $1"
+        exit $E_USAGE
+        ;;
+esac
+
+test $# -gt 1 &&
+{
+    echo "$SCRIPT: ERROR: multiple arguments not valid"
+    echo
+    echo "$*"
+    echo
+    exit $E_USAGE
+}
+
+pattern="$*"                            # case-respected if 'pattern' contains uppercase
+
+# ---------------------------------
+#  head1()
+# ---------------------------------
+
+function head1
+{
+    echo
+    printf -- "                           guard   run  trip  last    status          ents   title\n"
+    printf -- "           -----------------------------------------------------------------------------------\n"
+}
+
+# ---------------------------------
+#  head2()
+# ---------------------------------
+
+function head2
+{
+    echo
+    printf -- "  class                   count                             guard   run   ents   title\n"
+    printf -- "  -------------------------------------------------------------------------------------------------------------\n"
+}
+
+# ---------------------------------
+#  tell()
+# ---------------------------------
+
+function tell
+{
+    local xem="$1"
+    local cla="$2"                      # optional
+    local cnt="$3"                      # optional
+
+    local stem="${xem%%.$GUARD.$XEM}"
+
+    local rev=$( ident $xem | awk '                           /Revision/ { print $2 }' )
+    local tit=$(   cat $xem | awk '{ FS = ">" }                /r-title/ { print $2 }' )
+    local min=$(   cat $xem | awk '{ FS = ">" }            /minimum-svn/ { print $2 }' )
+    local run=$(   cat $xem | awk '{ FS = ">" }          /script-run-me/ { print $2 }' )
+    local tip=$(   cat $xem | awk '{ FS = ">" } /script-option-exittrip/ { print $2 }' )
+    local how=$(   cat $xem | awk '{ FS = ">" }    /script-model-status/ { print $2 }' )
+    local ens=$(  grep --count "^entity\." $xem )
+
+    tit=${tit:2}                        # trim leading char, a '"' (#\" failed to work)
+    tit=${tit%\"}                       # trim any trailing '"' (okay)
+
+    test $run -eq 0 && mok=" "          # no run
+    test $run -eq 0 || mok="+"          # to run
+
+    how=${how#' '}                      # strip one leading space (between the > and the first double-quote)
+    how=${how//'"'/''}                  # remove all double-quotes
+    test "$how" = "okay" && how="-"     # substitute okay
+
+    # protection against 'Revision' ident not being set -- as when the file is first created
+    printf -v dummy "%d" "$rev" 2>/dev/null || rev=0
+
+    case "$#" in
+        1) printf             "  %*s    %s    %d    %4d    %-16s %3d   %s\n"  $T2 "$stem" "$mok" $tip $rev "$how" $ens "$tit" ;;
+        3) printf "  %-*s %2d    %*s    %s    %4d   %s\n"     $T1 "$cla" $cnt $T2 "$stem" "$mok"                  $ens "$tit" ;;
+        *) echo "$SCRIPT: coding problem"
+    esac
+    return 0
+}
+
+# ---------------------------------
+#  show()
+# ---------------------------------
+
+function show
+{
+    local xem="$1"
+
+    test "$viz" = "yes" || return 0
+
+    local stem="${xem%%.$GUARD.$XEM}"
+    local png="$stem$GVTAG.png"
+    test -f "$png" &&
+    {
+        display -quiet $png &
+    }
+
+    return 0
+}
+
+# ---------------------------------
+#  lessxrun()
+# ---------------------------------
+
+# grepcall="grep \"$lessme\" $xrun | grep \"<\" | grep --invert-match \"r-highlight-output\""
+
+function lessxrun
+{
+    local xem="$1"                      # for convenience
+
+    test "$less" = "yes" || return 0
+
+    local stem="${xem%%.$GUARD.$XEM}"
+    local xrun="$stem.$XEM"
+
+    echo
+    echo "$SCRIPT: guard file    : $xem"
+
+    test -f "$xrun" ||                  # regular file test
+    {
+        echo "$SCRIPT: no run file   : $xrun"
+        return 1
+    }
+
+    echo "$SCRIPT: run file      : $xrun"
+
+    local lessout=$(cat $xrun | awk '{ FS = ">" } /r-highlight-output/ { print $2 }')
+
+    lessout=${lessout#' '}              # strip one leading space (between the > and the first double-quote)
+    lessout=${lessout//'"'/''}          # remove all double-quotes
+
+    local lessopt="--chop-long-lines"   # no line wrap
+    local call=""
+
+    case "$lessout" in
+        "")
+            echo "$SCRIPT: no search key : $LESSOUT"
+            call="less $lessopt $xrun"
+            ;;
+        *)
+            echo "$SCRIPT: search key    : $LESSOUT"
+            echo "$SCRIPT: search value  : \"$lessout\""
+            call="less $lessopt +/\" $lessout.*<\" $xrun"   # note leading space char
+            ;;
+    esac
+
+    eval "$call"
+    local ret=$?
+    test $ret -ne 0 && echo "$SCRIPT: call failure :  $ret"
+    echo "$SCRIPT: call          : $call" # report
+
+    return 0
+}
+
+# ---------------------------------
+#  seach()
+# ---------------------------------
+
+function search
+{
+    local xem="$1"
+
+    local classes_orig=$(cat $xem | awk '{ FS = ">" } /class/ { print $2 }')
+    local count1=0
+    local count2=0
+    local classes_uniq=$(echo "$classes_orig" | sort --uniq)
+    for class in $classes_uniq
+      do
+      case "$pattern" in
+          *[A-Z]*) count1=$(echo "$class" | grep               --count "$pattern" 2>/dev/null) ;;
+                *) count1=$(echo "$class" | grep --ignore-case --count "$pattern" 2>/dev/null) ;;
+      esac
+      test $count1 -ne 0 &&
+      {
+          count2=$(echo "$classes_orig" | grep --count "$class" 2>/dev/null)
+          tell "$xem" "$class" "$count2"     # note the 'tell' call
+      }
+    done
+    return 0
+}
+
+# ---------------------------------
+#  dump()
+# ---------------------------------
+
+# CAUTION: note based on the notion of a record but of
+# a double traverse -- and thereby less robust
+
+# see commit r6160 for the former code
+
+function dump
+{
+    local xem="$1"
+
+    test "$less" = "yes" && return 0
+
+    head1
+    tell "$xem"
+    echo
+
+    local entyids=($(grep "^entity\." $xem))
+    local classes=($(cat $xem | awk '{ FS = ">" } /class/ { print $2 }'))
+
+    local len1=${#entyids[*]}
+    local len2=${#classes[*]}
+    local lenzero                       # zero-based length
+    let "lenzero = $len1 - 1"
+
+    if [ $len1 -ne $len2 ]
+    then
+        echo "$SCRIPT: entity IDs and class fields do not match : $len1 $len2"
+        # return 1
+    fi
+
+    for i in $(seq 0 $lenzero)
+      do
+      printf "  %-30s  %s\n" "${classes[$i]}"  "${entyids[$i]}"
+    done
+
+    local ens=$(grep --count "^entity\." $xem)
+    echo
+    echo "  entities : $ens"
+    return 0
+}
+
+# ---------------------------------
+#  maketempfile()
+# ---------------------------------
+
+TEMPFILE="/dev/null"
+function maketempfile
+{
+    TEMPFILE=$(mktemp -t "$SCRIPT~XXXXXX") ||
+    {
+        echo "$SCRIPT: ERROR: 'mktemp' returned: $?"
+        exit $E_MKTEMP_FAIL
+    }
+}
+
+# ---------------------------------
+#  active code
+# ---------------------------------
+
+# process pattern on the assumption it is a filename
+file="$pattern"
+file=$(basename "$file")                # remove path
+file=${file%.$XEM}                      # remove xem string
+file=${file%.$GUARD}                    # remove guard string
+
+# screen for "stub.a" thru "stub.999" for actual files only and remark
+test -f "$file.$GUARD.$XEM" && {
+    echo "$file" | grep --quiet "\.[[:lower:][:digit:]]\{1,3\}$" || {
+        echo "$SCRIPT: file stub does not look like a classic name: '$file'"
+    }
+}
+
+# reconstruct filename
+file=$file.$GUARD.$XEM
+
+# process 'ls' utility options
+case "$sort" in
+    alphabet) lsopt=""                      ;;
+    lastmod)  lsopt="--reverse --sort=time" ;;
+esac
+
+xems=$(ls $lsopt *.$GUARD.$XEM)         # CAUTION: no double quotes
+
+if test -f $file
+    then
+    dump "    $file"
+    show     "$file"
+    lessxrun "$file"
+    echo
+elif test "$pattern" == "+"
+    then
+    test -z "$xems" && exit 1
+    for xem in $xems
+      do
+      dump "$xem"
+      show "$xem"
+    done
+    echo
+else
+    test -z "$xems" && exit 1
+    case "${#pattern}" in
+        0)
+            head1
+            for xem in $xems
+              do
+              tell "$xem"
+            done
+            ;;
+        *)
+            maketempfile
+            head2
+            for xem in $xems
+              do
+              search "$xem" >> "$TEMPFILE"
+            done
+            case "$modelsort" in
+                yes) cat  "$TEMPFILE"  ;;
+                no)  sort "$TEMPFILE"  ;;
+            esac
+            ;;
+    esac
+    test -n "$xems" && echo
+fi
+
+# ---------------------------------
+#  housekeeping
+# ---------------------------------
+
+exit 0
+
+# ---------------------------------
+#  junk code
+# ---------------------------------
+
+# class="${class//:/_}"             # swap ":" for "_"
+# echo "$class"
+# local index=$(expr index "$class" "$pattern")
+
+#  $Id: xmole 7450 2011-10-10 09:17:56Z robbie $
+#  end of file
+

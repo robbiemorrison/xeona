@@ -1,0 +1,37 @@
+--- poc.008.guard.xem	2012-04-07 18:35:26.568409879 +0200
++++ sen.08.xem	2012-04-07 18:35:46.538359447 +0200
+@@ -33,18 +33,18 @@
+     script-option-jumpy b                         > 0
+ 
+ program.study-description
+ 
+     study-name s                                  > "phd"
+-    scenario-name s                               > "reference energy system"
++    scenario-name s                               > "urban domain under 'fin' was 'ghg'"
+     scenario-author s                             > "robbie"
+-    scenario-leta s (+,a-z)                       > "+"
++    scenario-leta s (+,a-z)                       > "h"
+ 
+ program.r-processing
+ 
+     r-policy i                                    > 31
+-    r-title s                                     > "mainline model"
++    r-title s                                     > "scenario h"
+     r-plot-list s                                 > ""
+     r-highlight-output s                          > ""
+ 
+ program.post-processing
+ 
+@@ -3345,11 +3345,11 @@
+ 
+       these four GLPK solver behavior settings should
+       normally be set to true unless run-time tests indicate
+       otherwise -- also coeffs means structural coefficients
+ 
+-    commitment-mode s                             > "ghg"
++    commitment-mode s                             > "fin"
+ 
+       supported commitment-mode values (lmp is nodal pricing):
+       fin | ghg | nox | dep | luc | lmp | merit | first
+ 
+     ranked-selgates L                             > ""

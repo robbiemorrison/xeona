@@ -1,0 +1,127 @@
+
+note
+
+    $Revision: 2992 $
+    $Date: 2009-06-30 12:14:48 +0200 (Tue, 30 Jun 2009) $
+    $Author: robbie $
+    $URL: file:///home/robbie/svn-root/xeona/futz/trunk/xeona1/xeona-xmoks/layer_1_syscoord.guard.xem $
+
+  -------------------------------------------- program admin
+
+program.last-run
+
+    process-id                                    <
+    run-kind                                      <
+    used-svn                                      <
+    simulate-time (hh:mm:ss or s)                 <
+    simulate-return                               <
+
+program.data-format
+
+    minimum-svn                                   > 6745
+
+program.run-script-settings
+
+    script-model-status s                         > "okay"
+    script-run-me b                               > 1
+    script-option-exittrip i                      > 1
+    script-option-nodata b                        > 0
+
+program.r-processing
+
+    r-policy i                                    > 31
+    r-title s                                     > "system coordination slice"
+    r-plot-list s                                 > ""
+
+  --------------------------------------- mandatory entities
+
+entity.time-horizon
+
+    class                                         > TimeHorizon
+
+      the TimeHorizon entity is REQUIRED and the
+      "time-horizon" identifier is MANDATORY
+
+    builtin-remark s                              <
+
+    steps [-] i                                   > 2
+    interval [s] i                                > 3600
+    start-hour [-] i                              > 0
+    start-day [-] i                               > 1
+    leap-year [-] b                               > 0
+
+      the start-hour begins midnight local time and ranges
+      [0,23] and the start-day begins 01-Jan and ranges [1,365]
+
+      when leap-year is true then 29 February is presumed to
+      exist (although not all entities will support this)
+
+    hemisphere s                                  > "N"
+
+      the hemisphere is {N,S} for north and south
+
+      the modeler should ensuring that timeseries data given
+      elsewhere aligns with the specification given here
+
+      header: b/builtins.h
+
+entity.overseer
+
+    class                                         > Overseer
+
+    builtin-remark s                              <
+
+    captrans-algorithm s                          > "simple"
+    ranked-orig-domains L                         > ""
+
+      note intentionally empty domains list
+
+    total-financial [$] f                         < 0.0
+    total-greenhouse [kg] f                       < 0.0
+    total-nox [kg] f                              < 0.0
+    total-depletion [J] f                         < 0.0
+    total-landuse [m^2] f                         < 0.0
+
+    total-shortrun-financial [$] f                < 0.0
+    total-shortrun-greenhouse [kg] f              < 0.0
+    total-shortrun-nox [kg] f                     < 0.0
+    total-shortrun-depletion [J] f                < 0.0
+    total-shortrun-landuse [m2] f                 < 0.0
+
+      the cost-type totals cover the entire horizon, with
+      first step truncation given by program.last-run.run-kind
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+    embedded-costs-financial [$] F                < 0.0 ..
+    variable-costs-greenhouse [kg] F              < 0.0 ..
+    fixed-costs-greenhouse [kg] F                 < 0.0 ..
+    embedded-costs-greenhouse [kg] F              < 0.0 ..
+    variable-costs-nox [kg] F                     < 0.0 ..
+    fixed-costs-nox [kg] F                        < 0.0 ..
+    embedded-costs-nox [kg] F                     < 0.0 ..
+    variable-costs-depletion [J] F                < 0.0 ..
+    fixed-costs-depletion [J] F                   < 0.0 ..
+    embedded-costs-depletion [J] F                < 0.0 ..
+    variable-costs-landuse [m^2] F                < 0.0 ..
+    fixed-costs-landuse [m^2] F                   < 0.0 ..
+    embedded-costs-landuse [m^2] F                < 0.0 ..
+
+      header: overseer.h
+
+  ----------------------------------------------------- tail
+
+note
+
+    $Id: layer_1_syscoord.guard.xem 2992 2009-06-30 10:14:48Z robbie $
+
+note
+
+    useful emacs text editor settings
+    local variables:
+      tab-stop-list: (04 50 52)
+      truncate-lines: t
+    end:
+
+model-end
+

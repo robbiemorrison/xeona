@@ -1,0 +1,28 @@
+
+# role   = hydro scheme
+# study  = trial-008
+# scens  = *
+# cut    = :
+# tall   = T
+# lines  = F
+# ymax   = 0
+# zero   = T
+
+  entity.teas-hydro-scheme-a10.potential-productions         "hydro scheme : a10 : potential production"
+  entity.teas-hydro-scheme-a10.actual-productions            "hydro scheme : a10 : actual production"
+  entity.teas-hydro-scheme-a10.reservoir-storages            "hydro scheme : a10 : reservoir storage"
+  entity.teas-hydro-scheme-a10.inventory-delta               "hydro scheme : a10 : inventory delta"
+  entity.teas-hydro-scheme-a10.mean-inflow                   "hydro scheme : a10 : mean inflow"
+  entity.teas-hydro-scheme-a10.capacity-factor               "hydro scheme : a10 : capacity factor"
+  entity.teas-hydro-scheme-a10.spill-factor                  "hydro scheme : a10 : spill factor"
+  entity.teas-hydro-scheme-a10.spill-count                   "hydro scheme : a10 : spill count"
+
+##  emacs text editor settings
+##  local variables:
+##    mode: text
+##    make-backup-files: nil
+##    truncate-lines: t
+##    comment-start: "#"
+##    tab-stop-list: (02 12 60)
+##  end:
+

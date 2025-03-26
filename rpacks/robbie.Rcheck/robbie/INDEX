@@ -1,0 +1,4 @@
+robbie-package          General support functions
+robbie.getScriptName    Obtain script name
+robbie.updateTerminalWidth
+                        Dynamically update terminal width

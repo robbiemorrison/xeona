@@ -1,0 +1,135 @@
+
+#  file-purpose     : R statistical computing environment configuration
+#  file-initiator   : Robbie Morrison <robbie@actrix.co.nz>
+#  file-create-date : Tue 16-Jun-2009 13:42 UTC
+#  file-status      : work-in-progress
+#  file-keywords    : xeona
+
+#  $Revision: 2905 $
+#  $Date: 2009-06-16 20:13:07 +0200 (Tue, 16 Jun 2009) $
+#  $Author: robbie $
+#  $URL: file:///home/robbie/svn-root/xeona/futz/trunk/xeonar/dotRprofile $
+
+#  NOTE: this file is probably symlinked from '.Rprofile'
+
+# R statistical computing profile file
+
+# unless '--no-init-file' was given, R searches for a
+# file called '.Rprofile' in the current directory,
+# and, if not found, in your home directory, and then
+# 'sources()' this into your R workspace
+
+# see '?Startup', 'options()', 'getOption(opt)'
+
+# ---------------------------------
+#  options
+# ---------------------------------
+
+# * = possibly set again, read entire file
+
+options(papersize = "a4")                    # likely to be the default on most systems
+options(width = 65)                          # display width, default is 80 *
+options(digits = 5)                          # digits printed, default is 7
+options(show.signif.stars = FALSE)           # see 'printCoefmat', default is TRUE
+grDevices::ps.options(horizontal = FALSE)    # namespace now required for non-'base' packages
+
+options(check.bounds = TRUE)                 # complain if vector is extended, default is FALSE [1] *
+
+# CAUTION: [1] does not apply to vector recycling, for instance >  1:10 + 1:5
+
+options(width = 120)
+options(check.bounds = FALSE)
+
+# settings from R Journal article: Ligges, Uwe.  2006.
+# Accessing the sources (R Help Desk).  R News.  vol
+# 6/4, October.
+
+options(keep.source      = TRUE)
+options(keep.source.pkgs = TRUE)
+
+# ---------------------------------
+#  calls
+# ---------------------------------
+
+set.seed(1234)
+
+# utils::help.start()                        # use HTML help
+# printer(width = 79) # not graphics, not grDevices
+
+# ---------------------------------
+#  function : .First
+# ---------------------------------
+#  description  : standard session opening file
+#  status       : complete
+# ---------------------------------
+
+.First <- function()
+{
+  # report this file
+  profile <- ".Rprofile"
+  cat("robbie: loading local profile from file  : ", profile, "\n", sep = "")
+  if ( system (paste("test -L", profile), intern = FALSE) == 0 ) {
+    target <- system(paste("file --brief", profile), intern = TRUE)
+    # "symbolic link to `[path/]dotRprofile'"
+    target <- sub("symbolic link to `", "", target, fixed = TRUE)
+    target <- sub("'"                 , "", target, fixed = TRUE)
+    cat("robbie: profile file is symlinked to     : ", target, "\n", sep = "")
+  }
+
+  # load user functions file if possible
+  HOME   <- Sys.getenv("HOME")                 # named string vector, returns "" if not found
+  SYNK   <- Sys.getenv("SYNK")
+  XEONAR <- Sys.getenv("XEONAR")
+  path   <- "xeona/r-stat-comp"
+  file   <- "userFuncs.R"
+
+  if ( nchar(XEONAR) > 0 ) {                 # 'XEONAR' set
+    userFuncsFile <- file.path(XEONAR, file)
+    cat("robbie: environment variable XEONAR set  : ", XEONAR, "\n", sep = "")
+  }
+  else {                                     # 'XEONAR' not set
+    userFuncsFile <- file.path(HOME, SYNK, path, file)
+    cat("robbie: environment variable XEONAR not set\n")
+  }
+
+  if ( file.exists(userFuncsFile) ) {
+    cat("robbie: loading user functions from file : ", userFuncsFile, "\n", sep = "")
+    source(userFuncsFile, echo = FALSE)      # load call
+  }
+  else {
+    cat("robbie: user functions file NOT found    : ", userFuncsFile, "\n", sep = "")
+  }
+
+  # locale
+  locale <- Sys.getlocale()
+  if ( locale != "C" ) {
+    cat("robbie: system locale NOT \"C\"            : ", locale, "\n", sep = "")
+  }
+
+  # final newline
+  cat("\n")
+}
+
+# ---------------------------------
+#  function : .Last
+# ---------------------------------
+#  description  : standard session end file
+#  status       : complete
+# ---------------------------------
+
+.Last <- function()
+{
+  cat("\n")
+  cat("robbie: completing local profile file\n")
+}
+
+#   emacs text editor settings
+#   local variables:
+#     mode: r
+#     make-backup-files: t
+#     truncate-lines: t
+#   end:
+
+#  $Id: dotRprofile 2905 2009-06-16 18:13:07Z robbie $
+#  end of file
+

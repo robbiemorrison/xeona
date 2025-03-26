@@ -1,0 +1,485 @@
+
+note
+
+    $Revision: 8635 $
+    $Date: 2011-12-25 18:28:45 +0100 (Sun, 25 Dec 2011) $
+    $Author: robbie $
+    $URL: file:///home/robbie/svn-root/xeona/futz/trunk/xeona1/xeona-xmoks/submodel.30.guard.xem $
+
+    xem-role : submodel testing
+    status   : working
+
+  -------------------------------------------- program admin
+
+program.last-run
+
+    process-id                                    <
+    run-kind                                      <
+    used-svn                                      <
+    timestamp-start (UTC)                         <
+    simulate-time (hh:mm:ss or s)                 <
+    simulate-return                               <
+
+program.data-format
+
+    minimum-svn                                   > 7719
+
+program.run-script-settings
+
+    script-model-status s                         > "okay"
+    script-run-me b                               > 1
+    script-option-exittrip i                      > 2
+    script-option-nodata b                        > 0
+    script-option-jumpy b                         > 0
+
+program.r-processing
+
+    r-policy i                                    > 31
+    r-title s                                     > "generic storage without sourcing push"
+    r-plot-list s                                 > ""
+    r-highlight-output s                          > ""
+
+program.post-processing
+
+    summarize-list s                              > "entity.teas-simple-storage-elec-2.closing-inventorys entity.teas-source-elec-1.extractions entity.teas-load-elec-ts-3.loads"
+
+  -------------------------------------------- documentation
+
+      this model does not utilize storage because the source
+      only supplies on demand -- this submodel needs to be
+      repeated using the PV entity with the internal-dump-flag
+      set to false
+
+      the TeasLoadE lecTs entity has been superseded and should
+      be replace by 'TeasLoad:Elec' and 'AsopInelasticTs' or
+      'AsopInelasticParam'
+
+  --------------------------------------- mandatory entities
+
+entity.time-horizon
+
+    class                                         > TimeHorizon
+
+      the TimeHorizon entity is REQUIRED and the
+      "time-horizon" identifier is MANDATORY
+
+    builtin-remark s                              <
+
+    steps [-] i                                   > 6
+    interval [s] i                                > 3600
+    start-hour [-] i                              > 0
+    start-day [-] i                               > 1
+    leap-year [-] b                               > 0
+
+      the interval [300,86400] is further restricted to
+      common multiples of one hour ranging 5 mins to 24 hours
+
+      the start-hour begins midnight local time and ranges
+      [0,23] and the start-day begins 01-Jan and ranges
+      [1,365] -- used to align internal and model timeseries
+      when the latter commences after 00:00 on 01 January
+
+      when leap-year is true then 29 February is presumed to
+      exist (although not all entities will support this)
+
+    hemisphere s                                  > "N"
+
+      the hemisphere is {N,S} for north and south
+
+      the modeler should ensuring that timeseries data given
+      elsewhere aligns with the specification given here
+
+      header: b/builtins.h
+
+entity.overseer
+
+    class                                         > Overseer
+
+      the Overseer entity is REQUIRED and the "overseer"
+      identifier is MANDATORY
+
+      the overseer does little more that invoke the various
+      originating domains in nominated order at each new
+      interval
+
+    builtin-remark s                              <
+
+    captrans-algorithm s                          > "simple"
+
+      captrans-algorithm takes "fixed" | "simple" | "hop-relit"
+      but only "simple" is currently implemented (this call
+      contains experimental macro-controlled hop-relit code)
+
+    ranked-orig-domains L                         > "domain-controller-1"
+
+      the originating domain controllers must be given in
+      order of DESCENDING priority, any unannounced domains
+      will be discovered naturally during the various
+      traversals
+
+    total-financial [$] f                         < 0.0
+    total-greenhouse [kg] f                       < 0.0
+    total-nox [kg] f                              < 0.0
+    total-depletion [J] f                         < 0.0
+    total-landuse [m^2] f                         < 0.0
+
+    total-shortrun-financial [$] f                < 0.0
+    total-shortrun-greenhouse [kg] f              < 0.0
+    total-shortrun-nox [kg] f                     < 0.0
+    total-shortrun-depletion [J] f                < 0.0
+    total-shortrun-landuse [m2] f                 < 0.0
+
+      the cost-type totals cover the entire horizon, with
+      first step truncation given by program.last-run.run-kind
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+    embedded-costs-financial [$] F                < 0.0 ..
+    variable-costs-greenhouse [kg] F              < 0.0 ..
+    fixed-costs-greenhouse [kg] F                 < 0.0 ..
+    embedded-costs-greenhouse [kg] F              < 0.0 ..
+    variable-costs-nox [kg] F                     < 0.0 ..
+    fixed-costs-nox [kg] F                        < 0.0 ..
+    embedded-costs-nox [kg] F                     < 0.0 ..
+    variable-costs-depletion [J] F                < 0.0 ..
+    fixed-costs-depletion [J] F                   < 0.0 ..
+    embedded-costs-depletion [J] F                < 0.0 ..
+    variable-costs-landuse [m^2] F                < 0.0 ..
+    fixed-costs-landuse [m^2] F                   < 0.0 ..
+    embedded-costs-landuse [m^2] F                < 0.0 ..
+
+      header: b/overseer.h
+
+  ---------------------------------------------------- model
+
+entity.domain-controller-1
+
+    class                                         > DomainController
+
+      a domain controller entity (the only one provided)
+      which can take one of a number of commitment modes --
+      but REQUIRES that the managed entities support the
+      elected mode
+
+    builtin-remark s                              <
+
+    domain-role s                                 > "role"
+
+    init-scale-problem b                          > 1
+    init-use-advanced-initial-basis b             > 1
+    init-use-simplex-presolver b                  > 1
+    init-use-mip-presolver b                      > 1
+    init-apply-numerical-zero b                   > 1
+
+    trip-kkt-report-level i                       > 1
+    trip-coeff-span-level i                       > 1
+
+      these four GLPK solver behavior settings should
+      normally be set to true unless run-time tests indicate
+      otherwise -- also coeffs means structural coefficients
+
+    commitment-mode s                             > "fin"
+
+      supported commitment-mode values (lmp is nodal pricing):
+      fin | ghg | nox | dep | luc | lmp | merit | first
+
+    ranked-selgates L                             > ""
+
+      the ranked-selgates (bridging the right side) must be
+      null, one, or listed in DESCENDING priority
+
+    asset-operators L                             > "asop-internal-costs-1"
+
+      the asset-operators may be null, individual, or listed
+      in no particular order
+
+    demand-junctions L                            > "junc-demand-2-sym-elec-1"
+
+      the demand-junctions, which split and join demand, may
+      be null, individual, or listed in no particular order
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+      the following are consolidations for the entire domain
+
+    subtotal-financial [$] f                      < 0.0
+    subtotal-greenhouse [kg] f                    < 0.0
+    subtotal-nox [kg] f                           < 0.0
+    subtotal-depletion [J] f                      < 0.0
+    subtotal-landuse [m2] f                       < 0.0
+
+    header: b/domcon.h
+
+  ------------------------------------------- asset operator
+
+entity.asop-internal-costs-1
+
+    class                                         > AsopInternalCosts
+
+      basic asset operator with a null control objective and
+      with internal cost formation
+
+    builtin-remark s                              <
+
+    technical-assets L                            > "teas-source-elec-1 teas-simple-storage-elec-2 teas-load-elec-ts-3"
+
+      the order of the technical-assets is not significant
+
+    standing-cost-financial [$/s] f               > 5.0e-03
+    standing-cost-greenhouse [kg/s] f             > 5.0e-03
+    standing-cost-nox [kg/s] f                    > 0.0
+    standing-cost-depletion [J/s] f               > 0.0
+    standing-cost-landuse [m^2/s] f               > 0.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    header: b/asop01.h
+
+  --------------------------------------------------- source
+
+entity.teas-source-elec-1
+
+      base commodity in {Cert,Cseq,Elec,Fund,Heat,Oxid,Thrm,Work}
+      or derived commodity in {OxidGas}
+      quantifying extensity * in {J,kg,$}
+
+    class                                         > TeasSourceFin:Elec
+
+      an operator-coupled source entity with support for
+      capacity bounds
+
+      my socket label is 'sock-1'
+
+    builtin-remark s                              <
+
+    socket-commodity l                            > "cm-electricity-1"
+
+      socket-commodity defines the supplied commodity
+
+    extract-lo-bound [*/s] f                      > 0.0
+    extract-hi-bound [*/s] f                      > 8.0e+06
+
+      extract-hi-bound is used by the simulation whereas
+      nameplate-capacity informs the financial calculations
+
+    extractions [*/s] F                           < 0.0 ..
+
+      extractions are the actual extractions
+
+    nameplate-capacity [*/s] f                    > 6.0e+06
+    duty-specific-cost-financial [$/*] f          > 100.0
+    size-specific-cost-financial [$/*/s/s] f      > 200.0
+    standing-cost-financial [$/s] f               > 300.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    annual-discount-rate-decimal [-] f            > 0.10
+    economic-life [y] i                           > 25
+    capex-initial [$] f                           > 120e+03
+    capex-terminal [$] f                          > -10e+03
+    current-age [y] i                             > 2
+
+      a negative capex-terminal indicates salvage revenue as
+      opposed to decommissioning cost
+
+    embedded-costs-financial [$] F                < 0.0 ..
+
+      the embedded-costs-financial are calculated using the
+      DCF annuity method over the economic life of the entity
+      in question
+
+    header: b/teas04.h
+
+  ------------------------------------------ storage and bus
+
+entity.junc-demand-2-sym-elec-1
+
+      base commodity in {Cert,Cseq,Elec,Fund,Heat,Oxid,Thrm,Work}
+
+    class                                         > JuncDemand2Sym:Elec
+
+      a two socket demand joining junction for given commodity
+
+      my two socket labels are 'sock-1' and 'sock-2'
+
+    builtin-remark s                              <
+
+    socket-1 l                                    > "teas-simple-storage-elec-2.sock-1"
+    socket-2 l                                    > "teas-source-elec-1.sock-1"
+
+      socket-1 and socket-2 are my suppliers
+
+    junction-commodity l                          > "cm-electricity-1"
+
+      junction-commodity defines the underlying commodity
+
+    header: b/junc03.h
+
+entity.teas-simple-storage-elec-2
+
+      base commodity in {Cert,Cseq,Elec,Fund,Heat,Oxid,Thrm,Work}
+      or derived commodity in {OxidGas}
+
+    class                                         > TeasSimpleStorage:Elec
+
+      non-proactive storage asset which either stores excess
+      supply or discharges under some predefined unit price
+      and which will 'spill' if full and this feature is
+      enabled
+
+      associated sourcing entities will need to be set their
+      internal-dump-flag's to zero to drive recharging
+
+      my socket label is 'sock-1'
+
+    builtin-remark s                              <
+
+    socket l                                      > "junc-demand-2-sym-elec-1.sock-1"
+
+      socket is my supplier (often a busbar for electricity)
+
+    stored-commodity l                            > "cm-electricity-1"
+
+      stored-commodity defines the underlying commodity
+
+    round-trip-effy [-] f                         > 0.70
+    half-life [s] f                               > 604800
+
+      the round-trip-effy accounts for instantaneous storage
+      losses, the half-life accounts for inventory decay
+      where zero codes for no decay
+
+    capacity [*] f                                > 7.0e+03
+    opening-storage [-] f                         > 0.57
+    recharge-rate [*/s] f                         > 1.0e+03
+    discharge-rate [*/s] f                        > 1.5e+03
+
+      the capacity is self-explanatory, the two rates account
+      for rate restrictions, whereby -1.0 means omit
+
+    spill-flag b                                  > 0
+    discharge-unit-cost [$/*] f                   > 0.0
+
+      a spill-flag set to true (1) indicates spilling is
+      supported, the discharge-unit-cost (often zero) sets a
+      financial cost for discharge
+
+    modes [-] i                                   < 0 ..
+    charges [*/s] F                               < 0 ..
+    closing-inventorys [*] F                      < 0.0 ..
+
+      the modes {-1,0,+1} indicates discharge, no-change, or
+      recharge and closing-inventorys is self-explanatory
+
+    nameplate-capacity [W] f                      > 7.0e+03
+    duty-specific-cost-financial [$/J] f          > 100.0
+    size-specific-cost-financial [$/W/s] f        > 200.0
+    standing-cost-financial [$/s] f               > 300.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    annual-discount-rate-decimal [-] f            > 0.10
+    economic-life [y] i                           > 25
+    capex-initial [$] f                           > 120e+03
+    capex-terminal [$] f                          > -10e+03
+    current-age [y] i                             > 2
+
+      a negative capex-terminal indicates salvage revenue as
+      opposed to decommissioning cost
+
+    embedded-costs-financial [$] F                < 0.0 ..
+
+      the embedded-costs-financial are calculated using the
+      DCF annuity method over the economic life of the entity
+      in question
+
+    header: b/teas10.h
+
+  ----------------------------------------------------- load
+
+entity.teas-load-elec-ts-3
+
+    class                                         > TeasLoadElecTs
+
+      prescribed electricity load, lacking both flexibility
+      and context dependency
+
+    builtin-remark s                              <
+
+    socket-electricity l                          > "junc-demand-2-sym-elec-1.sock-2"
+    cable-electricity-commodity l                 > "cm-electricity-1"
+
+      the above fields define my supplier and their socket
+      label and our common electricity commodity
+
+    loads [W] F                                   > 1.0e+06 0.5e+06 ..
+
+      the loads are simply specified
+
+    nameplate-capacity [W] f                      > 2.0e+06
+    duty-specific-cost-financial [$/J] f          > 100.0
+    size-specific-cost-financial [$/W/s] f        > 200.0
+    standing-cost-financial [$/s] f               > 300.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    annual-discount-rate-decimal [-] f            > 0.10
+    economic-life [y] i                           > 25
+    capex-initial [$] f                           > 120e+03
+    capex-terminal [$] f                          > -10e+03
+    current-age [y] i                             > 2
+
+      a negative capex-terminal indicates salvage revenue as
+      opposed to decommissioning cost
+
+    embedded-costs-financial [$] F                < 0.0 ..
+
+      the embedded-costs-financial are calculated using the
+      DCF annuity method over the economic life of the entity
+      in question
+
+    header: b/teas03.h
+
+  ---------------------------------------------- commodities
+
+entity.cm-electricity-1
+
+    class                                         > CmElectricity
+
+      J-quantified electricity commodity
+
+      technical assets using electricity adopt a DC-power
+      flow model and thereby ignore shunt losses -- this
+      commodity provides suitable support
+
+    builtin-remark s                              <
+
+    voltage [V] f                                 > 24
+
+      for fixed-frequency AC power, use the RMS (root-mean-
+      square) voltage (as opposed to the peak-to-peak value)
+
+    header: b/commods.h
+
+  ----------------------------------------------------- tail
+
+note
+
+    $Id: submodel.30.guard.xem 8635 2011-12-25 17:28:45Z robbie $
+
+note
+
+    useful emacs text editor settings
+    local variables:
+      mode: xem
+      tab-stop-list: (04 50 52)
+      truncate-lines: t
+    end:
+
+model-end
+

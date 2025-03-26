@@ -1,0 +1,1525 @@
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.ls()
+source("gaia.R")
+gaias()
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.ls()
+source("gaia.R")
+gaias()
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.ls()
+source("gaia.R")
+gaias()
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.ls()
+source("gaia.R")
+gaias()
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.ls()
+source("gaia.R")
+gaias()
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.ls()
+source("gaia.R")
+gaias()
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.ls()
+source("gaia.R")
+gaias()
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.ls()
+source("gaia.R")
+gaias()
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.ls()
+source("gaia.R")
+gaias()
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.ls()
+source("gaia.R")
+gaias()
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.ls()
+source("gaia.R")
+gaias()
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.ls()
+source("gaia.R")
+gaias()
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.ls()
+source("gaia.R")
+gaias()
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.ls()
+source("gaia.R")
+gaias()
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.ls()
+source("gaia.R")
+gaias()
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.ls()
+source("gaia.R")
+gaias()
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.ls()
+source("gaia.R")
+gaias()
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.ls()
+source("gaia.R")
+gaias()
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.ls()
+source("gaia.R")
+gaias()
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.ls()
+source("gaia.R")
+gaias()
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.ls()
+source("gaia.R")
+gaias()
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.ls()
+source("gaia.R")
+gaias()
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.ls()
+source("gaia.R")
+gaias()
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.ls()
+source("gaia.R")
+gaias()
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.ls()
+source("gaia.R")
+gaias()
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.ls()
+source("gaia.R")
+gaias()
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.ls()
+source("gaia.R")
+gaias()
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.ls()
+source("gaia.R")
+gaias(1, jobs = 31, report = 6)
+gaias()
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.ls()
+source("gaia.R")
+gaias(1, jobs = 31, report = 6)
+gaias()
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.ls()
+source("gaia.R")
+gaias(1, jobs = 31, report = 6, clean = T)
+gaias()
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.ls()
+source("gaia.R")
+gaias(1, jobs = 31, report = 6, clean = T)
+gaias()
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.ls()
+source("gaia.R")
+gaias(1, jobs = 31, report = 6, clean = T)
+gaias()
+thomas()
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.ls()
+source("gaia.R")
+gaias(1, jobs = 31, report = 6, clean = T)
+gaias()
+thomas()
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+system("killall --quiet display")
+gaias(1, jobs = 31, report = 6, clean = R, snooze = 0)
+source("gaia.R")
+thomas("all")
+thomas("key")
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+system("killall display")
+gaias(1, jobs = 31, report = 6, clean = R, snooze = 0)
+source("gaia.R")
+thomas("all")
+thomas("key")
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+system("killall display")
+gaias(1, jobs = 31, report = 6, clean = R, snooze = 0)
+source("gaia.R")
+thomas("all", 0)
+thomas("key", 1)
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+system("killall display")
+gaias(1, jobs = 31, report = 6, clean = R, snooze = 0)
+source("gaia.R")
+thomas("all", 0)
+thomas("key", 1)
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+system("killall display"); robbie.killX11s()
+gaias(1, jobs = 31, report = 6, clean = R, snooze = 0)
+source("gaia.R")
+thomas("all", 0)
+thomas("key", 1)
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+system("killall display"); robbie.killX11s()
+gaias(1, jobs = 31, report = 6, clean = R, snooze = 0)
+source("gaia.R")
+thomas("all", snooze = 0)
+thomas("key", snooze = 1)
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+system("killall display"); robbie.killX11s()
+gaias(1, jobs = 31, report = 6, clean = R, snooze = 0)
+source("gaia.R")
+thomas(option = "all", snooze = 0)
+thomas(option = "key", snooze = 1)
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+system("killall display"); robbie.killX11s()
+gaias(1, jobs = 31, report = 6, clean = R, snooze = 0)
+source("gaia.R")
+thomas(option = "all", snooze = 0) # 25 seconds
+thomas(option = "key", snooze = 1) # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+gaias(1, jobs = 31, report = 6, clean = R, snooze = 0)
+source("gaia.R")
+thomas(option = "clean")
+thomas(option = "all", snooze = 0) # 25 seconds
+thomas(option = "key", snooze = 1) # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+gaias(1, jobs = 31, report = 6, clean = R, snooze = 0)
+source("gaia.R")
+thomas(option = "clean")
+thomas(option = "all", snooze = 0) # 25 seconds
+thomas(option = "key", snooze = 1) # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+gaias(1, jobs = 31, report = 6, clean = R, snooze = 0)
+source("gaia.R")
+thomas(option = "clean")
+thomas(option = "all", snooze = 0) # 25 seconds
+thomas(option = "key", snooze = 1) # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("gaia.R")
+thomas(option = "clean")
+thomas(option = "all", snooze = 0)    # 25 seconds
+thomas(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("gaia.R")
+thomas(option = "clean")
+thomas(option = "all", snooze = 0)    # 25 seconds
+thomas(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("gaia.R")
+thomas(option = "clean")
+thomas(option = "all", snooze = 0)    # 25 seconds
+thomas(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("gaia.R")
+thomas(option = "clean")
+thomas(option = "all", snooze = 0)    # 25 seconds
+thomas(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("gaia.R")
+thomas(option = "clean")
+thomas(option = "all", snooze = 0)    # 25 seconds
+thomas(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("gaia.R")
+thomas(option = "clean")
+thomas(option = "all", snooze = 0)    # 25 seconds
+thomas(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("gaia.R")
+thomas(option = "clean")
+thomas(option = "all", snooze = 0)    # 25 seconds
+thomas(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("gaia.R")
+thomas(option = "clean")
+thomas(option = "all", snooze = 0)    # 25 seconds
+thomas(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("gaia.R")
+thomas(option = "clean")
+thomas(option = "all", snooze = 0)    # 25 seconds
+thomas(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("gaia.R")
+thomas(option = "clean")
+thomas(option = "all", snooze = 0)    # 25 seconds
+thomas(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("gaia.R")
+thomas(option = "clean")
+thomas(option = "all", snooze = 0)    # 25 seconds
+thomas(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("gaia.R")
+thomas(option = "clean")
+thomas(option = "all", snooze = 0)    # 25 seconds
+thomas(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("gaia.R")
+thomas(option = "clean")
+thomas(option = "all", snooze = 0)    # 25 seconds
+thomas(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("gaia.R")
+rundemo(option = "clean")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("gaia.R")
+rundemo(option = "clean")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("gaia.R")
+rundemo(option = "clean")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("gaia.R")
+rundemo(option = "clean")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("gaia.R")
+rundemo(option = "clean")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)    # 25 seconds
+rundemo(option = "key", snooze = 1)    # 15 seconds
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)
+rundemo(option = "key1", snooze = 1)
+rundemo(option = "key3", snooze = 0)
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)
+rundemo(option = "key1", snooze = 1)
+rundemo(option = "key3", snooze = 0)
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)
+rundemo(option = "key1", snooze = 1)
+rundemo(option = "key3", snooze = 0)
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)
+rundemo(option = "key1", snooze = 1)
+rundemo(option = "key3", snooze = 0)
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)
+rundemo(option = "key1", snooze = 1)
+rundemo(option = "key3", snooze = 0)
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)
+rundemo(option = "key1", snooze = 1)
+rundemo(option = "key3", snooze = 0)
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)
+rundemo(option = "key1", snooze = 1)
+rundemo(option = "key3", snooze = 0)
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)
+rundemo(option = "key1", snooze = 1)
+rundemo(option = "key3", snooze = 0)
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)
+rundemo(option = "key1", snooze = 1)
+rundemo(option = "key3", snooze = 0)
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)
+rundemo(option = "key1", snooze = 1)
+rundemo(option = "key3", snooze = 0)
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)
+rundemo(option = "key1", snooze = 1)
+rundemo(option = "key3", snooze = 0)
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)
+rundemo(option = "key1", snooze = 1)
+rundemo(option = "key2", snooze = 0)
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)
+rundemo(option = "key1", snooze = 1)
+rundemo(option = "key2", snooze = 1)
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)
+rundemo(option = "key1", snooze = 1)
+rundemo(option = "key2", snooze = 1)
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)
+rundemo(option = "key1", snooze = 1)
+rundemo(option = "key2", snooze = 1)
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)
+rundemo(option = "key1", snooze = 1)
+rundemo(option = "key2", snooze = 1)
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)
+rundemo(option = "key1", snooze = 1)
+rundemo(option = "key2", snooze = 1)
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)
+rundemo(option = "key1", snooze = 1)
+rundemo(option = "key2", snooze = 1)
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)
+rundemo(option = "key1", snooze = 1)
+rundemo(option = "key2", snooze = 1)
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)
+rundemo(option = "key1", snooze = 1)
+rundemo(option = "key2", snooze = 1)
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)
+rundemo(option = "key1", snooze = 1)
+rundemo(option = "key2", snooze = 1)
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)
+rundemo(option = "key1", snooze = 1)
+rundemo(option = "key2", snooze = 1)
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)
+rundemo(option = "key1", snooze = 1)
+rundemo(option = "key2", snooze = 1)
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)
+rundemo(option = "key1", snooze = 1)
+rundemo(option = "key2", snooze = 1)
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)
+rundemo(option = "key1", snooze = 1)
+rundemo(option = "key2", snooze = 1)
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)
+rundemo(option = "key1", snooze = 1)
+rundemo(option = "key2", snooze = 1)
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)
+rundemo(option = "key1", snooze = 1)
+rundemo(option = "key2", snooze = 1)
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)
+rundemo(option = "key1", snooze = 1)
+rundemo(option = "key2", snooze = 1)
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)
+rundemo(option = "key1", snooze = 1)
+rundemo(option = "key2", snooze = 1)
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)
+rundemo(option = "key1", snooze = 1)
+rundemo(option = "key2", snooze = 1)
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)
+rundemo(option = "key1", snooze = 1)
+rundemo(option = "key2", snooze = 1)
+
+
+
+robbie.bye()
+robbie.killX11s()
+robbie.clean()
+robbie.ls()
+source("rundemo.R")
+rundemo(option = "close")
+rundemo(option = "all", snooze = 0)
+rundemo(option = "key1", snooze = 1)
+rundemo(option = "key2", snooze = 1)

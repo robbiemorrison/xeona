@@ -1,0 +1,152 @@
+#! /bin/bash
+
+#  file-purpose     : locate a particular 'xeona' binary
+#  file-initiator   : Robbie Morrison <robbie@actrix.co.nz>
+#  file-create-date : Wed 09-Nov-2011 10:30 UTC
+#  file-status      : working
+#  file-keywords    : xeona
+
+#  $Revision: 7932 $
+#  $Date: 2011-11-09 17:45:33 +0100 (Wed, 09 Nov 2011) $
+#  $Author: robbie $
+#  $URL: file:///home/robbie/svn-root/xeona/futz/trunk/scripts/xeonabin $
+
+#  $Revision: 7932 $
+#  $Date: 2011-11-09 17:45:33 +0100 (Wed, 09 Nov 2011) $
+#  $Author: robbie $
+#  $RCSfile: xgetxeona,v $
+
+#  note: expects 4 digit SVN number
+
+# ---------------------------------
+#  user modifiable
+# ---------------------------------
+
+path="$HOME/$SYNK/xeona/svn2/futz/trunk/xeona1"
+
+xeona="xeona"
+make="make"
+mach="mach"
+rel="r"                                 # release tab as in "xeona.r0000"
+
+# ---------------------------------
+#  preamble
+# ---------------------------------
+
+SCRIPT=$(basename "$0")                 # name of this script
+
+E_SUCCESS=0
+E_FAILURE=1
+E_USAGE=2
+E_FILE_NOT_FOUND=3
+E_FILE_NOT_EXEC=4
+
+# ---------------------------------
+#  display_help() - display help
+# ---------------------------------
+
+function display_help
+{
+    echo
+    cat << EOM
+        usage: $SCRIPT
+                 --release          print '$xeona.${rel}0000' as highest release build
+                 --mach             print '$xeona.$mach'
+                 --make             print '$xeona.$make'
+                $SCRIPT --help     display this message and exit (takes priority)
+      purpose: locate a particular 'xeona' binary if possible
+         note: short options not supported
+     on error: simply returns failure
+   exit codes: $E_SUCCESS = success
+               $E_USAGE = command-line usage issue
+               $E_FILE_NOT_FOUND = binary not found
+               $E_FILE_NOT_EXEC = binary found but not executable
+      example: dynamic usage: $ \$($SCRIPT --release) --version
+EOM
+    echo
+}
+
+# ---------------------------------
+#  locate_fixed_binary()
+# ---------------------------------
+
+function locate_fixed_binary
+{
+    local bin="$1"
+
+    test -z "$bin" && return 255
+
+    local target="$path/$bin"
+    if [ -x "$target" ]
+    then
+        echo "$target"
+        return $E_SUCCESS
+    else if [ -f $target ]
+    then
+#       echo
+        return $E_FILE_NOT_EXEC
+    else
+#       echo
+        return $E_FILE_NOT_FOUND
+    fi; fi                              # CAUTION: double construct is correct
+}
+
+# ---------------------------------
+#  locate_highest_release()
+# ---------------------------------
+
+function locate_highest_release
+{
+    local stub="$1"
+
+    # CAUTION: note the outer "()" on the 'glob' line
+    local glob=($(find -P $path -maxdepth 2 -name "$stub[0-9][0-9][0-9][0-9]" -type f -printf "%P\n" | sort --reverse))
+    local bin=${glob[0]}                # grab highest release number
+    locate_fixed_binary "$bin"          # resubmit as fixed name
+}
+
+# ---------------------------------
+#  process command-line
+# ---------------------------------
+
+case "$#" in
+    0)
+        echo "$SCRIPT: one argument required (try --help)"
+        exit $E_USAGE
+        ;;
+    1)
+        :                               # fall thru is correct
+        ;;
+    *)
+        echo "$SCRIPT: too many arguments (try --help): $#"
+        exit $E_USAGE
+        ;;
+esac
+
+case "$1" in
+    --help|--hel|--he|--h|-help|-hel|-he|-h|"-?")
+        shift
+        display_help
+        exit $E_SUCCESS
+        ;;
+    --mach)
+        locate_fixed_binary "$xeona.$mach"
+        exit
+        ;;
+    --make)
+        locate_fixed_binary "$xeona.$make"
+        exit
+        ;;
+    --release)
+        locate_highest_release "$xeona.$rel"
+        exit
+        ;;
+    *)
+        echo "$SCRIPT: unsupported option (try --help): $1"
+        exit $E_USAGE
+        ;;
+esac
+
+#  $Id: xeonabin 7932 2011-11-09 16:45:33Z robbie $
+#  end of file
+

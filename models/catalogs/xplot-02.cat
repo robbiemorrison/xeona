@@ -1,0 +1,47 @@
+
+# role   = ccgt plant : unit 1 abated and unabated
+# study  = trial-008
+# scens  = +e
+# cut    = :
+# lines  = F
+# tall   = T
+# ymax   = 0
+# zero   = T
+
+  entity.teas-ccgt-nocapture-a07.productions                "unabated CCGT unit 1 : a07 :  production"
+  entity.teas-ccgt-capture-a07.productions                  "abated CCGT unit 1 : a07 :  production"
+
+  entity.teas-ccgt-nocapture-a07.fuel-demands               "unabated CCGT unit 1 : a07 :  fuel demand"
+  entity.teas-ccgt-capture-a07.fuel-demands                 "abated CCGT unit 1 : a07 :  fuel demand"
+
+  entity.teas-ccgt-nocapture-a07.carbon-emissions           "unabated CCGT unit 1 : a07 :  carbon dioxide emissions"
+  entity.teas-ccgt-capture-a07.carbon-emissions             "abated CCGT unit 1 : a07 :  carbon dioxide emissions"
+
+  entity.teas-ccgt-nocapture-a07.carbon-captures            "unabated CCGT unit 1 : a07 :  carbon dioxide capture"
+  entity.teas-ccgt-capture-a07.carbon-captures              "abated CCGT unit 1 : a07 :  carbon dioxide capture"
+
+  entity.teas-ccgt-nocapture-a07.capacitys                  "unabated CCGT unit 1 : a07 :  capacity"
+  entity.teas-ccgt-capture-a07.capacitys                    "abated CCGT unit 1 : a07 :  capacity"
+
+  entity.teas-ccgt-nocapture-a07.shutdown-statuss           "unabated CCGT unit 1 : a07 :  shutdown status"
+  entity.teas-ccgt-capture-a07.shutdown-statuss             "abated CCGT unit 1 : a07 :  shutdown status"
+
+  entity.domain-controller-a.subtotal-greenhouse            "domain controller a : subtotal greenhouse costs"
+  entity.domain-controller-b.subtotal-greenhouse            "domain controller b : subtotal greenhouse costs"
+  entity.domain-controller-c.subtotal-greenhouse            "domain controller c : subtotal greenhouse costs"
+  entity.domain-controller-d.subtotal-greenhouse            "domain controller d : subtotal greenhouse costs"
+  entity.domain-controller-e.subtotal-greenhouse            "domain controller e : subtotal greenhouse costs"
+  entity.domain-controller-f.subtotal-greenhouse            "domain controller f : subtotal greenhouse costs"
+  entity.domain-controller-h.subtotal-greenhouse            "domain controller h : subtotal greenhouse costs"
+  entity.domain-controller-i.subtotal-greenhouse            "domain controller i : subtotal greenhouse costs"
+  entity.domain-controller-j.subtotal-greenhouse            "domain controller j : subtotal greenhouse costs"
+
+##  emacs text editor settings
+##  local variables:
+##    mode: text
+##    make-backup-files: nil
+##    truncate-lines: t
+##    comment-start: "#"
+##    tab-stop-list: (02 12 60)
+##  end:
+

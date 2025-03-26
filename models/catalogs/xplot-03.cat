@@ -1,0 +1,42 @@
+
+# role   = gas domain
+# study  = trial-008
+# scens  = +e
+# cut    = :
+# lines  = F
+# tall   = T
+# ymax   = 0
+# zero   = T
+
+  entity.domain-controller-d.variable-costs-financial                 "gas domain : d : variable financial costs"
+  entity.domain-controller-d.fixed-costs-financial                    "gas domain : d : fixed financial costs"
+
+  entity.asop-internal-costs-d01.variable-costs-financial             "gas extraction operator : d01 : variable costs financial"
+  entity.asop-internal-costs-d01.fixed-costs-financial                "gas extraction operator : d01 : fixed costs financial"
+
+  entity.teas-source-all-oxidgas-d01.extractions                      "gas extraction plant : d01 : extractions"
+  entity.teas-source-all-oxidgas-d01.variable-costs-financial         "gas extraction plant : d01 : variable costs financial "
+  entity.teas-source-all-oxidgas-d01.fixed-costs-financial            "gas extraction plant : d01 : fixed costs financial"
+  entity.teas-source-all-oxidgas-d01.embedded-costs-financial         "gas extraction plant : d01 : embedded costs financial"
+
+  entity.asop-internal-costs-d02.variable-costs-financial             "gas pipeline operator : d02 : variable costs financial"
+  entity.asop-internal-costs-d02.fixed-costs-financial                "gas pipeline operator : d02 : fixed costs financial"
+
+  entity.teas-pipeline-gas-d02.variable-costs-financial               "gas pipeline : d02 : variable costs financial"
+  entity.teas-pipeline-gas-d02.fixed-costs-financial                  "gas pipeline : d02 : fixed costs financial"
+
+  entity.gate-stated-tariff-ef-natgas-d01.quantitys                   "gateway (to HV domain) : d01 : quantities"
+  entity.gate-stated-tariff-ef-natgas-d01.marginal-prices             "gateway (to HV domain) : d01 : marginal prices"
+  entity.gate-stated-tariff-ef-natgas-d01.total-costs                 "gateway (to HV domain) : d01 : total costs"
+
+  entity.gate-stated-tariff-efac-natgas-d02.total-costs               "gateway (to occupant domain) : d02 : total costs"
+
+##  emacs text editor settings
+##  local variables:
+##    mode: text
+##    make-backup-files: nil
+##    truncate-lines: t
+##    comment-start: "#"
+##    tab-stop-list: (02 12 70)
+##  end:
+

@@ -1,0 +1,204 @@
+#! /bin/bash
+
+#  file-purpose     : run a submodel under valgrind and capture the output / script
+#  file-initiator   : Robbie Morrison <robbie@actrix.co.nz>
+#  file-create-date : Mon 22-Nov-2010 12:00 UTC
+#  file-status      : working
+#  file-keywords    : xeona
+
+#  $Revision: 5525 $
+#  $Date: 2010-11-22 16:16:53 +0100 (Mon, 22 Nov 2010) $
+#  $Author: robbie $
+#  $URL: file:///home/robbie/svn-root/xeona/futz/trunk/scripts/xgrind $
+
+# valgrind --tool=memcheck --leak-check=full --show-reachable=yes
+# ./xeona.mach --report 7 --guard --exittrip 1 --file xeona-xmoks/submodel.21.guard.xem
+# 2>> cap01.txt
+
+# ---------------------------------
+#  volatile
+# ---------------------------------
+
+# svn path (derived from this script)
+svnpath=$(dirname "$0")
+svnpath=${svnpath%"/scripts"}
+svnpath=${svnpath/#$HOME/"~"}           # CAUTION: the ~ must be in quotes to avoid re-expansion
+
+#xeona path
+xeonabin="xeona.mach"                   # 'xeona' binary
+xeonapath="$svnpath/xeona1/$xeonabin"
+
+# xem file tags
+pwd=$(pwd -P)
+pwd=${pwd/#$HOME/"~"}                   # CAUTION: the ~ must be in quotes to avoid re-expansion
+case "$pwd" in
+    "$svnpath/models")                  # 'models' subdirectory
+        tag1="test-"
+        tag2=".xem"
+        guard=""
+        ;;
+    "$svnpath/xeona1")                  # main subdirectory
+        tag1="./xeona-xmoks/submodel."
+        tag2=".guard.xem"
+        guard=" --guard"
+        ;;
+    *)
+        tag1="submodel."
+        tag2=".guard.xem"
+        guard=" --guard"
+        ;;
+esac
+
+# capture stub and extension
+stub="cap"                              # capture stubname
+ext="txt"                               # capture extension
+
+# ---------------------------------
+#  preamble
+# ---------------------------------
+
+SCRIPT=$(basename "$0")
+
+E_SUCCESS=0
+E_FAILURE=1
+E_USAGE=2
+E_NO_XEM=64
+
+# ---------------------------------
+#  help message
+# ---------------------------------
+
+case "$1" in
+    --help|--hel|--he|--h|-help|-hel|-he|-h|"-?")
+        echo
+        echo "       usage: $SCRIPT [-vvv] [-0] 00    run submodel '00' at specified level of 'valgrind' and 'xeona' reporting"
+        echo "              $SCRIPT --help            display this message and exit"
+        echo "     purpose: simplify and capture the running of xeona under valgrind"
+        echo "     options: valgrind     = --tool=memcheck --leak-check=full --show-reachable=yes"
+        echo "              xeona        = --report 0 --exittrip 1"
+        echo "      values: binary       = $xeonapath"
+        echo "              current dir  = $pwd"
+        echo "              xem pattern  = ${tag1}00${tag2}"
+        echo "              capture file = ${stub}-00.00.$ext"
+        echo "       notes: splashscreen reporting omitted"
+        echo "              special xem pattern for 'models' subdirectory"
+        echo "     example: \$ $SCRIPT -vv -7 21  # run 'submodel.21' with some 'valgrind' output and 'xeona' level 7 reporting"
+        echo
+        exit $E_SUCCESS
+        ;;
+    "")
+        echo "$SCRIPT: at least one argument required (try --help)"
+        exit $E_USAGE
+        ;;
+esac
+
+# ---------------------------------
+#  process command line
+# ---------------------------------
+
+misuse=0                                # abuse count
+
+cmdline="$SCRIPT $*"
+
+valopt=""                               # valgrind options
+case "$1" in
+    -v)   valopt=" --verbose"; shift                                         ;;
+    -vv)  valopt=" --verbose --leak-check=full"; shift                       ;;
+    -vvv) valopt=" --verbose --leak-check=full --show-reachable=yes"; shift  ;;
+esac
+
+report=""                               # 'xeona' reporting
+case "$1" in
+    -[0-7]) report=" --report ${1#-}"; shift  ;;
+    -*)     let "++misuse"; shift             ;;
+esac
+
+model=""                                # submodel number
+case "$1" in
+    0[1-9]|[1-2][0-9]) model="$1"; shift   ;;
+    *)                 let "++misuse"      ;;
+esac
+
+test $misuse -eq 0 || exit 1
+
+xem="$tag1$model$tag2"
+vcall="valgrind$valopt"
+xcall="$xeonapath$guard --exittrip 1$report --file $xem"
+
+# ---------------------------------
+#  confirm xem file
+# ---------------------------------
+
+if [ ! -f "$xem" ]
+then
+    echo "$SCRIPT: xem file not found: $xem"
+    exit $E_NO_XEM
+fi
+
+# ---------------------------------
+#  nextcap()
+# ---------------------------------
+
+# first file is satisfactorily labeled "01"
+
+capture="not-reset"
+stub="$stub-$model."
+
+function nextcap
+{
+    local files=($(find . -name "$stub*.$ext" -print | sort --reverse))
+    local file="${files[0]}"
+    local tag=$(basename "$file" ".$ext")
+    tag="${tag#$stub}"
+    tag=${tag#0}
+    let "++tag"                         # does not generally tolerate zero padding
+    printf -v tag "%02d" "$tag"
+    capture="$stub$tag.$ext"
+}
+
+# ---------------------------------
+#  active code
+# ---------------------------------
+
+nextcap                                 # function call
+
+# header information
+
+timestamp=$(date "+%Z %z %A %d-%b-%Y %H:%M")
+
+{
+    echo
+    echo "  command       : $cmdline"
+    echo "  timestamp     : $timestamp"
+    echo "  pwd           : $pwd"
+    echo "  valgrind call : $vcall"
+    echo "  xeona call    : $xcall"
+    echo "  capture file  : $capture"
+} >> "$capture"
+
+cat "$capture"                          # report
+
+echo "" >> "$capture"                   # blank line
+
+# primary call
+
+fall="$vcall $xcall 2>> $capture"
+eval "$fall"                            # valgrind
+ret="$?"
+
+# mopping up
+
+ls -l $stub[0-9][0-9].$ext              # CAUTION: omit soft-quotes
+less +/"SUMMARY" "$capture"             # note search
+
+echo
+echo "eval return : $ret"
+echo "cleaning    : rm --force $stub[0-9][0-9].$ext"
+
+# return
+
+exit "$ret"
+
+#  $Id: xgrind 5525 2010-11-22 15:16:53Z robbie $
+#  end of file
+

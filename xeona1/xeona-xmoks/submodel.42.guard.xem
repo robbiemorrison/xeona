@@ -1,0 +1,501 @@
+
+note
+
+    $Revision: 8635 $
+    $Date: 2011-12-25 18:28:45 +0100 (Sun, 25 Dec 2011) $
+    $Author: robbie $
+    $URL: file:///home/robbie/svn-root/xeona/futz/trunk/xeona1/xeona-xmoks/submodel.42.guard.xem $
+
+    xem-role   : submodel development
+    xem-status : working
+
+ --------------------------------------------- documentation
+
+      - this model use a Y-branched supply whereby the cheap
+        option is controlled by a prescriptive valve
+
+      - the underlying commodity is carbon certificates
+
+ --------------------------------------------- program admin
+
+program.last-run
+
+    process-id                                    <
+    run-kind                                      <
+    used-svn                                      <
+    timestamp-start (UTC)                         <
+    simulate-time (hh::mm::ss or s.s)             <
+    simulate-return (not application exit)        <
+
+program.data-format
+
+    minimum-svn                                   > 7698
+
+program.run-script-settings
+
+    script-model-status s                         > "okay"
+    script-run-me b                               > 1
+    script-option-exittrip i                      > 2
+    script-option-nodata b                        > 0
+    script-option-jumpy b                         > 0
+
+program.r-processing
+
+    r-policy i                                    > 31
+    r-title s                                     > "timeseries valve trial"
+    r-plot-list s                                 > ""
+    r-highlight-output s                          > ""
+
+program.post-processing
+
+    summarize-list s                              > "entity.teas-source-fin-cert-1.extractions entity.teas-source-fin-cert-2.extractions entity.teas-load-cert-1.loads"
+
+ ---------------------------------------- mandatory entities
+
+entity.time-horizon
+
+    class                                         > TimeHorizon
+
+      the TimeHorizon entity is REQUIRED and the
+      'time-horizon' identifier is MANDATORY
+
+    builtin-remark s                              <
+
+    steps [-] i                                   > 6
+    interval [s] i                                > 3600
+    start-hour [-] i                              > 0
+    start-day [-] i                               > 1
+    leap-year [-] b                               > 0
+
+      the interval [300,86400] is further restricted to
+      common multiples of one hour ranging 5 mins to 24 hours
+
+      the start-hour begins midnight local time and ranges
+      [0,23] and the start-day begins 01-Jan and ranges
+      [1,365] -- used to align internal and model timeseries
+      when the latter commences after 00:00 on 01 January
+
+      when leap-year is true then 29 February is presumed to
+      exist (although not all entities will support this)
+
+    hemisphere s                                  > "N"
+
+      the hemisphere is {N,S} for north and south
+
+      the modeler should ensuring that timeseries data given
+      elsewhere aligns with the specification given here
+
+    header: b/builtins.h
+
+entity.overseer
+
+    class                                         > Overseer
+
+      the Overseer entity is REQUIRED and the 'overseer'
+      identifier is MANDATORY
+
+      the overseer does little more that invoke the various
+      originating domains in nominated order at each new
+      interval
+
+    builtin-remark s                              <
+
+    captrans-algorithm s                          > "simple"
+
+      captrans-algorithm takes 'fixed' | 'simple' | 'hop-relit'
+      but only 'simple' is currently implemented (this call
+      contains experimental macro-controlled hop-relit code)
+
+    ranked-orig-domains L                         > "domain-controller-a"
+
+      the originating domain controllers must be given in
+      order of DESCENDING priority, any unannounced domains
+      will be discovered naturally during the various
+      traversals -- an originating domain must contain at
+      least one source entity
+
+    total-financial [$] f                         < 0.0
+    total-greenhouse [kg] f                       < 0.0
+    total-nox [kg] f                              < 0.0
+    total-depletion [J] f                         < 0.0
+    total-landuse [m^2] f                         < 0.0
+
+    total-shortrun-financial [$] f                < 0.0
+    total-shortrun-greenhouse [kg] f              < 0.0
+    total-shortrun-nox [kg] f                     < 0.0
+    total-shortrun-depletion [J] f                < 0.0
+    total-shortrun-landuse [m2] f                 < 0.0
+
+      the cost-type totals cover the entire horizon, with
+      first step truncation given by program.last-run.run-kind
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+    embedded-costs-financial [$] F                < 0.0 ..
+    variable-costs-greenhouse [kg] F              < 0.0 ..
+    fixed-costs-greenhouse [kg] F                 < 0.0 ..
+    embedded-costs-greenhouse [kg] F              < 0.0 ..
+    variable-costs-nox [kg] F                     < 0.0 ..
+    fixed-costs-nox [kg] F                        < 0.0 ..
+    embedded-costs-nox [kg] F                     < 0.0 ..
+    variable-costs-depletion [J] F                < 0.0 ..
+    fixed-costs-depletion [J] F                   < 0.0 ..
+    embedded-costs-depletion [J] F                < 0.0 ..
+    variable-costs-landuse [m^2] F                < 0.0 ..
+    fixed-costs-landuse [m^2] F                   < 0.0 ..
+    embedded-costs-landuse [m^2] F                < 0.0 ..
+
+    header: b/overseer.h
+
+ ------------ DOMAIN A ------------------------ first domain
+
+entity.domain-controller-a
+
+    class                                         > DomainController
+
+      a domain controller entity (the only one provided)
+      which can take one of a number of commitment modes --
+      but REQUIRES that the managed entities support the
+      elected mode
+
+    builtin-remark s                              <
+
+    domain-role s                                 > "role"
+
+    init-scale-problem b                          > 1
+    init-use-advanced-initial-basis b             > 1
+    init-use-simplex-presolver b                  > 1
+    init-use-mip-presolver b                      > 1
+    init-apply-numerical-zero b                   > 1
+
+      these five GLPK solver behavior settings should
+      normally be set to true unless run-time tests indicate
+      otherwise -- numerical zero rounding applies to both
+      input coefficients and output values
+
+    trip-kkt-report-level i                       > 1
+    trip-coeff-span-level i                       > 1
+
+      trip-kkt-report-level in { 0 1 2 3 } for no check, then
+      report awful, close, and every, trip-coeff-span-level
+      in { 0 1 2 } for no check, then report bad and every
+      min and max abs coeff from original matrix
+
+    commitment-mode s                             > "fin"
+
+      supported commitment-mode values (lmp is nodal pricing):
+      fin | ghg | nox | dep | luc | lmp | merit | first
+
+    ranked-selgates L                             > ""
+
+      the ranked-selgates (bridging the right side) must be
+      null, one, or listed in DESCENDING priority
+
+    asset-operators L                             > "asop-internal-costs-1 asop-inelastic-param-1"
+
+      the asset-operators may be null, individual, or listed
+      in no particular order
+
+    demand-junctions L                            > "junc-demand-2-split-cert-1"
+
+      the demand-junctions, which split and join demand, may
+      be null, individual, or listed in no particular order
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+      the following are consolidations for the entire domain
+
+    subtotal-financial [$] f                      < 0.0
+    subtotal-greenhouse [kg] f                    < 0.0
+    subtotal-nox [kg] f                           < 0.0
+    subtotal-depletion [J] f                      < 0.0
+    subtotal-landuse [m2] f                       < 0.0
+
+    header: b/domcon.h
+
+ ----------------------------------------------- supply side
+
+entity.asop-internal-costs-1
+
+       operates the two supply plant and the valve entity
+
+    class                                         > AsopInternalCosts
+
+      basic asset operator with a null control objective and
+      with internal cost formation
+
+    builtin-remark s                              <
+
+    technical-assets L                            > "teas-source-fin-cert-1 teas-source-fin-cert-2 teas-valve-ts-cert-1"
+
+      the order of the technical-assets is not significant
+
+    standing-cost-financial [$/s] f               > 5.0e-03
+    standing-cost-greenhouse [kg/s] f             > 5.0e-03
+    standing-cost-nox [kg/s] f                    > 0.0
+    standing-cost-depletion [J/s] f               > 0.0
+    standing-cost-landuse [m^2/s] f               > 0.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    header: b/asop01.h
+
+entity.teas-source-fin-cert-1
+
+      cheap source controlled by the valve entity
+
+    class                                         > TeasSourceFin:Cert
+
+      an operator-coupled source entity with support for
+      capacity bounds and financial costs
+
+      my socket label is 'sock-1'
+
+    builtin-remark s                              <
+
+    socket-commodity l                            > "cm-carbon-cert-1"
+
+      socket-commodity defines the supplied commodity
+
+    extract-lo-bound [*/s] f                      > 0.0
+    extract-hi-bound [*/s] f                      > 500
+
+      extract-hi-bound is used by the simulation whereas
+      nameplate-capacity informs the financial calculations
+
+    extractions [*/s] F                           < 0.0 ..
+
+      extractions are the actual extractions
+
+    nameplate-capacity [*/s] f                    > 500
+    duty-specific-cost-financial [$/*] f          > 10.0
+    size-specific-cost-financial [$/*/s/s] f      > 2.0
+    standing-cost-financial [$/s] f               > 3.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    annual-discount-rate-decimal [-] f            > 0.10
+    economic-life [y] i                           > 25
+    capex-initial [$] f                           > 120e+03
+    capex-terminal [$] f                          > -10e+03
+    current-age [y] i                             > 2
+
+      a negative capex-terminal indicates salvage revenue as
+      opposed to decommissioning cost
+
+    embedded-costs-financial [$] F                < 0.0 ..
+
+      the embedded-costs-financial are calculated using the
+      DCF annuity method over the economic life of the entity
+      in question
+
+    header: b/teas04.h
+
+entity.teas-source-fin-cert-2
+
+      expensive source
+
+    class                                         > TeasSourceFin:Cert
+
+      an operator-coupled source entity with support for
+      capacity bounds and financial costs
+
+      my socket label is 'sock-1'
+
+    builtin-remark s                              <
+
+    socket-commodity l                            > "cm-carbon-cert-1"
+
+      socket-commodity defines the supplied commodity
+
+    extract-lo-bound [*/s] f                      > 0.0
+    extract-hi-bound [*/s] f                      > 500
+
+      extract-hi-bound is used by the simulation whereas
+      nameplate-capacity informs the financial calculations
+
+    extractions [*/s] F                           < 0.0 ..
+
+      extractions are the actual extractions
+
+    nameplate-capacity [*/s] f                    > 500
+    duty-specific-cost-financial [$/*] f          > 20.0
+    size-specific-cost-financial [$/*/s/s] f      > 2.0
+    standing-cost-financial [$/s] f               > 3.0
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+
+    annual-discount-rate-decimal [-] f            > 0.10
+    economic-life [y] i                           > 25
+    capex-initial [$] f                           > 120e+03
+    capex-terminal [$] f                          > -10e+03
+    current-age [y] i                             > 2
+
+      a negative capex-terminal indicates salvage revenue as
+      opposed to decommissioning cost
+
+    embedded-costs-financial [$] F                < 0.0 ..
+
+      the embedded-costs-financial are calculated using the
+      DCF annuity method over the economic life of the entity
+      in question
+
+    header: b/teas04.h
+
+entity.teas-valve-ts-cert-1
+
+    class                                         > TeasValveTs:Cert
+
+      autonomous valve taking settings from a proscribed
+      timeseries (can extend to take instructions from a
+      suitable operator)
+
+      my socket label is 'sock-1'
+
+    builtin-remark s                              <
+
+    socket-1 l                                    > "teas-source-fin-cert-1.sock-1"
+
+      socket-1 is my upstream supplier
+
+    common-commodity l                            > "cm-carbon-cert-1"
+
+      cable-commodity defines the underlying commodity
+
+    capacity [*/s] f                              > 3.0e+06
+    valve-settings [-] F                          > 0.0 0.5 1.0 0.5 ..
+
+      capacity is the maximum capacity, valve-settings are
+      relative to the capacity
+
+    valve-capacitys [*/s] F                       < 0.0 ..
+    valve-binds [-] b                             < 0 ..
+    maximum-duty [*/s] f                          < 0.0
+
+    header: b/teas12.h
+
+ -------------------------------------------------- Y-branch
+
+entity.junc-demand-2-split-cert-1
+
+    class                                         > JuncDemand2Split:Cert
+
+      a two cable demand splitting junction for given commodity
+
+      my sole socket label is 'sock-1'
+
+    builtin-remark s                              <
+
+    socket-1 l                                    > "teas-valve-ts-cert-1.sock-1"
+    socket-2 l                                    > "teas-source-fin-cert-2.sock-1"
+
+      socket-1 and socket-2 are my two potential suppliers
+
+    junction-commodity l                          > "cm-carbon-cert-1"
+
+      junction-commodity defines the underlying commodity
+
+    header: b/junc01.h
+
+ ----------------------------------------------- demand side
+
+entity.asop-inelastic-param-1
+
+      demand setting operator
+
+    class                                         > AsopInelasticParam
+
+      asset operator with generated diurnal demand and
+      thereby price-inelastic behavior
+
+    builtin-remark s                              <
+
+    technical-assets L                            > "teas-load-cert-1"
+
+      the technical-assets should have the same quantifying
+      extensity
+
+    demand-mean [*/s] f                           > 200
+    demand-amplitude [*/s] f                      > 50
+    temporal-shift [h] i                          > 0
+    demand-randomness [-] f                       > 0.1
+
+      demand-mean is the mean value before noise,
+      demand-amplitude is peak-to-peak measure,
+      temporal-shift is relative to midnight,
+      demand-randomness is the maximum noise relative to the
+      amplitude, use zero to disable
+
+    header: b/asop03.h
+
+entity.teas-load-cert-1
+
+      load entity without financial costs
+
+    class                                         > TeasLoad:Cert
+
+      a load entity which is operator coupled for load
+      definition, for example to AsopInelasticTs, but without
+      support for costs
+
+    builtin-remark s                              <
+
+    socket-1 l                                    > "junc-demand-2-split-cert-1.sock-1"
+
+      socket-1 is my supplier
+
+    cable-commodity l                             > "cm-carbon-cert-1"
+
+      cable-commodity defines the underlying commodity
+
+    demand-hi-bound [*/s] f                       > 500
+
+    loads [*/s] F                                 < 0.0 ..
+
+      demand-hi-bound is the maximum load, loads are the
+      actual loads
+
+    header: b/teas04.h
+
+ ----------------------------------------------- commodities
+
+entity.cm-carbon-cert-1
+
+      carbon certificates, as an instrument, are just like any
+      other commodity in 'xeona'
+
+    class                                         > CmCarbonCert
+
+      kg-quantified financial instrument granting a CO2e
+      emissions entitlement
+
+    builtin-remark s                              <
+
+    unit-prices [$/kg] F                          > 14.0 ..
+
+      unit prices are currently coded as exogenous data, but
+      that could be developed
+
+    header: b/commods.h
+
+ ------------------------------------------------------ tail
+
+note
+
+    $Id: submodel.42.guard.xem 8635 2011-12-25 17:28:45Z robbie $
+
+note
+
+    useful emacs text editor settings
+    local variables:
+      mode: xem
+      tab-stop-list: (04 50 52)
+      truncate-lines: t
+    end:
+
+model-end
+

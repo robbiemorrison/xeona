@@ -1,0 +1,14 @@
+Package: xem
+Type: Package
+Title: Support functions for the xeona energy systems modeling
+        environment
+Version: 0.1
+Date: 2011-12-07
+Author: Robbie Morrison <robbie@actrix.co.nz>
+Maintainer: Robbie Morrison <robbie@actrix.co.nz>
+Depends: tcltk
+Description: Set of functions for recovering data from 'xeona' model
+        (XEM) files and for subsequent manipulation.
+License: GPL-3
+LazyLoad: yes
+Built: R 2.10.1; ; 2012-03-02 12:55:08 UTC; unix

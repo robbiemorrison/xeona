@@ -1,0 +1,63 @@
+--- poc.008.guard.xem	2012-04-03 17:35:31.034723638 +0200
++++ sen.03.xem	2012-04-03 17:36:03.485350083 +0200
+@@ -33,18 +33,18 @@
+     script-option-jumpy b                         > 0
+ 
+ program.study-description
+ 
+     study-name s                                  > "phd"
+-    scenario-name s                               > "reference energy system"
++    scenario-name s                               > "ambient air 2C warmer"
+     scenario-author s                             > "robbie"
+-    scenario-leta s (+,a-z)                       > "+"
++    scenario-leta s (+,a-z)                       > "c"
+ 
+ program.r-processing
+ 
+     r-policy i                                    > 31
+-    r-title s                                     > "mainline model"
++    r-title s                                     > "scenario c"
+     r-plot-list s                                 > ""
+     r-highlight-output s                          > ""
+ 
+ program.post-processing
+ 
+@@ -1858,11 +1858,11 @@
+     elevation [m] f                               < 0
+ 
+     hours-offset [-] i                            > 0
+     days-offset [-] i                             > 0
+     wind-speed-scale [-] f                        > 1.0
+-    temperature-shift [C] f                       > 0.0
++    temperature-shift [C] f                       > 2.0
+ 
+       hours-offset and days-offset are used to vary the
+       starting point
+ 
+     wind-speeds [m/s] F                           < 0.0 ..
+@@ -3159,11 +3159,11 @@
+       prior values do not influence the current values
+ 
+     builtin-remark s                              <
+ 
+     mean-wind-speed [m/s] f                       > 10.5
+-    constant-air-temp [C] f                       > 15.0
++    constant-air-temp [C] f                       > 17.0
+ 
+       mean-wind-speed is measured at 10m above ground
+ 
+       constant-air-temp allows this entity to provide
+       temperature data in line with the CxAmbientAir
+@@ -4104,11 +4104,11 @@
+     elevation [m] f                               < 0
+ 
+     hours-offset [-] i                            > 0
+     days-offset [-] i                             > 0
+     wind-speed-scale [-] f                        > 1.0
+-    temperature-shift [C] f                       > 0.0
++    temperature-shift [C] f                       > 2.0
+ 
+       hours-offset and days-offset are used to vary the
+       starting point
+ 
+     wind-speeds [m/s] F                           < 0.0 ..

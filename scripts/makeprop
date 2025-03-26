@@ -1,0 +1,457 @@
+#! /bin/bash
+
+#  file-purpose     : to propagate new makefiles when under svn
+#  file-initiator   : Robbie Morrison <robbie@actrix.co.nz>
+#  file-create-date : Tue 14-Aug-2007 11:59 UTC
+#  file-status      : working
+#  file-keywords    : xeona
+
+#  $Revision: 4685 $
+#  $Date: 2010-07-08 18:57:15 +0200 (Thu, 08 Jul 2010) $
+#  $Author: robbie $
+#  $URL: file:///home/robbie/svn-root/xeona/futz/trunk/scripts/makeprop $
+
+#  Purpose
+#
+#      To propagate new makefiles under SVN version control.
+#
+#  Requires (at time of writing)
+#
+#          - a master makefile  : makefile.to-clone
+#          - a backup extension : OLDX=_0.00.0
+#          - a clean svn return : no outstanding commits or updates
+#
+#  To restore committed changes
+#
+#      Essentially undertake a back-out merge and recommit
+#      -- see SVN book "Undoing changes" (Collins-Sussman
+#      etal 2004 pp64-65).
+#
+#      information gathering:
+#
+#      $ cd $BASE                       # lowest directory in svn-space
+#      $ svresurrect --help             # get repository URL (assuming trunk) [my script]
+#      $ svlog                          # dump logs [my alias]
+#      $ svnstakes . <keyphrase>        # search logs [my script]
+#
+#      action:
+#
+#      $ svn merge -r 303:302 <repro-url>
+#      $ svn status                        # or 'svar' or 'svat' [my aliases]
+#      $ svn commit --message "undoing change committed in r303"
+#
+#  To restore uncommitted changes (CAUTION: not tested)
+#
+#      $ cd $BASE
+#      $ svn revert --recursive .
+#
+#  References
+#
+#      Collins-Sussman, Ben, Brian W Fitzpatrick, C Michael
+#      Pilato.  2004.  Version control with subversion --
+#      First edition.  O'Reilly Media, Sebastopol,
+#      California, USA.  ISBN 0-596-00448-6.  [also
+#      available as 'svn-book.0000.pdf']
+
+# ---------------------------------
+#  preamble
+# ---------------------------------
+
+# defaults
+
+host=$(hostname --short)
+case "$host" in
+    hinau) BASE="$HOME/$SYNK/xeona/svn2/futz/trunk"  ;;     # svn version base for the purposes of this script
+    sojus) BASE="$HOME/$SYNK/xeona/svn/futz"         ;;     # svn version base for the purposes of this script
+    *)     BASE="$HOME/$SYNK/xeona/svn/futz"         ;;     # svn version base for the purposes of this script
+esac
+
+SUB="scripts"
+MAKEFILE="makefile"
+TEMX=".to-clone"                        # master file extension
+OLDX=".bak"                             # must not be present (conflicts are checked)
+
+# overrides
+
+OLDX="_1.34.1"                          # for 1.34.1 to 1.35 upgrade
+OLDX="_1.35.0"                          # CAUTION: in preparation for 1.35.1 upgrade
+
+# ---------------------------------
+#  further literals
+# ---------------------------------
+
+# composites
+
+MASTER="$BASE/$SUB/$MAKEFILE$TEMX"
+SCRIPT=$(basename "$0")
+
+# exit states
+
+E_SUCCESS=0
+E_USAGE=2
+E_PRELIM_CHECK=10
+E_USER_REQUEST=11
+E_BACKUP_NOT_CLEAR=12
+E_NO_TARGETS=13
+E_BAD_SVN_RET=14
+
+# ---------------------------------
+#  help message
+# ---------------------------------
+
+case "$1" in
+    --help|--hel|--he|--h|-help|-hel|-he|-h|"-?")
+        echo
+        echo "      usage: $SCRIPT  (three user prompts but no --run option)"
+        echo "             $SCRIPT  --help"
+        echo "    purpose: propagate and svn commit an updated makefile"
+        echo "     master: $MASTER"
+        echo "  backup to: $OLDX"
+        echo "   see also: svresurrect, svstakes, svlog (alias)"
+        echo
+        exit 0
+        ;;
+esac
+
+# ---------------------------------
+#  svn_state()
+# ---------------------------------
+
+function svn_state
+{
+    local svnver=$(svnversion $BASE 2>/dev/null)
+
+    # if svnver contains : then an update is needed
+    # if svnver contains M then a commit and update is needed
+
+    test $(expr index "$svnver" "M") -ne 0 && return 2      # commit and update needed
+    test $(expr index "$svnver" ":") -ne 0 && return 1      # update needed
+    return 0                                                # clean
+}
+
+# ---------------------------------
+#  preliminary checks
+# ---------------------------------
+
+errorcount=0                            # error count
+
+# check the state of subversion
+
+svn_state
+svnstate=$?                             # collect the return value
+case $svnstate in
+    0)  :                               # do nothing
+        ;;
+    1)  echo "$SCRIPT: subversion update needed"
+        let "errorcount++"
+        ;;
+    2)  echo "$SCRIPT: subversion commit and update needed"
+        let "errorcount++"
+        ;;
+esac
+
+# check the master makefile
+
+if [ ! -f "$MASTER" ]
+    then
+    echo "$SCRIPT: master makefile not found: $MASTER"
+    let "errorcount++"
+else
+
+    if [ ! -s "$MASTER" ]
+        then
+        echo "$SCRIPT: master makefile empty: $MASTER"
+        let "errorcount++"
+    fi
+fi
+
+# process error count
+
+if [ $errorcount -ne 0 ]
+    then
+    echo "$SCRIPT: abandoning script: errors occurred: $errorcount"
+    exit $E_PRELIM_CHECK
+fi
+
+# ---------------------------------
+#  user_confirm()
+# ---------------------------------
+
+function user_confirm
+{
+    local response=""
+    while [ "$response" != "y" ]
+      do
+      echo -n "  $SCRIPT: enter 'y' to continue/commit or 'n' to quit : "
+      read response
+      case "$response" in
+          n)
+              echo
+              echo "$SCRIPT: abandoning script at this point"
+              echo
+              exit $E_USER_REQUEST
+              ;;
+      esac
+    done
+    return 0
+}
+
+# ---------------------------------
+#  check_ret()
+# ---------------------------------
+
+function check_ret
+{
+    local ret=$?                        # must be first
+    test $ret -eq 0 && return 0         # return if okay
+
+    local msg="$1"                      # short form of call
+    echo "$SCRIPT: abandoning script: '$msg exit' status: $ret"
+    exit $E_BAD_SVN_RET                 # exit script if bad
+}
+
+# ---------------------------------
+#  create messages for later
+# ---------------------------------
+
+lin1="new makefile propagated"
+
+# CAUTION: the use of -v in printf is necessary to keep the trailing newline
+printf -v SVNMSG1 "$lin1 (part 1 of 2) by '%s' using '%s' script\n" "$USER" "$SCRIPT"
+printf -v SVNMSG2 "$lin1 (part 2 of 2) by '%s' using '%s' script\n" "$USER" "$SCRIPT"
+
+# ---------------------------------
+#  generate makefile list
+# ---------------------------------
+
+makefiles=$(find "$BASE" -name "$MAKEFILE" -type f -print)
+
+count=0
+for mfile in $makefiles
+  do
+  if [ -f "$mfile$OLDX" ]
+      then
+      echo "$SCRIPT: abandoning script because filename exists: $mfile$OLDX"
+      exit $E_BACKUP_NOT_CLEAR
+  fi
+  let "count++"
+done
+
+echo
+
+if [ $count -eq 0 ]
+    then
+    echo "$SCRIPT: abandoning script: no target makefiles: $count"
+    exit $E_NO_TARGETS
+else
+    echo "$SCRIPT: makefile name          : $MAKEFILE"
+    echo "$SCRIPT: master file            : $SUB/$MAKEFILE$TEMX"
+    echo "$SCRIPT: backup form            : $MAKEFILE$OLDX"
+    echo "$SCRIPT: target makefiles count : $count"
+fi
+
+echo
+user_confirm
+
+# ---------------------------------
+#  process repository / part 1
+# ---------------------------------
+
+echo
+for mfile in $makefiles
+  do
+  svn move "$mfile" "$mfile$OLDX"
+  check_ret "svn move"
+done
+
+echo
+user_confirm
+
+echo
+svn commit "$BASE" --message "$SVNMSG1"
+check_ret "svn commit part 1"
+
+echo
+svn update "$BASE"
+check_ret "svn update part 1"
+
+# ---------------------------------
+#  process repository / part 2
+# ---------------------------------
+
+echo
+for mfile in $makefiles
+  do
+  svn copy "$MASTER" "$mfile"
+  check_ret "svn copy"
+done
+
+echo
+user_confirm
+
+echo
+svn commit "$BASE" --message "$SVNMSG2"
+check_ret "svn commit part 2"
+
+echo
+svn update "$BASE"
+check_ret "svn update part 2"
+
+# ---------------------------------
+#  housekeeping
+# ---------------------------------
+
+echo
+echo "$SCRIPT: complete"
+echo
+
+exit $E_SUCCESS
+
+# OUTPUT
+#
+#  $ cd ~/synk/xeona/svn/futz/scripts
+#  $ pathadd
+#  $ makeprop
+#
+#  makeprop: makefile name          : makefile
+#  makeprop: master file            : scripts/makefile.to-clone
+#  makeprop: backup form            : makefile_1.34.1
+#  makeprop: target makefiles count : 19
+#
+#    makeprop: enter 'y' to continue/commit or 'n' to quit : y
+#
+#  A         /home/robbie/synk/xeona/svn/futz/siglpk3/makefile_1.34.1
+#  D         /home/robbie/synk/xeona/svn/futz/siglpk3/makefile
+#  A         /home/robbie/synk/xeona/svn/futz/siglp1/makefile_1.34.1
+#  D         /home/robbie/synk/xeona/svn/futz/siglp1/makefile
+#  A         /home/robbie/synk/xeona/svn/futz/factory2/makefile_1.34.1
+#  D         /home/robbie/synk/xeona/svn/futz/factory2/makefile
+#  A         /home/robbie/synk/xeona/svn/futz/frame2/makefile_1.34.1
+#  D         /home/robbie/synk/xeona/svn/futz/frame2/makefile
+#  A         /home/robbie/synk/xeona/svn/futz/siglpk4/makefile_1.34.1
+#  D         /home/robbie/synk/xeona/svn/futz/siglpk4/makefile
+#  A         /home/robbie/synk/xeona/svn/futz/frame3/makefile_1.34.1
+#  D         /home/robbie/synk/xeona/svn/futz/frame3/makefile
+#  A         /home/robbie/synk/xeona/svn/futz/source2/makefile_1.34.1
+#  D         /home/robbie/synk/xeona/svn/futz/source2/makefile
+#  A         /home/robbie/synk/xeona/svn/futz/source1/makefile_1.34.1
+#  D         /home/robbie/synk/xeona/svn/futz/source1/makefile
+#  A         /home/robbie/synk/xeona/svn/futz/factory1/makefile_1.34.1
+#  D         /home/robbie/synk/xeona/svn/futz/factory1/makefile
+#  A         /home/robbie/synk/xeona/svn/futz/actors1/makefile_1.34.1
+#  D         /home/robbie/synk/xeona/svn/futz/actors1/makefile
+#  A         /home/robbie/synk/xeona/svn/futz/xml1/makefile_1.34.1
+#  D         /home/robbie/synk/xeona/svn/futz/xml1/makefile
+#  A         /home/robbie/synk/xeona/svn/futz/plant1/makefile_1.34.1
+#  D         /home/robbie/synk/xeona/svn/futz/plant1/makefile
+#  A         /home/robbie/synk/xeona/svn/futz/factory3/makefile_1.34.1
+#  D         /home/robbie/synk/xeona/svn/futz/factory3/makefile
+#  A         /home/robbie/synk/xeona/svn/futz/actors2/makefile_1.34.1
+#  D         /home/robbie/synk/xeona/svn/futz/actors2/makefile
+#  A         /home/robbie/synk/xeona/svn/futz/factory4/makefile_1.34.1
+#  D         /home/robbie/synk/xeona/svn/futz/factory4/makefile
+#  A         /home/robbie/synk/xeona/svn/futz/factory5/makefile_1.34.1
+#  D         /home/robbie/synk/xeona/svn/futz/factory5/makefile
+#  A         /home/robbie/synk/xeona/svn/futz/glpk-leaktest/makefile_1.34.1
+#  D         /home/robbie/synk/xeona/svn/futz/glpk-leaktest/makefile
+#  A         /home/robbie/synk/xeona/svn/futz/data1/makefile_1.34.1
+#  D         /home/robbie/synk/xeona/svn/futz/data1/makefile
+#  A         /home/robbie/synk/xeona/svn/futz/xeona1/makefile_1.34.1
+#  D         /home/robbie/synk/xeona/svn/futz/xeona1/makefile
+#
+#    makeprop: enter 'y' to continue/commit or 'n' to quit : y
+#
+#  Deleting       actors1/makefile
+#  Adding         actors1/makefile_1.34.1
+#  Deleting       actors2/makefile
+#  Adding         actors2/makefile_1.34.1
+#  Deleting       data1/makefile
+#  Adding         data1/makefile_1.34.1
+#  Deleting       factory1/makefile
+#  Adding         factory1/makefile_1.34.1
+#  Deleting       factory2/makefile
+#  Adding         factory2/makefile_1.34.1
+#  Deleting       factory3/makefile
+#  Adding         factory3/makefile_1.34.1
+#  Deleting       factory4/makefile
+#  Adding         factory4/makefile_1.34.1
+#  Deleting       factory5/makefile
+#  Adding         factory5/makefile_1.34.1
+#  Deleting       frame2/makefile
+#  Adding         frame2/makefile_1.34.1
+#  Deleting       frame3/makefile
+#  Adding         frame3/makefile_1.34.1
+#  Deleting       glpk-leaktest/makefile
+#  Adding         glpk-leaktest/makefile_1.34.1
+#  Deleting       plant1/makefile
+#  Adding         plant1/makefile_1.34.1
+#  Deleting       siglp1/makefile
+#  Adding         siglp1/makefile_1.34.1
+#  Deleting       siglpk3/makefile
+#  Adding         siglpk3/makefile_1.34.1
+#  Deleting       siglpk4/makefile
+#  Adding         siglpk4/makefile_1.34.1
+#  Deleting       source1/makefile
+#  Adding         source1/makefile_1.34.1
+#  Deleting       source2/makefile
+#  Adding         source2/makefile_1.34.1
+#  Deleting       xeona1/makefile
+#  Adding         xeona1/makefile_1.34.1
+#  Deleting       xml1/makefile
+#  Adding         xml1/makefile_1.34.1
+#
+#  Committed revision 1606.
+#
+#  At revision 1606.
+#
+#  A         /home/robbie/synk/xeona/svn/futz/siglpk3/makefile
+#  A         /home/robbie/synk/xeona/svn/futz/siglp1/makefile
+#  A         /home/robbie/synk/xeona/svn/futz/factory2/makefile
+#  A         /home/robbie/synk/xeona/svn/futz/frame2/makefile
+#  A         /home/robbie/synk/xeona/svn/futz/siglpk4/makefile
+#  A         /home/robbie/synk/xeona/svn/futz/frame3/makefile
+#  A         /home/robbie/synk/xeona/svn/futz/source2/makefile
+#  A         /home/robbie/synk/xeona/svn/futz/source1/makefile
+#  A         /home/robbie/synk/xeona/svn/futz/factory1/makefile
+#  A         /home/robbie/synk/xeona/svn/futz/actors1/makefile
+#  A         /home/robbie/synk/xeona/svn/futz/xml1/makefile
+#  A         /home/robbie/synk/xeona/svn/futz/plant1/makefile
+#  A         /home/robbie/synk/xeona/svn/futz/factory3/makefile
+#  A         /home/robbie/synk/xeona/svn/futz/actors2/makefile
+#  A         /home/robbie/synk/xeona/svn/futz/factory4/makefile
+#  A         /home/robbie/synk/xeona/svn/futz/factory5/makefile
+#  A         /home/robbie/synk/xeona/svn/futz/glpk-leaktest/makefile
+#  A         /home/robbie/synk/xeona/svn/futz/data1/makefile
+#  A         /home/robbie/synk/xeona/svn/futz/xeona1/makefile
+#
+#    makeprop: enter 'y' to continue/commit or 'n' to quit : y
+#
+#  Adding         actors1/makefile
+#  Adding         actors2/makefile
+#  Adding         data1/makefile
+#  Adding         factory1/makefile
+#  Adding         factory2/makefile
+#  Adding         factory3/makefile
+#  Adding         factory4/makefile
+#  Adding         factory5/makefile
+#  Adding         frame2/makefile
+#  Adding         frame3/makefile
+#  Adding         glpk-leaktest/makefile
+#  Adding         plant1/makefile
+#  Adding         siglp1/makefile
+#  Adding         siglpk3/makefile
+#  Adding         siglpk4/makefile
+#  Adding         source1/makefile
+#  Adding         source2/makefile
+#  Adding         xeona1/makefile
+#  Adding         xml1/makefile
+#
+#  Committed revision 1607.
+#
+#  At revision 1607.
+#
+#  makeprop: complete
+
+#  $Id: makeprop 4685 2010-07-08 16:57:15Z robbie $
+#  end of file
+

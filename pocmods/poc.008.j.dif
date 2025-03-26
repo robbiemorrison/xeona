@@ -1,0 +1,37 @@
+--- poc.008.guard.xem	2012-04-07 18:35:26.568409879 +0200
++++ sen.10.xem	2012-04-07 18:35:46.558357971 +0200
+@@ -33,18 +33,18 @@
+     script-option-jumpy b                         > 0
+ 
+ program.study-description
+ 
+     study-name s                                  > "phd"
+-    scenario-name s                               > "reference energy system"
++    scenario-name s                               > "reduced inflows (dry year)"
+     scenario-author s                             > "robbie"
+-    scenario-leta s (+,a-z)                       > "+"
++    scenario-leta s (+,a-z)                       > "j"
+ 
+ program.r-processing
+ 
+     r-policy i                                    > 31
+-    r-title s                                     > "mainline model"
++    r-title s                                     > "scenario j"
+     r-plot-list s                                 > ""
+     r-highlight-output s                          > ""
+ 
+ program.post-processing
+ 
+@@ -1685,11 +1685,11 @@
+       this context resamples for intervals other than 3600s
+ 
+     builtin-remark s                              <
+ 
+     flowset-id s                                  > "benmore1983"
+-    scale [-] f                                   > 1.9
++    scale [-] f                                   > 1.5
+ 
+       flowset-id is the identifier of an embedded flowset,
+       scale [0,inf] rescales the entire timeseries
+ 
+     flowset-description s                         < "_"

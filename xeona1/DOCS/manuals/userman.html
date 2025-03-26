@@ -1,0 +1,2762 @@
+<html lang="en">
+<head>
+<title>xeona : an energy systems modeling environment</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="xeona : an energy systems modeling environment">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="top" href="#Top">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<!--
+This manual documents the _xeona_ energy systems modeling environment.
+
+Copyright (C) 2010 Robbie Morrison. Some rights reserved.
+
+This manual is licensed under a Creative Commons BY-NC-SA, a copy of which
+may be found at `http://www.creativecommons.org/licenses/by-nc-sa/3.0/'
+
+Robbie Morrison
+Institute for Energy Engineering
+Technical University of Berlin
+Marchstrasse 18, D-10587 Berlin, Germany
+Email: <robbie@actrix.co.nz>
+
+Source: $Id: userman.texi 5313 2010-10-14 11:03:20Z robbie $
+-->
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<h1 class="settitle">xeona : an energy systems modeling environment</h1>
+<div class="node">
+<a name="Top"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Overview">Overview</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#dir">(dir)</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#dir">(dir)</a>
+
+</div>
+
+<ul class="menu">
+<li><a accesskey="1" href="#Overview">Overview</a>:                     About <em>xeona</em>
+<li><a accesskey="2" href="#Requirements">Requirements</a>:                 System requirements for <em>xeona</em>
+<li><a accesskey="3" href="#Tar-distributions">Tar distributions</a>:            Tar distributions
+<li><a accesskey="4" href="#Usage">Usage</a>:                        Using <em>xeona</em>
+<li><a accesskey="5" href="#Models">Models</a>:                       Preparing models
+<li><a accesskey="6" href="#Data-rules">Data rules</a>:                   Date considerations
+<li><a accesskey="7" href="#Example">Example</a>:                      Model file example
+<li><a accesskey="8" href="#Entities">Entities</a>:                     List of entity classes
+<li><a accesskey="9" href="#Background">Background</a>:                   Further background
+<li><a href="#Tar-log">Tar log</a>:                      Tar distributions status log
+<li><a href="#Terminology">Terminology</a>:                  Terminology
+<li><a href="#URLs">URLs</a>:                         URLs
+<li><a href="#Concept-index">Concept index</a>:                Concept index
+</ul>
+
+<!--  contents -->
+<!-- @shortcontents -->
+   <div class="contents">
+<h2>Table of Contents</h2>
+<ul>
+<li><a name="toc_Overview" href="#Overview">1 Overview of <em>xeona</em></a>
+<ul>
+<li><a href="#Overview">Some features</a>
+<li><a href="#Overview">System requirements in brief</a>
+<li><a href="#Overview">Credits</a>
+<li><a href="#Overview">Legal</a>
+</li></ul>
+<li><a name="toc_Requirements" href="#Requirements">2 System requirements</a>
+<ul>
+<li><a href="#Requirements">2.1 Linux development platform</a>
+<li><a href="#Requirements">2.2 Cross-compile to Microsoft Windows</a>
+<li><a href="#Requirements">2.3 Run-time recommendations</a>
+<li><a href="#Requirements">2.4 Build-time requirements</a>
+</li></ul>
+<li><a name="toc_Tar-distributions" href="#Tar-distributions">3 Tar distributions</a>
+<ul>
+<li><a href="#Tar-distributions">3.1 Introduction</a>
+<li><a href="#Tar-distributions">3.2 Unpack and test</a>
+<li><a href="#Tar-distributions">3.3 Run <em>xeona</em> directly</a>
+<li><a href="#Tar-distributions">3.4 Build <em>xeona</em> using <code>make</code></a>
+</li></ul>
+<li><a name="toc_Usage" href="#Usage">4 Using <em>xeona</em></a>
+<ul>
+<li><a href="#Usage">4.1 File naming conventions</a>
+<li><a href="#Usage">4.2 Model file processing and version control</a>
+<li><a href="#Usage">4.3 Console reporting</a>
+<li><a href="#Usage">4.4 Help</a>
+<li><a href="#Usage">4.5 Command-line usage</a>
+</li></ul>
+<li><a name="toc_Models" href="#Models">5 Preparing models</a>
+<ul>
+<li><a href="#Models">5.1 Overview</a>
+<li><a href="#Models">5.2 Emacs <code>xem-mode</code> major mode</a>
+<li><a href="#Models">5.3 Model visualization</a>
+<li><a href="#Models">5.4 Creating a new model</a>
+<li><a href="#Models">5.5 Debugging models</a>
+</li></ul>
+<li><a name="toc_Data-rules" href="#Data-rules">6 Data considerations</a>
+<ul>
+<li><a href="#Data-rules">6.1 Rules governing data preparation</a>
+<li><a href="#Data-rules">6.2 Entity classes, commodities, and connectivity</a>
+</li></ul>
+<li><a name="toc_Example" href="#Example">7 Example model</a>
+<li><a name="toc_Entities" href="#Entities">8 Entity class library</a>
+<li><a name="toc_Background" href="#Background">9 Further background</a>
+<ul>
+<li><a href="#Background">9.1 Potential roles</a>
+<li><a href="#Background">9.2 The underpinning model</a>
+<li><a href="#Background">9.3 Should <em>xeona</em> have a GUI?</a>
+<li><a href="#Background">9.4 Code quality</a>
+</li></ul>
+<li><a name="toc_Tar-log" href="#Tar-log">10 Tar distribution status log</a>
+</li></ul>
+</div>
+
+<!--  overview -->
+<div class="node">
+<a name="Overview"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Requirements">Requirements</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Top">Top</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
+
+</div>
+
+<h2 class="chapter">1 Overview of <em>xeona</em></h2>
+
+<p><a name="index-overview-of-_0040emph_007bxeona_007d-1"></a>
+<em>xeona</em> is an energy systems modeling environment. 
+It is designed to support near-term<!-- /@w --> energy<!-- /@w --> and
+climate policy development through comparative
+simulation.  The underpinning model takes a web of
+demands, adds microeconomic and technical processes,
+and then solves the resulting<!-- /@w --> patchwork of
+operational decisions for each timestep.  The program
+is command-line, but its clean data-model<!-- /@w -->
+encourages the use of scripted tools to prepare and
+visualize simulation scenarios.
+
+<h3 class="unnumberedsec">Some features</h3>
+
+<p>To give a flavor of <em>xeona</em>, the program is able
+to simulate multi-player systems by providing modelers
+with a range of:
+
+     <ul>
+<li>technologies
+<li>commodity types
+<li>plant operating policies
+<li>supply contracts and tariff structures
+<li>nodal auctions and bidding strategies
+<li>weather instances and other forms of operating context
+</ul>
+
+<p class="noindent">Structural entities are individually represented and
+can include operators, technical assets, gateways, and
+contexts.  A group of operators who coordinate their
+operations form a domain &mdash; an example of which is a
+nodal electricity market.  A gateway spans adjacent
+domains and comprises a meter, contract, and tariff
+structure.  An operator may embed actor-based behavior,
+such as adaptive bidding.  A context captures some
+aspect of the physical or institutional environment
+
+   <p>A given simulation normally covers one year in steps of
+30 or 60&nbsp;minutes<!-- /@w -->.  On each time step, the
+structural entities are recharacterized in relation to
+their state and context, transformed and combined into
+mixed-integer optimization problems, and solved
+accordingly.
+
+   <p>The software is intended for energy and climate policy
+analysis, both public and private.  To this end,
+<em>xeona</em> collects and reports the following system
+performance criterion for further discussion and
+potential trade-off:
+
+     <ul>
+<li>financial costs [$]
+<li>greenhouse gas emissions [kg]
+<li>depletable energy resource use [J]
+<li>NOx pollution [kg]
+<li>land usage [m^2]
+</ul>
+
+<h3 class="unnumberedsec">System requirements in brief</h3>
+
+<p><a name="index-system-requirements-_0028in-brief_0029-2"></a>
+<em>xeona</em> release binaries should run on any recent
+Linux or Windows system with Intel i386-compatible
+hardware.  The exact run-time and development
+requirements are covered elsewhere.
+
+<h3 class="unnumberedsec">Credits</h3>
+
+<p><em>xeona</em> is being written by Robbie Morrison as
+part of his energy engineering PhD at the Technical
+University of Berlin.  The underlying model draws on
+and generalizes concepts from an earlier energy systems
+model, <em>deeco</em>, authored by Thomas Bruckner and
+released in 1994.  <em>xeona</em> links to the GNU GLPK
+linear programming library by Andrew Makhorin.
+
+<h3 class="unnumberedsec">Legal</h3>
+
+<p><em>xeona</em> is distributed under the GNU General
+Public License version 3.  In addition, users are
+requested to forward any modifications they might make
+back to the <em>xeona</em> project for possible inclusion
+in the main codebase. This manual is licensed under a
+Creative Commons BY-NC-SA<!-- /@w -->.
+
+<!--  requirements -->
+<div class="node">
+<a name="Requirements"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Tar-distributions">Tar distributions</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Overview">Overview</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
+
+</div>
+
+<h2 class="chapter">2 System requirements</h2>
+
+<p><a name="index-system-requirements-_0028chapter_0029-3"></a>
+This chapter describes the system requirements for
+running and developing <em>xeona</em>.  <em>xeona</em> is
+being written using free software. 
+<!-- all media, not just tex -->
+<a rel="footnote" href="#fn-1" name="fnd-1"><sup>1</sup></a>
+
+<h3 class="section">2.1 Linux development platform</h3>
+
+<p><a name="index-development-platform-4"></a>
+<em>xeona</em> is being developed on a relatively common
+numerical computing environment. 
+The minimum requirements are as follows:
+
+   <blockquote>
+   <p><table summary=""><tr align="left"><td valign="top" width="20%">hardware          </td><td valign="top" width="5%">: </td><td valign="top" width="75%">Intel 80386 instruction set
+<br></td></tr><tr align="left"><td valign="top" width="20%">operating&nbsp;system<!-- /@w --> </td><td valign="top" width="5%">: </td><td valign="top" width="75%">32-bit Linux kernel 2.6 (or better)
+<br></td></tr><tr align="left"><td valign="top" width="20%">compiler          </td><td valign="top" width="5%">: </td><td valign="top" width="75%">GNU GCC 4.1 and 4.4
+   <br></td></tr></table>
+</blockquote>
+
+<p class="noindent"><em>xeona</em> has not been <em>source-level</em> ported to
+Windows or MacOS.  That said, care has been taken to
+isolate system specific code and hence such ports are
+expected to be relatively straightforward for the same
+compiler.  Indeed, the GCC compiler and the third-party
+libraries used by <em>xeona</em> are regularly deployed
+on these other platforms.
+
+<!-- the file utility reports: MS-DOS executable PE for MS Windows (console) Intel 80386 32-bit -->
+<h3 class="section">2.2 Cross-compile to Microsoft Windows</h3>
+
+<p><a name="index-Windows-binary-port-5"></a>
+<em>xeona</em> has been <em>binary-level</em> ported
+(cross-compiled) to the following minimum environment:
+
+   <blockquote>
+   <p><table summary=""><tr align="left"><td valign="top" width="20%">hardware          </td><td valign="top" width="5%">: </td><td valign="top" width="75%">Intel 80386 instruction set
+<br></td></tr><tr align="left"><td valign="top" width="20%">operating&nbsp;system<!-- /@w -->
+                           </td><td valign="top" width="5%">: </td><td valign="top" width="75%">Microsoft Win32 API &mdash; Windows NT 4.0 or 95 (or better)
+<br></td></tr><tr align="left"><td valign="top" width="20%">binary name       </td><td valign="top" width="5%">: </td><td valign="top" width="75%"><code>xeona.exe</code> or <code>xeona0000.exe</code>
+   <br></td></tr></table>
+</blockquote>
+
+<p class="noindent">This cross-compiled executable may lack some very minor
+system-related functionality when compared with the
+native version.  But this loss should be insignificant. 
+Users will also need to convert Linux-based model files
+from UNIX (<code>LF</code>) to DOS (<code>CR</code>+<code>LF</code>)
+newline conventions to properly view and edit them,
+although <em>xeona</em> will accept either format.  The
+Windows executable is <strong>not</strong> currently included
+in the tar distribution.
+
+<h3 class="section">2.3 Run-time recommendations</h3>
+
+<p><a name="index-run_002dtime-recommendations-6"></a>
+This section presumes Linux (or the same features on a
+Windows system).  Release versions of <em>xeona</em> are
+now <em>statically</em> linked.  This means that there
+are <em>no</em> run-time system requirements beyond the
+CPU and kernel specifications listed above.  This is
+evidenced by the <code>file</code> and <code>ldd</code> utilities:
+
+<pre class="example">     $ file xeona.r0000
+       xeona.r0000: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV),
+       for GNU/Linux 2.6.0, statically linked, for GNU/Linux 2.6.0, notstripped
+</pre>
+   <pre class="example">     $ ldd xeona.r0000
+       not a dynamic executable
+</pre>
+   <p class="noindent">If any of the <em>xeona</em> shell scripts are to be
+used, a reasonably recent bash shell is required:
+
+     <ul>
+<li>the <code>bash</code> shell, version 3 or better
+</ul>
+
+<p class="noindent">You can determine your shell as follows:
+
+<pre class="example">     $ echo $SHELL
+       /bin/bash
+     $ echo $BASH_VERSION
+       3.1.17(1)-release
+</pre>
+   <p class="noindent">Although not strictly requirements, the following tools
+and packages may prove useful when working with
+<em>xeona</em>:
+
+     <ul>
+<li>the <code>firefox</code> web browser &mdash; for viewing
+mixed-integer problems
+
+     <li>the <code>R</code> statistical computing environment
+&mdash; for plotting and visualization
+
+     <li>the <code>graphiz</code> network visualization utility
+&mdash; for visualization
+
+     <li>the <code>display</code> bitmap viewer
+&mdash; for visualization
+
+     <li>the <code>less</code> pager &mdash; for paging and searching
+<em>xeona</em> models
+
+     <li>the <code>emacs</code> editor &mdash; particularly for the
+custom <code>xem-mode</code> editing mode </ul>
+
+<p class="noindent">Finally <em>xeona</em>, by default, expects to be run on
+a console with a width of <b>142 columns</b> or more. 
+You may need to reduce the text size of your terminal
+(zoom out) to achieve this.  The current width can be
+found as follows:
+
+<pre class="example">     $ stty size        <span class="roman"># </span><i>reports lines columns</i>
+       50 143           <span class="roman"># </span><i>143 is okay</i>
+</pre>
+   <h3 class="section">2.4 Build-time requirements</h3>
+
+<p><a name="index-build_002dtime-requirements-7"></a>
+This section lists the build-time system requirements
+for <em>xeona</em>.  These will probably require some
+work, for which you may also need superuser privileges.
+
+<h4 class="subheading"><code>fastdep</code> utility 0.16</h4>
+
+<p><a name="index-g_t_0040code_007bfastdep_007d-utility-8"></a>
+The <code>fastdep</code> utility, written by Bart
+Vanhauwaert, is used to identify source file
+dependencies
+(<a href="http://www.irule.be/bvh/c++/fastdep/">fastdep information</a>). 
+Either build this program directly or
+hunt for an RPM or DEB package.  For instance, on
+Ubuntu Linux, simply install the following:
+
+     <ul>
+<li>fastdep (fast dependency generator for C/C++ files)
+</ul>
+
+<h4 class="subheading">GNU GLPK solver library 4.44</h4>
+
+<p><a name="index-GLPK-solver-library-9"></a>
+The GNU GLPK linear programming library is maintained
+by its author Andrew Makhorin.  GLPK is often available
+as a Linux package but these may lag by several
+releases.  The GLPK library &mdash; in static link form &mdash;
+can normally be built from source without difficulty as
+follows:
+
+<pre class="example">     $ tar -xzvf glpk-4.44.tar.gz
+     $ cd glpk-4.44/
+     $ ./configure --disable-shared
+     $ make
+     $ make check
+     $ sudo make install
+     $ glpsol --version
+</pre>
+   <p class="noindent">The latest GLPK tarfile can be downloaded from the web
+(<a href="http://www.gnu.org/software/glpk">GLPK website</a>).  The GLPK help newsgroup is active and the
+postings archive can be a good source of information. 
+For the record, <code>glpsol</code> is the command-line
+solver associated with GLPK.
+
+<h4 class="subheading">Boost C++ libraries 1.45.0</h4>
+
+<p><a name="index-Boost-C_002b_002b-libraries-suite-10"></a>
+The Boost C++ libraries are designed to extend and
+compliment the C++ Standard Template Library.  These
+libraries can be built from source.  But it may be
+easier to install the suite as a metapackage.  If you
+choose the latter approach, be sure to download the
+<strong>dev</strong> (header) files and the documentation.  The
+project website (<a href="http://www.boost.org">Boost website</a>) is extensive and the help newsgroup has high
+traffic.
+
+   <p><a name="index-link_002dtime-problems-with-Boost-libraries-11"></a>
+One issue you may well strike is that the g++ linker
+cannot find the required Boost libraries.  For
+instance, the linker might not know to look in
+<code>/usr/local/lib</code>.  There are several strategies
+for dealing with this all to common problem &mdash; you
+might wish to consider the following:
+
+     <ul>
+<li>pass Boost <code>bootstrap.sh</code> the string <code>--prefix=/usr</code>
+at build-time
+
+     <li>set the environment variable <code>LIBRARY_PATH=/usr/local/lib</code>
+
+     <li>pass g++ the linker option <code>-L/usr/local/lib</code>
+
+     <li>add a symbolic link from <code>/dev/lib</code> to <code>/usr/local/lib</code>
+for each library
+</ul>
+
+<h4 class="subheading">Other tools</h4>
+
+<p>The section provides a list of tools which modelers and
+developers might find additionally useful.  Most if not
+all should be available as Linux packages.  First, the
+following utilities are sometimes used in bash scripts
+(<code>bash</code> version 3 or better):
+
+     <ul>
+<li>the <code>gawk</code> GNU awk utility
+<a name="index-g_t_0040code_007bgawk_007d-utility-12"></a><li>the <code>beep</code> &ldquo;beep the PC speaker any number of ways&rdquo; utility
+<a name="index-g_t_0040code_007bbeep_007d-utility-13"></a></ul>
+
+<p class="noindent">The following tools are more directed toward
+significant development.
+
+     <ul>
+<li><code>gdb</code> GNU command-line debugger
+<a name="index-g_t_0040code_007bgdb_007d-command_002dline-debugger-14"></a><li><code>texinfo</code> software documentation system
+<a name="index-g_t_0040code_007btextinfo_007d-software-documentation-system-15"></a><li><code>umbrello</code> UML modeler
+<a name="index-g_t_0040code_007bumbrello_007d-UML-modeler-16"></a><li><code>valgrind</code> memory checker
+<a name="index-g_t_0040code_007bvalgrind_007d-memory-checker-17"></a></ul>
+
+<!--  tars -->
+<div class="node">
+<a name="Tar-distributions"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Usage">Usage</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Requirements">Requirements</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
+
+</div>
+
+<h2 class="chapter">3 Tar distributions</h2>
+
+<p><a name="index-tar-distributions-_0028chapter_0029-18"></a>
+This chapter describes the so-called tar (or tarball)
+distribution method.  Tar distributions are intended to
+get potential <em>xeona</em> modelers started, while
+simultaneously meeting the GPL license.
+
+   <p><em>xeona</em> does not have systematic versioning at
+present.  If need be, this can be implemented.  Until
+that time, the tar distributions merely encode the
+prevailing subversion revision.
+
+<h3 class="section">3.1 Introduction</h3>
+
+<p>A tar distribution contains the current release binary,
+together with sufficient source files to build a
+similar (but not identical) binary using the
+<code>make</code> utility (given that the build-time
+requirements are met).  A tar distribution also
+includes plain text developer documentation, formatted
+user documentation, and a set of test models.  Note
+that the &ldquo;<code>r0000</code>&rdquo; codes the subversion
+revision number at the time of packing.
+
+   <p>A tar distribution does <em>not</em> provide a number of
+important but nonetheless ancillary files, including,
+but not limited to, build scripts, unit testing code
+and scripts, and design documentation.
+
+   <p>Nor does a tar distribution contain historical
+development information.  For the record, the best way
+to transmit all known information is to <em>dump</em> the
+entire subversion version control repository:
+
+<pre class="example">     $ svnadmin dump <var>repository</var> &gt; <var>dumpfile</var>
+</pre>
+   <h3 class="section">3.2 Unpack and test</h3>
+
+<p>Release binaries (from <code>r4241</code> onward) are
+statically linked and do not require the presence of
+specific run-time libraries.
+
+<p class="noindent">First unpack the tar distribution:
+
+<pre class="example">     $ tar -xzvf xeona.r0000.tar.gz
+     $ ls
+       xeona.r0000/
+       xeona.r0000.tar.gz
+       xeona.r0000.txt        <span class="roman"># </span><i>contains some pack-time details</i>
+</pre>
+   <p class="noindent">Then run the test script:
+
+<pre class="example">     $ cd xeona.r0000/
+     $ ./testme.sh --help
+     $ ./testme.sh
+     $ ls *.log
+       testme.<i>000000</i>.log
+</pre>
+   <p class="noindent">The automated test normally runs one or more test
+models. The final line of console output should
+indicate <code>PASS</code> or <code>FAIL</code>.  The entire output
+stream is also written to the log file.
+
+<p class="noindent">Here are some trouble shooting calls (should you need
+to):
+
+<pre class="example">     $ ls -l xeona.r0000
+     $ file xeona.r0000
+     $ ldd xeona.r0000
+     $ ./xeona.r0000 --version
+</pre>
+   <h3 class="section">3.3 Run <em>xeona</em> directly</h3>
+
+<p class="noindent">Run the supplied binary directly as follows.  Note that
+<em>xeona</em> options can be abbreviated to <em>two</em>
+dashes and the leading letter.
+
+<p class="noindent">First change directory (if not already there):
+
+<pre class="example">     $ cd xeona.r0000/
+</pre>
+   <p class="noindent">Then explore some command-line information (piping the
+output through the <code>less</code> pager is simply for
+convenience):
+
+<pre class="example">     $ ./xeona.r0000 --help
+     $ ./xeona.r0000 --usage | less
+</pre>
+   <p class="noindent">Then run the compiled-in model using 24 time steps:
+
+<pre class="example">     $ ./xeona.r0000 --inbuilt 24 --report 4
+</pre>
+   <p class="noindent">Then run one of the bundled models (note that
+<code>--file</code> is always implied and thereby optional):
+
+<pre class="example">     $ cd xeona-xmoks/
+     $ ls *.guard.xem
+       submodel.00.guard.xem
+     $ ../xeona.r0000 --guard [--file] submodel.00
+</pre>
+   <p class="noindent">The nested extensions <code>.guard</code> and <code>.xem</code> can
+be omitted on the command-line &mdash; although they must
+be present in the underlying files.
+
+   <p>If you wish to continue using <em>xeona</em>, you should
+probably make the binary more generally available.  One
+way to do this, assuming <code>~/bin</code> is on your
+<var>PATH</var>, is to link the binary relative to your bin
+directory:
+
+<pre class="example">     $ cd ~/bin/
+     $ ln --symbolic ~/path-to/xeona.r0000 xeona
+</pre>
+   <h3 class="section">3.4 Build <em>xeona</em> using <code>make</code></h3>
+
+<p><em>xeona</em> can be built from source using the
+<code>make</code> utility and the bundled <code>makefile</code>. 
+All build-time requirements will need to be honored. 
+This procedure will produce a somewhat different binary
+because the <code>mach</code> script normally used to build
+<em>xeona</em> modifies some of the make flags.  The
+resulting binary is named <code>xeona.make</code>.
+
+<p class="noindent">First, some exploratory calls:
+
+<pre class="example">     $ cd xeona.r0000/
+     $ ls makefile
+       makefile
+     $ make help                    <span class="roman"># </span><i>display usage message</i>
+     $ ./sysinfo.sh --help          <span class="roman"># </span><i>display usage message</i>
+</pre>
+   <p class="noindent">Second, the build calls.  The <code>sysinfo.sh</code> script
+reports on your environment and attempts to flag
+potential problems.  There is no <code>sudo make
+install</code> command.  In other words, the intention is
+that <em>xeona</em> binaries remain in the user-space.
+
+<pre class="example">     $ ./sysinfo.sh                 <span class="roman"># </span><i>passive reporting of environment</i>
+     $ make                         <span class="roman"># </span><i>the </i><code>all</code><i> option is implied</i>
+</pre>
+   <p class="noindent">Third, calls to confirm the build:
+
+<pre class="example">     $ make check
+     $ ./xeona.make --help
+</pre>
+   <!-- visual formatting -->
+<!-- @need 1500                                   @c visual formatting -->
+<p class="noindent">The exact command used to build the bundled release
+version is given in the <code>lastbuild</code> text file
+under the <code>make-call</code> field.  This can be
+recovered using:
+
+<pre class="example">     $ make CPPFLAGS="-D_XTCOLS=142 -D_XSVNREV=0000 -D_XRELEASE -DNDEBUG" \
+       CXXFLAGS="-Wall -O3 -fno-strict-aliasing" LDFLAGS="-static" binary="xeona.r0000" all
+</pre>
+   <p class="noindent">It is <em>not</em> recommend that a tar distribution be
+used for significant development.
+
+<!--  usage -->
+<div class="node">
+<a name="Usage"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Models">Models</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Tar-distributions">Tar distributions</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
+
+</div>
+
+<h2 class="chapter">4 Using <em>xeona</em></h2>
+
+<p><a name="index-using-_0040emph_007bxeona_007d-_0028chapter_0029-19"></a>
+This chapter gives information on the run-time use of
+<em>xeona</em>.
+
+<h3 class="section">4.1 File naming conventions</h3>
+
+<p><a name="index-binary-file-naming-conventions-20"></a><a name="index-naming-conventions_002c-binary-files-21"></a>
+<strong>Binary files</strong>&nbsp;: the following binary file
+naming convention is adopted.  If you build your own
+binaries, please use a <em>different</em> convention.
+
+   <blockquote>
+   <p><table summary=""><tr align="left"><td valign="top" width="40%"><code>xeona.r0000</code> </td><td valign="top" width="60%">revision <em>0000</em> release build
+<br></td></tr><tr align="left"><td valign="top" width="40%"><code>xeona.mach</code>  </td><td valign="top" width="60%">development build using the <code>mach</code> build script
+<br></td></tr><tr align="left"><td valign="top" width="40%"><code>xeona.make</code>  </td><td valign="top" width="60%">development build using <code>make</code>
+   <br></td></tr></table>
+</blockquote>
+
+<p class="noindent">A release build is one in which code optimizations are
+applied and static linking is employed.  A development
+build, on the other hand, has debugging information
+included and uses dynamic linking, except for the
+static GLPK solver library.
+
+   <p><a name="index-model-file-naming-conventions-22"></a><a name="index-naming-conventions_002c-model-files-23"></a>
+<strong>Model files</strong>&nbsp;: the following model file
+naming convention is adopted.  This convention is
+hard-coded into <em>xeona</em> and is therefore
+mandatory.
+
+   <blockquote>
+   <p><table summary=""><tr align="left"><td valign="top" width="40%"><code>mymodel.xem</code>       </td><td valign="top" width="60%">model which may or may not have been run
+<br></td></tr><tr align="left"><td valign="top" width="40%"><code>mymodel.xem~</code>      </td><td valign="top" width="60%">model backup retaining the un-run state
+<br></td></tr><tr align="left"><td valign="top" width="40%"><code>mymodel.guard.xem</code> </td><td valign="top" width="60%">so-called guard model
+   <br></td></tr></table>
+</blockquote>
+
+<p class="noindent">Hence <code>.xem</code> is used as the standard file
+extension for <em>xeona</em> models.  The term XEM is
+also used as shorthand for <em>xeona</em> model.  See the
+next section for details about the way in which
+<em>xeona</em> processes model files.
+
+<h3 class="section">4.2 Model file processing and version control</h3>
+
+<p><a name="index-model-file-processing-24"></a><a name="index-model-file-version-control-25"></a><a name="index-version-control_002c-for-model-files-26"></a>
+Unlike most programs, <em>xeona</em> does not use
+distinct and separate input files and output files. 
+Instead <em>xeona</em> destructively reads its given
+model file, processes the information, and then writes
+new data back to the same file.  The original file is
+automatically backed up with a trailing&nbsp;<code>~</code><!-- /@w -->
+beforehand.  Hence the before and after state of a
+particular model can be determined by issuing, for
+example:
+
+   <p><a name="index-g_t_0040code_007bsdiff_007d-utility_002c-example-of-use-27"></a>
+<pre class="example">     $ sdiff --suppress-common-lines mymodel.{xem,xem~}
+</pre>
+   <p class="noindent">A guard model is run using the <code>--guard</code> option
+&mdash; in which case the guard model file is first copied
+without the &ldquo;<code>.guard</code>&rdquo; and then run under its
+new name as usual.  Hence, a guard file can never be
+modified by <em>xeona</em>, not even accidentally.
+
+   <p>Guard model files therefore remain fixed and are
+generally used for test purposes.  Normal model files,
+on the other hand, naturally evolve.  Previous
+incarnations are therefore lost, but can be recovered
+if annotated version control is used.  In this regard,
+Emacs VC can provide a straightforward one file at a
+time solution,
+while Subversion offers a more integrated alternative. 
+A model can, of course, be forked by assigning it a new
+filename.
+
+<h3 class="section">4.3 Console reporting</h3>
+
+<p><a name="index-console-reporting-28"></a><a name="index-run_002dtime-output-29"></a><a name="index-output-streams-30"></a>
+<em>xeona</em> is currently configured to send run-time
+output to the following output streams:
+
+   <blockquote>
+   <p><table summary=""><tr align="left"><td valign="top" width="15%"><code>stdout</code> </td><td valign="top" width="5%"></td><td valign="top" width="80%">splash screens <br> exception reporting
+<br></td></tr><tr align="left"><td valign="top" width="15%"><code>stderr</code> </td><td valign="top" width="5%"></td><td valign="top" width="80%">run-time logging <br> GLPK solver output
+   <br></td></tr></table>
+</blockquote>
+
+<p class="noindent">These two streams would typically be combined before
+being piped elsewhere:
+
+<pre class="example">     $ ./xeona.r0000 mymodel --report 6 2&gt;&amp;1 | grep [--color] "my-search-term"
+</pre>
+   <p class="noindent">In addition, the options <code>--report</code> and
+<code>--watch</code> can be used to control output.  And the
+option <code>--mode 6</code> can be used to limit a model run
+to just the first step.
+
+<h3 class="section">4.4 Help</h3>
+
+<p><a name="index-help-31"></a>
+Users should acquaint themselves with the output from
+the following options (the <code>less</code> pipe is
+optional).
+
+<pre class="example">     $ ./xeona.r0000 --usage | less
+     $ ./xeona.r0000 --data  | less
+     $ ./xeona.r0000 --output 8        <span class="roman"># </span><i>for example</i>
+</pre>
+   <p class="noindent">The <code>--usage</code> option displays an expanded help
+message, with examples.  The <code>--data</code> option
+explains the basic rules governing the preparation and
+parsing of data.  The <code>--output</code> option describes
+the <em>xeona</em> return code passed to it as an
+argument (intended for scripts).
+
+   <p>The <code>--class</code> option displays templates for the
+entities which match its case-sensitive regex (regular
+expression) argument. 
+Note also the special argument <code>+</code> which lists all
+currently supported entities by name and header file. 
+This information then allows one to study the source
+code and author comments of the entity in question &mdash;
+open source at its best!
+
+<pre class="example">     $ ./xeona.r0000 --class +           <span class="roman"># </span><i>interpreted character, not regex</i>
+     $ ./xeona.r0000 --class .           <span class="roman"># </span><i>dump all with match-any-char operator</i>
+     $ ./xeona.r0000 --class Windfarm    <span class="roman"># </span><i>case-sensitive</i>
+</pre>
+   <h3 class="section">4.5 Command-line usage</h3>
+
+<p><a name="index-command_002dline-usage-32"></a><a name="index-options_002c-command_002dline-33"></a>
+Command-line usage is as follows &mdash; the file
+extensions <code>.xem</code> or <code>.guard.xem</code> can be
+omitted on the command-line but they <em>must</em> be
+present in the underlying file:
+
+<pre class="example">     $ ./xeona.r0000 &lt;options&gt;         [--file] mymodel[.xem]
+     $ ./xeona.r0000 &lt;options&gt; --guard [--file] mymodel[.guard][.xem]
+</pre>
+   <p class="noindent">The first form is used for scenario development and the
+model file gets &ldquo;consumed and reconstituted&rdquo; in the
+process (as described above).  The second form leaves
+the guard file untouched, and is primarily intended for
+application and entity development and also automated
+testing.  If no model name is passed, <em>xeona</em>
+defaults to <code>test.xem</code> and <code>test.guard.xem</code>
+respectively.
+
+   <p>Command-line options are processed in order <em>shown
+here</em> and not in the order <em>encountered</em> on the
+command-line!  Options can also be abbreviated if they
+remain unambiguous.
+
+<p class="noindent">The first block of options are <em>informational</em>:
+
+   <p><table summary=""><tr align="left"><td valign="top" width="23%"><code>--help</code>
+</td><td valign="top" width="77%">display command-line options and quit
+<br></td></tr><tr align="left"><td valign="top" width="23%"><code>--usage</code>
+</td><td valign="top" width="77%">display longer usage message and quit
+<br></td></tr><tr align="left"><td valign="top" width="23%"><code>--output arg</code>
+</td><td valign="top" width="77%">describe application return code <code>arg</code> and quit
+
+<p><br></td></tr><tr align="left"><td valign="top" width="23%"><code>--legal</code>
+</td><td valign="top" width="77%">display copyright notice and license and quit
+<br></td></tr><tr align="left"><td valign="top" width="23%"><code>--svn</code>
+</td><td valign="top" width="77%">display embedded source code revision number and quit
+<br></td></tr><tr align="left"><td valign="top" width="23%"><code>--version</code>
+</td><td valign="top" width="77%">display version details in structured form and quit
+
+<p><br></td></tr><tr align="left"><td valign="top" width="23%"><code>--data</code>
+</td><td valign="top" width="77%">display xem file data rules and quit
+<br></td></tr><tr align="left"><td valign="top" width="23%"><code>--class arg</code>
+</td><td valign="top" width="77%">display fields for entity class regex <code>arg</code> and quit
+<br></td></tr><tr align="left"><td valign="top" width="23%"><code>--xem arg</code>
+</td><td valign="top" width="77%">display <code>arg</code> head|mand|tail|comb xem file parts and quit
+   <br></td></tr></table>
+
+<p class="noindent">The second block of options determine how a <em>model will be run</em>:
+
+<!-- @item @code{-quiet} -->
+<!-- @tab silence all output except the above (@strong{not implemented}) -->
+   <p><table summary=""><tr align="left"><td valign="top" width="23%"><code>--beep arg</code>
+</td><td valign="top" width="77%">set beep behavior 0&ndash;2 (silent to noisy) (default 0)
+<br></td></tr><tr align="left"><td valign="top" width="23%"><code>--report arg</code>
+</td><td valign="top" width="77%">set report level 0&ndash;6 (nil to verbose) (default 6)
+<br></td></tr><tr align="left"><td valign="top" width="23%"><code>--nodata</code>
+</td><td valign="top" width="77%">empty data fields generate warnings not debugs
+<br></td></tr><tr align="left"><td valign="top" width="23%"><code>--jumpy</code>
+</td><td valign="top" width="77%">range failures and such generate warnings not debugs
+<br></td></tr><tr align="left"><td valign="top" width="23%"><code>--watch arg</code>
+</td><td valign="top" width="77%">report fully from sources matching <code>arg</code> regex
+<br></td></tr><tr align="left"><td valign="top" width="23%"><code>--exittrip arg</code>
+</td><td valign="top" width="77%">set nonzero exit trip to <code>arg</code> level logs (default 1)
+
+<p><br></td></tr><tr align="left"><td valign="top" width="23%"><code>--mode arg</code>
+</td><td valign="top" width="77%">set run mode 1&ndash;7 (reduced to normal) (default 7)
+<br></td></tr><tr align="left"><td valign="top" width="23%"><code>--pepper</code>
+</td><td valign="top" width="77%">reseed random number generators using time() return
+<br></td></tr><tr align="left"><td valign="top" width="23%"><code>--again</code>
+</td><td valign="top" width="77%">continue when choked or hard problems encountered
+<br></td></tr><tr align="left"><td valign="top" width="23%"><code>--krazy</code>
+</td><td valign="top" width="77%">omit defensive coding and try to run to failure
+<br></td></tr><tr align="left"><td valign="top" width="23%"><code>--yeek arg</code>
+</td><td valign="top" width="77%">run non-standard code based on <code>arg</code> (changeable)
+<br></td></tr><tr align="left"><td valign="top" width="23%"><code>--zero</code>
+</td><td valign="top" width="77%">disable close-to-zero solver output rounding
+
+<p><br></td></tr><tr align="left"><td valign="top" width="23%"><code>--inbuilt arg</code>
+</td><td valign="top" width="77%">generate and run inbuilt test model using <code>arg</code> steps
+<br></td></tr><tr align="left"><td valign="top" width="23%"><code>--guard</code>
+</td><td valign="top" width="77%">regenerate xem file from guard file if present
+<br></td></tr><tr align="left"><td valign="top" width="23%"><code>--tidy</code>
+</td><td valign="top" width="77%">shallow reformat xem file (alias <code>--report 3 --mode 3</code>)
+   <br></td></tr></table>
+
+<p class="noindent">Note also the <em>implicit</em> option (implied in the
+sense that it can be and is often omitted):
+
+   <p><table summary=""><tr align="left"><td valign="top" width="23%"><code>--file arg</code>
+</td><td valign="top" width="77%">process filename <code>arg</code>, perhaps lacking <code>.xem</code> and <code>.guard</code>
+   <br></td></tr></table>
+
+<!--  models -->
+<div class="node">
+<a name="Models"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Data-rules">Data rules</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Usage">Usage</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
+
+</div>
+
+<h2 class="chapter">5 Preparing models</h2>
+
+<p><a name="index-preparing-models-_0028chapter_0029-34"></a><a name="index-model-preparation-35"></a>
+This chapter explains how to prepare <em>xeona</em>
+models.  The underlying conceptualization is largely
+beyond the scope of this manual and will be documented
+elsewhere in due course.  Some material is nonetheless
+given in the chapter on background.
+
+<h3 class="section">5.1 Overview</h3>
+
+<p>As already noted, <em>xeona</em> uses structured plain
+text to define a model and its results within the one
+file.  This format is both human readable and
+relatively easy to edit. 
+Model files should ideally be kept 8-bit clean (no &auml;,
+&ouml;, &uuml;), notwithstanding <em>xeona</em> will accept
+identifiers with umlauted characters.
+
+   <p>A <em>xeona</em> model is simply a collection of entity
+specifications, each with a unique identifier.  Each
+entity necessarily maps to a concrete entity class
+within the <em>xeona</em> codebase.  Cross-references are
+then used to define the following kinds of directed
+association between entities:
+
+     <ul>
+<li>coordination relationships&nbsp;: overseer ==&gt; domain ==&gt; operator ==&gt; asset (for instance)
+<li>demand connectivity&nbsp;: cable ==&gt; socket connections between technical assets
+<li>commodity linkages&nbsp;: which need to be consistent with the demand connectivity
+<li>context linkages&nbsp;: entity ==&gt; context (information channels, may be bi-directional)
+</ul>
+
+<p class="noindent">The model file initially comprises input data
+describing the model together with placeholders for the
+results.  These placeholders are duly overwritten at
+run-time.  Input data (in-data) can be recognized by
+the &gt; symbol and output data (out-data) by the &lt;
+symbol.
+
+   <p>The single model file concept is designed to encourage
+model integrity and aid downstream analysis.  Model
+files under development can be placed under notated
+version control to limit disk usage and assist with
+back-tracking.  Where necessary, a new model can be
+forked by simply assigning it a new filename.
+
+   <p>A <em>xeona</em> model file also holds meta-data related
+to the last run-time and may optionally contain
+configuration details for processing by third-party
+scripts.  In database terms, a <em>xeona</em> model is a
+shallow set of hierarchical records with embedded
+cross-referenced primary keys. 
+Three important sources of information in regards model
+preparation are:
+
+     <ul>
+<li>the <em>xeona</em> options <code>--data</code> and <code>--class</code>
+
+     <li>the example models in the <code>xeona-xmoks/</code> subdirectory
+
+     <li>the plain text documentation as <code>DOCS/*.txt</code>
+</ul>
+
+<h3 class="section">5.2 Emacs <code>xem-mode</code> major mode</h3>
+
+<p><a name="index-g_t_0040code_007bxem_002dmode_007d_002c-custom-emacs-editing-mode-for-_0040emph_007bxeona_007d-36"></a>
+The emacs <code>xem-mode</code> major mode can be used to
+edit <em>xeona</em> model files.  It is contained in the
+emacs lisp file <code>xem.el</code> and Emacs itself can be
+configured to automatically associate <code>*.xem</code>
+files with this mode.  The mode provides custom
+coloration, navigation, data entry, and reformatting
+calls.  Although not strictly necessary, this mode can
+substantially aid model editing.  A copy of
+<code>xem.el</code> is included in the tar distribution.
+
+<h3 class="section">5.3 Model visualization</h3>
+
+<p><a name="index-model-visualization-37"></a><a name="index-visualizing-models-38"></a>
+Visualization can be a powerful tool for model
+debugging.  A missed demand connection is usually
+immediately evident on a network plot, but more
+circuitous to find by other means.  Some actual plots
+are given with the example model.
+
+<h4 class="subheading">Optimization problem visualization <i>via</i> HTML</h4>
+
+<p><a name="index-MIP-problem-instance-visualization-39"></a><a name="index-visualization_002c-MIP-problem-instance-40"></a>
+For <em>each</em> domain and time step, <em>xeona</em>
+progressively generates and combines a number of
+so-called optimization sub-problems (OSP) into a single
+optimization problem.  The set of domain problems can
+be visualized for the first step only (designated step
+0) by passing <code>--yeek 1</code>.  This option writes HTML
+files for each domain to the current directory.  It
+should also open these files using the Firefox web
+browser if the hardcoded system call <code>"firefox"</code>
+succeeds (poor style).
+
+<h4 class="subheading">Model visualization using R</h4>
+
+<!-- @cindex model visualization, breadboard plot -->
+<!-- @cindex model visualization, network plot -->
+<p><a name="index-breadboard-plot-41"></a><a name="index-network-plot-42"></a><a name="index-g_t_0040code_007bxem_002eR_007d-visualization-script-43"></a><a name="index-g_t_0040code_007bgraphviz_007d-visualization-utility-44"></a><a name="index-g_t_0040code_007bR_007d-statistical-computing-language_002fenvironment-45"></a>
+A small <code>R</code> statistical computing program named
+<code>xem.R</code> will, when passed a suitably notated model
+file, generate the following:
+     <ul>
+<li>conventional <var>xy</var> plots of nominated timeseries
+
+     <li>a breadboard plot showing the aforementioned
+associations of coordination, demand, commodity
+linkage, and context information
+
+     <li>a network plot of the above, assuming the
+<code>graphviz</code> utility is present
+</ul>
+
+<h3 class="section">5.4 Creating a new model</h3>
+
+<p><a name="index-creating-a-new-model-46"></a>
+The following represents one way of creating a new
+model file:
+
+<pre class="example">     $ ./xeona.r0000 --xem comb &gt; newmodel.guard.xem
+     $ nano newmodel.guard.xem          <span class="roman"># </span><i>or your preferred editor</i>
+     $ ./xeona.r0000 --guard newmodel [&amp;&amp; less newmodel.xem]
+</pre>
+   <p class="noindent">If using Emacs in <code>xem-mode</code>, simply issue the
+command <code>M-x xem-insert-new-model</code>.
+
+<h3 class="section">5.5 Debugging models</h3>
+
+<p><a name="index-debugging-models-47"></a>
+The building up of models in small tested increments is
+recommended.  Notwithstanding, model debugging can
+often be advanced through the judicious use of the
+following options, either separately or in combination:
+
+     <ul>
+<li><code>--jumpy</code>
+<li><code>--nodata</code>
+<li><code>--mode&nbsp;{</code><i>4,5,6,7</i><code>}</code>
+<li><code>--report&nbsp;{</code><i>2,3,4,5,6</i><code>}</code>
+<li><code>--watch </code><i>source-column-regex</i>
+</ul>
+
+<p class="noindent">Or, more dangerously:
+
+     <ul>
+<li><code>--again</code>
+<li><code>--krazy</code>
+</ul>
+
+<p class="noindent">And also:
+
+     <ul>
+<li><code>--yeek 0|</code><i>n</i>
+</ul>
+
+<p class="noindent">The <code>--yeek </code><i>n</i> option runs non-standard test
+and/or reporting code.  Passing <code>--yeek 0</code> to
+<em>xeona</em> will print a list of currently supported
+values for <i>n</i>
+&ge;1.
+
+   <p>All logged warnings and thrown exceptions should be
+carefully scrutinized.  Processing a model through
+<code>xem.R</code> (or some allied <code>R</code> wrapper script)
+to obtain breadboard and network plots can often be
+illuminating.
+
+<!--  data -->
+<div class="node">
+<a name="Data-rules"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Example">Example</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Models">Models</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
+
+</div>
+
+<h2 class="chapter">6 Data considerations</h2>
+
+<p><a name="index-data-considerations-_0028chapter_0029-48"></a>
+This chapter presents some rules governing the
+preparation of data.  These same rules are also
+available under the <code>--data</code> option.  The last
+part of this chapter looks at entity classes and
+commodity types.  A UML (unified modeling language)
+class diagram of the <em>xeona</em> data-model is
+available on request.
+
+<h3 class="section">6.1 Rules governing data preparation</h3>
+
+<p class="noindent"><b>Text alignment</b>
+
+     <ul>
+<li>column 0 has no leading space, column 4 has four leading spaces
+<li>record identifiers must start in column 0, data fields and comments may start anywhere
+<li>the same alignment rule applies to the record and field disable character <code>#</code>
+<li>by convention, data fields are placed in column 4 and comments in column 6
+</ul>
+
+<p class="noindent"><b>Model file</b>
+
+     <ul>
+<li>a XEM file is a set of records
+<li>the record order has no semantic significance
+</ul>
+
+<p class="noindent"><b>Records</b>
+
+     <ul>
+<li>each record begins with an identifier placed in column 0 (otherwise line deemed a comment!) 
+<li>the leading dot-separated part of each identifier indicates the record kind (see below)
+<li>processing ceases when the special <code>model-end</code> record identifier is met
+<li>blank lines are not intrinsically significant
+<li>column alignment is not significant, except for the placement of the record identifier
+<li>a note record is treated as set of comment lines, with multiple blank lines removed on output
+<li>records are written out in the order that they are read in
+</ul>
+
+<p class="noindent"><b>Record kinds</b> (with identifiers)
+
+   <blockquote>
+   <p><table summary=""><tr align="left"><td valign="top" width="15%">note      </td><td valign="top" width="15%"><code>note</code>        </td><td valign="top" width="3%">: </td><td valign="top" width="67%">verbatim text (except multiple blank lines are squeezed)
+<br></td></tr><tr align="left"><td valign="top" width="15%">program   </td><td valign="top" width="15%"><code>program.*</code>   </td><td valign="top" width="3%">: </td><td valign="top" width="67%">run information
+<br></td></tr><tr align="left"><td valign="top" width="15%">entity    </td><td valign="top" width="15%"><code>entity.*</code>    </td><td valign="top" width="3%">: </td><td valign="top" width="67%">model entities
+<br></td></tr><tr align="left"><td valign="top" width="15%">model end </td><td valign="top" width="15%"><code>model-end</code>   </td><td valign="top" width="3%">: </td><td valign="top" width="67%">processing stops (remaining text is lost)
+   <br></td></tr></table>
+</blockquote>
+
+<p class="noindent"><b>Fields</b>
+
+     <ul>
+<li>a record is made up of zero or more data fields and/or comments
+<li>any field containing a single angle bracket is a data field, otherwise it is a comment
+<li>each data field has an identifier, followed optionally by <code>[unit]</code> and optionally by <code>a remark</code>
+<li>a comment may possess matched angle brackets (for instance <code>&lt;email@address&gt;</code> is legal)
+</ul>
+
+<p class="noindent"><b>Data</b>
+
+     <ul>
+<li>a data field may hold:
+<blockquote>
+     <p><table summary=""><tr align="left"><td valign="top" width="100%">a single value
+<br></td></tr><tr align="left"><td valign="top" width="100%">a timeseries
+<br></td></tr><tr align="left"><td valign="top" width="100%">an individual entity identifier
+<br></td></tr><tr align="left"><td valign="top" width="100%">a list of identifiers
+     <br></td></tr></table>
+</blockquote>
+     <li>single or timeseries values may be of data-type:
+<blockquote>
+     <p><table summary=""><tr align="left"><td valign="top" width="100%">string
+<br></td></tr><tr align="left"><td valign="top" width="100%">integer
+<br></td></tr><tr align="left"><td valign="top" width="100%">float
+<br></td></tr><tr align="left"><td valign="top" width="100%">boolean
+     <br></td></tr></table>
+</blockquote>
+     <li>a string value is set in double quotes, a boolean value is either 0 (false) or 1 (true)
+<li>a connectivity list comprises zero or more space-separated entity identifiers placed within one set of double quotes
+<li>entities may disallow the use of null entity identifiers in some cases (as documented)
+</ul>
+
+<p class="noindent"><b>Disabling records and fields</b>
+
+     <ul>
+<li>a record can be disabled by placing a leading <code>#</code> in column 0 (and nowhere else)
+<li>a data field can be disabled by placing a leading <code>#</code> anywhere (but best to avoid column 0)
+<li>a disabled field must appear <strong>after</strong> its respective enabled field
+<li>a leading <code>#</code> on a comment line is automatically removed and not replaced <br> (think of this as a feature)
+</ul>
+
+<p class="noindent"><b>Reformatting on write out</b>
+
+     <ul>
+<li><em>xeona</em> reformats the XEM file on write out
+<li>most notably, in-data, out-data, and comments are grouped together in that order
+<li>additional support is provided for Emacs text editor local variables if originally present
+</ul>
+
+<p class="noindent"><b>Field kinds</b>
+
+   <blockquote>
+   <p><table summary=""><tr align="left"><td valign="top" width="15%">comment     </td><td valign="top" width="5%">: </td><td valign="top" width="80%">no angle bracket (or alternatively matched angle brackets)
+<br></td></tr><tr align="left"><td valign="top" width="15%">in-data     </td><td valign="top" width="5%">: </td><td valign="top" width="80%">&gt;
+<br></td></tr><tr align="left"><td valign="top" width="15%">out-data    </td><td valign="top" width="5%">: </td><td valign="top" width="80%">&lt;
+   <br></td></tr></table>
+</blockquote>
+
+<p class="noindent"><b>Data values</b>
+
+     <ul>
+<li>floats may be input in either decimal or exponent format: <code>-0.01234</code> or <code>-12.34e-03</code>
+<li>a trailing <code>..</code> on timeseries input data means repeat that pattern as often as needed
+<li><em>xeona</em> holds floats using the <em>8-byte</em> <code>double</code> arithmetic type (assuming IEEE 754 support)
+</ul>
+
+<p class="noindent"><b>Mandatory entities with preset identifiers</b>
+
+   <blockquote>
+   <p><table summary=""><tr align="left"><td valign="top" width="33%"><code>TimeHorizon</code> </td><td valign="top" width="65%"><code>entity.time-horizon</code>
+<br></td></tr><tr align="left"><td valign="top" width="33%"><code>Overseer</code>    </td><td valign="top" width="65%"><code>entity.overseer</code>
+   <br></td></tr></table>
+</blockquote>
+
+<p class="noindent"><b>Field value data-type prompts</b> (not actively parsed but provided to assist data preparation)
+
+     <ul>
+<li>entity connectivity (in-data only, both can be null in some circumstances)
+<blockquote>
+     <p><table summary=""><tr align="left"><td valign="top" width="5%"><code>l</code> </td><td valign="top" width="95%">individual entity identifier within double quotes
+<br></td></tr><tr align="left"><td valign="top" width="5%"><code>L</code> </td><td valign="top" width="95%">space-separated list of entity identifiers within one set of double quotes
+     <br></td></tr></table>
+</blockquote>
+     <li>normal data (both in-data and out-data)
+<blockquote>
+     <p><table summary=""><tr align="left"><td valign="top" width="5%"><code>s</code> </td><td valign="top" width="95%">single string in double quotes
+<br></td></tr><tr align="left"><td valign="top" width="5%"><code>S</code> </td><td valign="top" width="95%">timeseries of strings with each element in double quotes
+<br></td></tr><tr align="left"><td valign="top" width="5%"><code>i</code> </td><td valign="top" width="95%">single integer
+<br></td></tr><tr align="left"><td valign="top" width="5%"><code>I</code> </td><td valign="top" width="95%">timeseries of integers
+<br></td></tr><tr align="left"><td valign="top" width="5%"><code>f</code> </td><td valign="top" width="95%">single floating-point number
+<br></td></tr><tr align="left"><td valign="top" width="5%"><code>F</code> </td><td valign="top" width="95%">timeseries of floating-point numbers
+<br></td></tr><tr align="left"><td valign="top" width="5%"><code>b</code> </td><td valign="top" width="95%">single boolean
+<br></td></tr><tr align="left"><td valign="top" width="5%"><code>B</code> </td><td valign="top" width="95%">timeseries of booleans
+     <br></td></tr></table>
+</blockquote>
+     <li>reinterpreted data (entity-specific in-data)
+<blockquote>
+     <p><table summary=""><tr align="left"><td valign="top" width="5%"><code>x</code> </td><td valign="top" width="95%">single character stream within double quotes (for instance, bidset data)
+<br></td></tr><tr align="left"><td valign="top" width="5%"><code>X</code> </td><td valign="top" width="95%">timeseries of above with each element in double quotes
+     <br></td></tr></table>
+</blockquote>
+     </ul>
+
+<p class="noindent"><b>Field units</b> (enclosed in square brackets)
+
+     <ul>
+<li>physical quantities (unprefixed SI units are presumed unless otherwise documented)
+<blockquote>
+     <p><table summary=""><tr align="left"><td valign="top" width="18%">time              </td><td valign="top" width="82%"><code>s</code>
+<br></td></tr><tr align="left"><td valign="top" width="18%">raw SI units      </td><td valign="top" width="82%"><code>kg m ohm V</code> etc
+<br></td></tr><tr align="left"><td valign="top" width="18%">derived SI units  </td><td valign="top" width="82%"><code>J Pa W</code> etc
+<br></td></tr><tr align="left"><td valign="top" width="18%">temperature       </td><td valign="top" width="82%"><code>C</code> or <code>K</code>  (<code>C</code> preferred unless calculation utilizes <code>K</code>)
+     <br></td></tr></table>
+</blockquote>
+     <li>economic quantities
+<blockquote>
+     <p><table summary=""><tr align="left"><td valign="top" width="18%">time              </td><td valign="top" width="82%"><code>y</code>  (year can be more intuitive than <code>s</code> in certain cases)
+<br></td></tr><tr align="left"><td valign="top" width="18%">generic currency  </td><td valign="top" width="82%"><code>$</code>  (representing, for example, EUR or USD)
+     <br></td></tr></table>
+</blockquote>
+     <li>quantities lacking dimensionality
+<blockquote>
+     <p><table summary=""><tr align="left"><td valign="top" width="18%">unitless          </td><td valign="top" width="82%"><code>&minus;</code>  (unitless normally preferred over <code>%</code>)
+<br></td></tr><tr align="left"><td valign="top" width="18%">percentage        </td><td valign="top" width="82%"><code>%</code>
+     <br></td></tr></table>
+</blockquote>
+     <li>embedded costs
+<blockquote>
+     <p><table summary=""><tr align="left"><td valign="top" width="18%">reported          </td><td valign="top" width="82%"><code>$</code> per-interval  (not <code>$/s</code>)
+     <br></td></tr></table>
+</blockquote>
+
+   </ul>
+
+<p class="noindent"><b>Entity documentation</b>
+
+     <ul>
+<li>entity documentation can be obtained through <em>xeona</em> option <code>--class +|regex</code>
+<li>commodity-templated entities often use generic documentation, such that:
+          <ul>
+<li>base commodity in { <code>Cert</code>, <code>Cseq</code>, <code>Elec</code>, <code>Fiss</code>, <code>Fund</code>, <code>Heat</code>, <code>Oxid</code>, <code>Thrm</code>, <code>Work</code> }
+<li>stand-in quantifying extensity field unit: <code>*</code> in { kg, J, $ } as appropriate
+</ul>
+     </ul>
+
+<p class="noindent"><b>Compiled-in literals relating to data usage</b> (set in
+unit <code>common</code>)
+
+   <blockquote>
+   <p><table summary=""><tr align="left"><td valign="top" width="50%">ISO 4217 currency code                 </td><td valign="top" width="5%">: </td><td valign="top" width="25%"><code>EUR</code>
+<br></td></tr><tr align="left"><td valign="top" width="50%">record or field disable string         </td><td valign="top" width="5%">: </td><td valign="top" width="25%"><code>#</code>
+<br></td></tr><tr align="left"><td valign="top" width="50%">timeseries repeat indicator            </td><td valign="top" width="5%">: </td><td valign="top" width="25%"><code>..</code>
+<br></td></tr><tr align="left"><td valign="top" width="50%">pairwise delimiter for string values   </td><td valign="top" width="5%">: </td><td valign="top" width="25%"><code>"</code>
+<br></td></tr><tr align="left"><td valign="top" width="50%">nodal bid and tariff entry separator   </td><td valign="top" width="5%">: </td><td valign="top" width="25%"><code>*</code>
+<br></td></tr><tr align="left"><td valign="top" width="50%">model end marker                       </td><td valign="top" width="5%">: </td><td valign="top" width="25%"><code>model-end</code>
+<br></td></tr><tr align="left"><td valign="top" width="50%">separator string for OSP tag reporting </td><td valign="top" width="5%">: </td><td valign="top" width="25%"><code>.</code>
+   <br></td></tr></table>
+</blockquote>
+
+<p class="noindent"><b>Data-related abbreviations</b>
+
+   <blockquote>
+   <p><table summary=""><tr align="left"><td valign="top" width="10%">EUR </td><td valign="top" width="90%">euro
+<br></td></tr><tr align="left"><td valign="top" width="10%">OSP </td><td valign="top" width="90%">optimization sub-problem
+<br></td></tr><tr align="left"><td valign="top" width="10%">XEM </td><td valign="top" width="90%"><em>xeona</em> model
+   <br></td></tr></table>
+</blockquote>
+
+<p class="noindent">Please be aware that entity authors may not have
+respected these guidelines in their entirety &mdash; that
+said, non-standard practice should be signaled <i>via</i>
+the <code>builtin-remark</code> field
+
+<h3 class="section">6.2 Entity classes, commodities, and connectivity</h3>
+
+<p>This section covers entity classes, commodity types,
+and demand connectivity in more detail.  These
+descriptions also provide some insight into the
+object-oriented model on which <em>xeona</em> is built.
+
+<h4 class="subheading">Entity class prefix conventions</h4>
+
+<p><a name="index-entity-class-prefix-conventions-49"></a><a name="index-naming-conventions_002c-entity-class-prefixes-50"></a>
+The following entity class prefix conventions are used. 
+These can be useful when searching with the
+<code>--class</code> option:
+
+   <blockquote>
+   <p><table summary=""><tr align="left"><th valign="top" width="12%">Prefix
+</th><th valign="top" width="30%">C++ parent class
+</th><th valign="top" width="58%">General type
+<br></th></tr><tr align="left"><td valign="top" width="12%"></td><td valign="top" width="30%"></td><td valign="top" width="58%">
+<br></td></tr><tr align="left"><td valign="top" width="12%"><code>Asop</code>
+</td><td valign="top" width="30%"><code>AssetOperator</code>
+</td><td valign="top" width="58%">asset operator
+<br></td></tr><tr align="left"><td valign="top" width="12%"><code>Cm</code>
+</td><td valign="top" width="30%"><code>Commodity</code>
+</td><td valign="top" width="58%">commodity
+<br></td></tr><tr align="left"><td valign="top" width="12%"><code>Con</code>
+</td><td valign="top" width="30%"><code>ContractManager</code>
+</td><td valign="top" width="58%"><i>reserved for future use</i>
+<br></td></tr><tr align="left"><td valign="top" width="12%"><code>Cx</code>
+</td><td valign="top" width="30%"><code>Context</code>
+</td><td valign="top" width="58%">surrounding context
+<br></td></tr><tr align="left"><td valign="top" width="12%"><code>Gate</code>
+</td><td valign="top" width="30%"><code>Gateway</code>
+</td><td valign="top" width="58%">domain-spanning gateway
+<br></td></tr><tr align="left"><td valign="top" width="12%"><code>Junc</code>
+</td><td valign="top" width="30%"><code>DemandJunction</code>
+</td><td valign="top" width="58%">demand splitting and joining
+<br></td></tr><tr align="left"><td valign="top" width="12%"><code>Node</code>
+</td><td valign="top" width="30%"><code>LmpNode</code>
+</td><td valign="top" width="58%">nodal pricing node
+<br></td></tr><tr align="left"><td valign="top" width="12%"><code>Teas</code>
+</td><td valign="top" width="30%"><code>TechnicalAsset</code>
+</td><td valign="top" width="58%">hard asset or &ldquo;plant&rdquo;
+<br></td></tr><tr align="left"><td valign="top" width="12%">&mdash;
+</td><td valign="top" width="30%"><code>DomainController</code>
+</td><td valign="top" width="58%">domain controller
+<br></td></tr><tr align="left"><td valign="top" width="12%">&mdash;
+</td><td valign="top" width="30%"><code>Overseer</code>
+</td><td valign="top" width="58%">hardcoded identifier <code>entity.overseer</code>
+<br></td></tr><tr align="left"><td valign="top" width="12%">&mdash;
+</td><td valign="top" width="30%"><code>TimeHorizon</code>
+</td><td valign="top" width="58%">hardcoded identifier <code>entity.time-horizon</code>
+   <br></td></tr></table>
+</blockquote>
+
+<p class="noindent">Hence, the windfarm technical asset in <em>xeona</em> is
+naturally named <code>TeasWindfarm</code> and derives
+internally from class <code>TechnicalAsset</code>.
+
+<h4 class="subheading">Commodity types</h4>
+
+<p><a name="index-commodity-types-51"></a>
+Commodity entities associate with technical entities
+or, more precisely, their various sockets and cables. 
+The term commodity <em>type</em> simply refers to the
+underlying class of a commodity entity &mdash; thus the
+terms type and class are broadly interchangeable.
+
+   <p><em>xeona</em> employs commodity entities for two
+reasons.  First, like any normal entity, commodities
+may embed state information &mdash; either fixed at
+construction-time or changeable throughout a
+simulation.  And second, demand connectivity can be
+restricted on the basis of commodity type &mdash; which
+means that the author of a thermal generator class can
+(and probably should) require that it can only be
+fueled with a commodity of class <code>CmOxidize</code> or,
+more restrictively, a particular subclass, like
+<code>CmOxidBiocoal</code>.
+
+   <p>The following commodity type aliases are supported:
+
+   <blockquote>
+   <p><table summary=""><tr align="left"><th valign="top" width="12%">Alias
+</th><th valign="top" width="25%">Base class
+</th><th valign="top" width="63%">Comment
+<br></th></tr><tr align="left"><td valign="top" width="12%"></td><td valign="top" width="25%"></td><td valign="top" width="63%">
+<br></td></tr><tr align="left"><td valign="top" width="12%"><code>Cert</code>
+</td><td valign="top" width="25%"><code>CmCarbonCert</code>
+</td><td valign="top" width="63%">carbon certificate
+<br></td></tr><tr align="left"><td valign="top" width="12%"><code>Cseq</code>
+</td><td valign="top" width="25%"><code>CmCarbonSeq</code>
+</td><td valign="top" width="63%">carbon sequestration service (using supercritical CO_2)
+<br></td></tr><tr align="left"><td valign="top" width="12%"><code>Elec</code>
+</td><td valign="top" width="25%"><code>CmElectricity</code>
+</td><td valign="top" width="63%">electricity (loss models are usually DC)
+<br></td></tr><tr align="left"><td valign="top" width="12%"><code>Fiss</code>
+</td><td valign="top" width="25%"><code>CmFission</code>
+</td><td valign="top" width="63%">fissile material
+<br></td></tr><tr align="left"><td valign="top" width="12%"><code>Fund</code>
+</td><td valign="top" width="25%"><code>CmFunds</code>
+</td><td valign="top" width="63%">funds (quantified in units of account)
+<br></td></tr><tr align="left"><td valign="top" width="12%"><code>Heat</code>
+</td><td valign="top" width="25%"><code>CmHeat</code>
+</td><td valign="top" width="63%">thermodynamic heat (in the sense of Q)
+<br></td></tr><tr align="left"><td valign="top" width="12%"><code>Oxid</code>
+</td><td valign="top" width="25%"><code>CmOxidize</code>
+</td><td valign="top" width="63%">oxidizable (combustible) fuel
+<br></td></tr><tr align="left"><td valign="top" width="12%"><code>Thrm</code>
+</td><td valign="top" width="25%"><code>CmThermalFluid</code>
+</td><td valign="top" width="63%">recirculating thermal fluid (supporting heat transfer)
+<br></td></tr><tr align="left"><td valign="top" width="12%"><code>Work</code>
+</td><td valign="top" width="25%"><code>CmWork</code>
+</td><td valign="top" width="63%">non-electricity thermodynamic work (in the sense of W)
+   <br></td></tr></table>
+</blockquote>
+
+<p class="noindent">Some inherently flexible technical asset classes can be
+instantiated using some or all commodity types. 
+The entity input data field <code>class</code>, in this case,
+takes the entity class name, then a colon&nbsp;<code>:</code>
+and then a commodity alias.  For example, a generalized
+sink entity taking only electricity might be specified
+thus:
+
+<pre class="example">     class &gt; TeasLoad:Elec
+</pre>
+   <p class="noindent">The example model file in the next chapter uses this
+same entity class &mdash; identified as
+<code>entity.teas-load-elec-1</code>.
+
+<h4 class="subheading">Commodity demand connectivity</h4>
+
+<p><a name="index-demand-connectivity-52"></a>
+Commodity demand connectivity is central to
+<em>xeona</em>.  The reason being that the direction of
+demand can always be <em>unequivocally</em> specified in
+advance &mdash; unlike any of the candidate quantifying
+extensities, including energy and exergy.  Moreover,
+the revenue stream normally flows in reverse (negative
+pricing excepted). 
+Therefore <em>xeona</em> adopts a demand-based &ldquo;cable
+and socket&rdquo; analogy, the direct equivalent of plugging
+a household appliance into a wall plate.
+
+<!--  example -->
+<div class="node">
+<a name="Example"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Entities">Entities</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Data-rules">Data rules</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
+
+</div>
+
+<h2 class="chapter">7 Example model</h2>
+
+<p><a name="index-example-model-_0028chapter_0029-53"></a><a name="index-model-example-54"></a>
+This following model is offered as an example.  It is
+included as <code>submodel.15.guard.xem</code>.
+
+<h3 class="heading">Model description</h3>
+
+<p>This model contains a single windfarm asset supplying a
+single non-adaptive load.  The model comprises just one
+domain, operating under minimum financial cost. 
+Admittedly the resulting optimization problem is
+trivial, but that should not detract from the example.
+
+<!-- omit extension, need { png, eps, pdf } -->
+   <div class="float">
+<a name="fig1"></a><img src="xeona-manex.png" alt="xeona-manex.png">
+
+   <p><strong class="float-caption">Figure 7.1: Schematic for <code>submodel.15</code>.  This
+diagram contains the same information as the later
+network and breadboard plots &mdash; except the arrow
+coloration has been simplified here.  Typical input
+data fields are shown in grey.  The windfarm socket
+label is also highlighted thus.</strong></p></div>
+
+<!-- visual formatting -->
+<!-- @noindent -->
+   <p>The windfarm is powered by synthetic wind, sampled from
+a Rayleigh distribution.  The load requirements of the
+demander are specified exogenously and passed to the
+load asset at each time step.  The demander is tagged
+&ldquo;inelastic&rdquo; because this same entity class can also
+participate in electricity auctions.  The windfarm
+operator is tagged &ldquo;basic&rdquo; because it does not create
+or report costs in its own right &mdash; if this is not
+suitable, a more sophisticated operator can be
+substituted.  The windfarm and load assets are
+connected <i>via</i> a 11<span class="dmn">kV</span> interface.  As currently
+specified, the simulation runs for just two 3600<span class="dmn">s</span>
+time steps.
+
+   <p>This example also hints at how a relatively small set
+of compatible technical assets, asset operators, and
+commitment modes can be combined to represent a diverse
+range of situations.
+
+<h3 class="heading">Model file structure</h3>
+
+<p>First up, the model listing (given next) has <em>not</em>
+been run &mdash; as evidenced by the
+<code>program.last-run.*</code> fields being empty.
+
+   <p>Variable length dot-separated naming is used to
+identify entities, data fields, and other model
+elements.  For instance,
+<code>entity.teas-windfarm-1.actual-productions</code> refers
+to the timeseries of actual output from the given
+windfarm (this windfarm will spill wind if required). 
+Scripts (such as <code>xem.R</code>) can parse a model file
+like that shown, and uniquely recover a particular
+timeseries or any other known data element.  Comments
+are, of course, not addressable in this manner.
+
+   <p>Much of the model specification is taken up with the
+creation of associations between model elements.  In
+this example, the input field
+<code>entity.asop-inelastic-ts-1.technical-assets</code> is
+set to <code>teas-load-elec-1</code> (the <code>entity.</code>
+prefix is implied) in order to &ldquo;couple&rdquo; the windfarm
+operator and the windfarm itself.
+
+   <p>Identifiers beginning <code>program.*</code> relate to
+run-time administration and do not influence the actual
+model in any way.  The same applies to the <code>note</code>
+element for verbatim text.
+
+   <p>A selection of results are given after the model file
+is presented.  Model visualization is discussed at the
+end of this chapter.  For more information on data
+preparation, consult the previous chapter.
+
+<h3 class="heading">Listing for <code>submodel.15.guard.xem</code></h3>
+
+<pre class="verbatim">note
+
+    $Revision: 4294 $
+    $Date: 2010-01-19 15:46:52 +0100 (Tue, 19 Jan 2010) $
+    $Author: robbie $
+    $URL: file:///home/robbie/svn-root/xeona/futz/trunk/xeona1/xeona-xmoks/submodel.15.guard.xem $
+
+    xem-role:
+
+  -------------------------------------------- program admin
+
+program.last-run
+
+    process-id                                    &lt;
+    run-kind                                      &lt;
+    used-svn                                      &lt;
+    simulate-return                               &lt;
+
+program.data-format
+
+    minimum-svn                                   > 0
+
+program.run-script-settings
+
+    script-model-status s                         > "okay"
+    script-run-me b                               > 0
+    script-option-exittrip i                      > 1
+    script-option-nodata b                        > 0
+
+program.r-processing
+
+    r-policy i                                    > 31
+    r-title s                                     > "user manual example"
+    r-plot-list s                                 > "entity.teas-windfarm-1.actual-productions"
+    r-highlight-output s                          > "actual-productions"
+
+  -------------------------------------------- model overview
+
+      used in 'userman.texi' documentation
+
+  --------------------------------------- mandatory entities
+
+entity.time-horizon
+
+    class                                         > TimeHorizon
+
+      the TimeHorizon entity is REQUIRED and the
+      "time-horizon" identifier is MANDATORY
+
+    builtin-remark s                              &lt;
+
+    steps [-] i                                   > 2
+    interval [s] i                                > 3600
+    start-hour [-] i                              > 0
+    start-day [-] i                               > 1
+
+      the start-hour begins midnight local time and ranges
+      [0,23] and the start-day begins 01-Jan and ranges [1,365]
+
+    hemisphere s                                  > "N"
+
+      the hemisphere is {N,S} for north and south
+
+      the modeler should ensuring that timeseries data given
+      elsewhere aligns with the specification given here
+
+      header: b/builtins.h
+
+entity.overseer
+
+    class                                         > Overseer
+
+      the Overseer entity is REQUIRED and the "overseer"
+      identifier is MANDATORY
+
+      the overseer does little more that invoke the various
+      originating domains in nominated order at each new
+      interval
+
+    builtin-remark s                              &lt;
+
+    captrans-algorithm s                          > "simple"
+
+      captrans-algorithm takes "fixed" | "simple" | "hop-relit"
+      but only "simple" is currently implemented (this call
+      contains experimental macro-controlled hop-relit code)
+
+    ranked-orig-domains L                         > "domain-controller-1"
+
+      the originating domain controllers must be given in
+      order of DESCENDING priority, any unannounced domains
+      will be discovered naturally during the various
+      traversals
+
+    total-financial [$] f                         &lt; 0.0
+    total-greenhouse [kg] f                       &lt; 0.0
+    total-nox [kg] f                              &lt; 0.0
+    total-depletion [J] f                         &lt; 0.0
+    total-landuse [m^2] f                         &lt; 0.0
+
+      the cost-type totals cover the entire horizon, with
+      first step truncation given by program.last-run.run-kind
+
+    variable-costs-financial [$] F                &lt; 0.0 ..
+    fixed-costs-financial [$] F                   &lt; 0.0 ..
+    embedded-costs-financial [$] F                &lt; 0.0 ..
+    variable-costs-greenhouse [kg] F              &lt; 0.0 ..
+    fixed-costs-greenhouse [kg] F                 &lt; 0.0 ..
+    embedded-costs-greenhouse [kg] F              &lt; 0.0 ..
+    variable-costs-nox [kg] F                     &lt; 0.0 ..
+    fixed-costs-nox [kg] F                        &lt; 0.0 ..
+    embedded-costs-nox [kg] F                     &lt; 0.0 ..
+    variable-costs-depletion [J] F                &lt; 0.0 ..
+    fixed-costs-depletion [J] F                   &lt; 0.0 ..
+    embedded-costs-depletion [J] F                &lt; 0.0 ..
+    variable-costs-landuse [m^2] F                &lt; 0.0 ..
+    fixed-costs-landuse [m^2] F                   &lt; 0.0 ..
+    embedded-costs-landuse [m^2] F                &lt; 0.0 ..
+
+      header: b/overseer.h
+
+  --------------------------------------------------- domain
+
+entity.domain-controller-1
+
+    class                                         > DomainController
+
+      a domain controller entity (the only one provided)
+      which can take one of a number of commitment modes --
+      but REQUIRES that the managed entities support the
+      elected mode
+
+    builtin-remark s                              &lt;
+
+    init-scale-problem b                          > 1
+    init-use-advanced-initial-basis b             > 1
+    init-use-simplex-presolver b                  > 1
+    init-use-mip-presolver b                      > 0
+
+      these four GLPK solver behavior settings should be set
+      to true unless run-time tests indicate otherwise
+
+    commitment-mode s                             > "fin"
+
+      supported commitment-mode values (lmp is nodal pricing):
+      fin | ghg | nox | dep | luc | lmp | merit | first
+
+    ranked-selgates L                             > ""
+
+      the ranked-selgates (bridging the right side) must be
+      null, one, or listed in DESCENDING priority
+
+    asset-operators L                             > "asop-inelastic-ts-1 asop-basic-1"
+
+      the asset-operators may be null, individual, or listed
+      in no particular order
+
+    demand-junctions L                            > ""
+
+      the demand-junctions, which split and join demand, may
+      be null, individual, or listed in no particular order
+
+    variable-costs-financial [$] F                &lt; 0.0 ..
+    fixed-costs-financial [$] F                   &lt; 0.0 ..
+
+    header: b/domcon.h
+
+  -------------------------------------------- load operator
+
+entity.asop-inelastic-ts-1
+
+      quantifying extensity * in {J,kg,$} as appropriate
+
+    class                                         > AsopInelasticTs
+
+      asset operator with stated demand and thereby
+      price-inelastic behavior
+
+    builtin-remark s                              &lt;
+
+    technical-assets L                            > "teas-load-elec-1"
+
+      the technical-assets should have the same quantifying
+      extenstity
+
+    demands [*/s] F                               > 1.0e+06 0.0e+06
+
+      the demand needs to be extensity-compatible with the
+      associated assets (not checked), in addition each asset
+      gets the same value
+
+    header: b/asop03.h
+
+entity.teas-load-elec-1
+
+      shortcut documentation
+      base commodity in {Cert,Cseq,Elec,Fund,Heat,Oxid,Thrm,Work}
+      quantifying extensity * in {J,kg,$}
+
+    class                                         > TeasLoad:Elec
+
+      a load entity which is operator coupled for load
+      definition, for example to AsopInelasticTs
+
+    builtin-remark s                              &lt;
+
+    socket-1 l                                    > "teas-windfarm-1.elec-1"
+
+      socket-1 is my supplier
+
+    cable-commodity l                             > "cm-elec-1"
+
+      cable-commodity defines the underlying commodity
+
+    demand-hi-bound [*/s] f                       > 5.0e+06
+
+    loads [*/s]                                   &lt; 0.0 ..
+
+      demand-hi-bound is the maximum load, loads are the
+      actual loads
+
+    nameplate-capacity [*/s] f                    > 6.0e+06
+    duty-specific-cost-financial [$/*] f          > 100.0
+    size-specific-cost-financial [$/*/s/s] f      > 200.0
+    standing-cost-financial [$/s] f               > 300.0
+
+    variable-costs-financial [$] F                &lt; 0.0 ..
+    fixed-costs-financial [$] F                   &lt; 0.0 ..
+
+    annual-discount-rate-decimal [-] f            > 0.10
+    economic-life [y] i                           > 25
+    capex-initial [$] f                           > 120e+03
+    capex-terminal [$] f                          > -10e+03
+    current-age [y] i                             > 2
+
+      a negative capex-terminal indicates salvage revenue as
+      opposed to decommissioning cost
+
+    embedded-costs-financial [$] F                &lt; 0.0 ..
+
+      the embedded-costs-financial are calculated using the
+      DCF annuity method over the economic life of the entity
+      in question
+
+    header: b/teas04.h
+
+  ---------------------------------------- windfarm operator
+
+entity.asop-basic-1
+
+    class                                         > AsopBasic
+
+      basic asset operator with a null control policy and
+      without internal cost formation
+
+    builtin-remark s                              &lt;
+
+    technical-assets L                            > "teas-windfarm-1"
+
+      technical-assets in any order
+
+    header: b/asop01.h
+
+entity.teas-windfarm-1
+
+    class                                         > TeasWindfarm
+
+      a windfarm comprising one or more identical turbines,
+      which can also spill wind
+
+    builtin-remark s                              &lt;
+
+    count [-] i                                   > 5
+    turbine-rating [W] f                          > 1000e+03
+    lo-cut-speed [m/s] f                          > 5.0
+    hi-cut-speed [m/s] f                          > 25.0
+
+      the turbine-rating applies at the cut-out-speed and can
+      be multiplied by count to calculate the windfarm capacity
+
+    socket-electricity-commodity l                > "cm-elec-1"
+
+      socket-electricity-commodity defines the shared
+      electricity commodity
+
+    ambient-air-context l                         > "cx-ambient-air-sim-1"
+
+      the context entity must be a sub-class of CxAmbientAir
+
+    potential-productions [W] F                   &lt; 0.0 ..
+    actual-productions [W] F                      &lt; 0.0 ..
+    availability [-] f                            &lt; 0.0
+    spill [-] f                                   &lt; 0.0
+
+      availability [0,1] is the ratio of potential output to
+      turbine-rating, spill [0,1] is the ratio of discarded
+      to potential output
+
+    nameplate-capacity [W] f                      > 5000e+03
+    duty-specific-cost-financial [$/J] f          > 100.0
+    size-specific-cost-financial [$/W/s] f        > 200.0
+    standing-cost-financial [$/s] f               > 300.0
+
+    variable-costs-financial [$] F                &lt; 0.0 ..
+    fixed-costs-financial [$] F                   &lt; 0.0 ..
+
+    annual-discount-rate-decimal [-] f            > 0.10
+    economic-life [y] i                           > 25
+    capex-initial [$] f                           > +120e+03
+    capex-terminal [$] f                          > -10e+03
+    current-age [y] i                             > 2
+
+      a negative capex-terminal indicates salvage revenues as
+      opposed to decommissioning cost
+
+    embedded-costs-financial [$] F                &lt; 0.0 ..
+
+    header: b/teas02.h
+
+  ---------------------------------------------- commodities
+
+entity.cm-elec-1
+
+    class                                         > CmElectricity
+
+      J-quantified electricity commodity
+
+      technical assets using electricity adopt a DC-power
+      flow model and thereby ignore shunt losses -- this
+      commodity provides suitable support
+
+    builtin-remark s                              &lt;
+
+    voltage [V] f                                 > 11.0e+03
+
+      for fixed-frequency AC power, use the RMS (root-mean-
+      square) voltage (as opposed to the peak-to-peak value)
+
+    header: b/commods.h
+
+  ------------------------------------------------- contexts
+
+entity.cx-ambient-air-sim-1
+
+    class                                         > CxAmbientAirSim
+
+      an ambient air context with wind speeds sampled from a
+      stateless Rayleigh distribution -- meaning that the
+      prior values do not influence the current values
+
+    builtin-remark s                              &lt;
+
+    mean-wind-speed [m/s] f                       > 10.5
+    constant-air-temp [C] f                       > 15.0
+
+      mean-wind-speed is measured at 10m above ground
+
+      constant-air-temp allows this entity to provide
+      temperature data in line with the CxAmbientAir
+      interface
+
+    wind-speeds [m/s] F                           &lt; 0.0 ..
+
+      the wind-speeds are duly calculated
+
+    header: e/cxamb01.h
+
+  ----------------------------------------------------- tail
+
+note
+
+    $Id: submodel.15.guard.xem 4294 2010-01-19 14:46:52Z robbie $
+
+note
+
+    useful emacs text editor settings
+    local variables:
+      tab-stop-list: (04 50 52)
+      truncate-lines: t
+    end:
+
+model-end
+</pre>
+
+<h3 class="heading">Selected results</h3>
+
+<p>Selected results are shown after having run the model
+over two time steps, as defined by the in-data field
+<code>entity.time-horizon.steps</code>.  Fortunately, the
+demand in the second step was nil, because there was
+insufficient synthetic wind for the wind turbines to
+operate.  Some cost types also reported zero, because
+many of the input parameters were left at zero.
+
+<pre class="verbatim">entity.overseer
+
+    total-financial [$] f                         &lt; +3.24e+13
+
+entity.domain-controller-1
+
+    variable-costs-financial [$] F                &lt; +8.64e+12 +7.92e+12
+    fixed-costs-financial [$] F                   &lt; +7.92e+12 +7.92e+12
+
+entity.teas-windfarm-1
+
+    potential-productions [W] F                   &lt; +1.17e+06 +0.00e+00
+    actual-productions [W] F                      &lt; +1.00e+06 +0.00e+00
+    availability [-] f                            &lt; +1.17e-01
+    spill [-] f                                   &lt; +1.42e-01
+
+    embedded-costs-financial [$] F                &lt; +1.50e+00 +1.50e+00
+
+entity.cx-ambient-air-sim-1
+
+    wind-speeds [m/s] F                           &lt; +1.54e+01 +4.52e+00
+</pre>
+
+<!-- @page                                        @c visual formatting -->
+<h3 class="heading">Script-generated visualization</h3>
+
+<p>Two forms of script-generated visualization are shown:
+network plots and breadboard plots.
+
+   <pre class="sp">
+
+</pre>
+
+<!-- omit extension, need { png, eps, pdf } -->
+
+   <div class="float">
+<a name="fig2"></a><img src="submodel.15.viz.png" alt="submodel.15.viz.png">
+
+   <p><strong class="float-caption">Figure 7.2: Network plot of <code>submodel.15</code>.</strong></p></div>
+<a name="index-network-plot_002c-example-55"></a>
+Demand flows from <b>teas-load-elec-1</b> to
+<b>teas-windfarm-1</b> along association <b>04</b>, which
+represents an 11<span class="dmn">kV</span> electricity connection based
+on commodity <b>cm-elec-1</b>.  On solution, electricity
+flows in reverse.  The <b>ambient-air-sim-1</b> context
+generates synthetic wind data which is then accessed by
+the windfarm though association <b>08</b>.  The asset
+operator <b>asop-inelastic-ts-1</b> provides load
+information to its sink asset, while operator
+<b>asop-basic-1</b> is essentially hollow.  This single
+domain problem, coordinated by <b>domain-controller-1</b>,
+is informed by financial least cost.  In this example,
+for each time step, the feasible space is a single
+point (the solution) and the optimization problem is
+indeed rather trivial.
+
+<p>The numbering was added by <code>xem.R</code> and is not
+related to <em>xeona</em>.  The plot itself was drawn by
+<code>graphviz</code> after <code>xem.R</code> wrote out an
+intermediate DOT file.  DOT is a plain text graph
+description language.
+
+<!-- visual formatting -->
+   <div class="float">
+<a name="fig3"></a><img src="submodel.15.bread.png" alt="submodel.15.bread.png">
+
+   <p><strong class="float-caption">Figure 7.3: Breadboard plot of <code>submodel.15</code>.</strong></p></div>
+<a name="index-breadboard-plot_002c-example-56"></a>
+This figure depicts the same association information as a breadboard plot. 
+The numbering and coloration is also identical to the
+previous figure.  The windfarm socket label
+<code>elec-1</code> was also added automatically.  The image
+itself was generated natively from <code>xem.R</code>.
+
+<p>On occasion, <code>graphviz</code> hangs on relatively small
+<em>xeona</em> problems which means visualization and
+model debugging must rely on breadboard plots.
+
+<!--  entities classes -->
+<div class="node">
+<a name="Entities"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Background">Background</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Example">Example</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
+
+</div>
+
+<h2 class="chapter">8 Entity class library</h2>
+
+<p><a name="index-entity-class-library-_0028chapter_0029-57"></a>
+This chapter lists and briefly describes the currently
+supported entity classes.  Consult the source code in
+subdirectory <code>b/</code> for more details and for
+up-to-date status information.
+
+<h4 class="subheading">Asset operators</h4>
+
+<blockquote>
+
+<p class="noindent"><code>AsopBasic</code>
+<blockquote>
+basic asset operator with a null control policy and
+without internal cost formation
+</blockquote>
+
+<p class="noindent"><code>AsopGrid</code>
+<blockquote>
+asset operator which controls LMP nodes and
+transmission assets
+</blockquote>
+
+<p class="noindent"><code>AsopInelasticTs</code>
+<blockquote>
+asset operator with stated demand and thereby
+price-inelastic behavior
+</blockquote>
+
+<p class="noindent"><code>AsopInternalCosts</code>
+<blockquote>
+asset operator with internal cost formation
+</blockquote>
+
+<p class="noindent"><code>AsopLmpBidAdaptive1</code>
+<blockquote>
+asset operator with automated nodal bidding based on
+the preceding and desired commitments and predetermined
+price change rules (read the source code for details)
+</blockquote>
+
+<p class="noindent"><code>AsopLmpBidDialog</code>
+<blockquote>
+asset operator which interactively seeks a new bidset
+for each interval
+</blockquote>
+
+<p class="noindent"><code>AsopLmpBidStatedTs1</code>
+<blockquote>
+asset operator using a single read-in (as apposed to
+stochastic or adaptive) nodal bidding timeseries
+(<code>Ts1</code>)
+</blockquote>
+
+<p class="noindent"><code>AsopPrescribedOrder</code>
+<blockquote>
+asset operator implementing prescribed order operations
+</blockquote>
+
+</blockquote>
+
+<h4 class="subheading">Commodities</h4>
+
+<blockquote>
+
+<p class="noindent"><code>CmCarbonCert</code>
+<blockquote>
+kg-quantified financial instrument
+</blockquote>
+
+<p class="noindent"><code>CmCarbonSeq</code>
+<blockquote>
+kg-quantified pressure state-changeable
+sequestration-service commodity
+
+   <p>demand flow is antiparallel to physical flow, similar
+in behavior to that of a conventional fuel (like coal)
+</blockquote>
+
+<p class="noindent"><code>CmElectricity</code>
+<blockquote>
+J-quantified electricity commodity
+
+   <p>technical assets using electricity adopt a DC-power
+flow model and thereby ignore shunt losses &mdash; this
+commodity provides suitable support
+</blockquote>
+
+<p class="noindent"><code>CmFission</code>
+<blockquote>
+kg-quantified state-invariant fissionable commodity
+
+   <p>caution: there is currently no support for
+nuclear-powered electricity generation
+</blockquote>
+
+<p class="noindent"><code>CmFunds</code>
+<blockquote>
+funds are quantified in UOA (units of account) and can
+be accounted using either the cash method (with actual
+transfers) or the accrual method (with legal transfers)
+</blockquote>
+
+<p class="noindent"><code>CmHeat</code>
+<blockquote>
+J-quantified classic <var>Q</var> commodity
+
+   <p>currently lacking intensive state, but could
+specialized to include boundary temperature
+</blockquote>
+
+<p class="noindent"><code>CmOxidBiocoal</code>
+<blockquote>
+biocoal as <code>CmOxidize</code> specialization with added
+data range checking
+</blockquote>
+
+<p class="noindent"><code>CmOxidize</code>
+<blockquote>
+kg-quantified state-invariant oxidizable commodity
+</blockquote>
+
+<p class="noindent"><code>CmThermalFluid</code>
+<blockquote>
+J-quantified temperature state-changeable recirculating
+thermal fluid commodity
+</blockquote>
+
+<p class="noindent"><code>CmWork</code>
+<blockquote>
+J-quantified state-invariant classic <var>W</var> commodity,
+covering, among other things, shaft power
+</blockquote>
+
+</blockquote>
+
+<h4 class="subheading">Contexts</h4>
+
+<blockquote>
+
+<p class="noindent"><code>CxAmbientAirSim</code>
+<blockquote>
+an ambient air context with wind speeds sampled from a
+stateless Rayleigh distribution &mdash; meaning that the
+prior values do not influence the current values
+</blockquote>
+
+<p class="noindent"><code>CxAmbientAirTs</code>
+<blockquote>
+ambient air context based on exogenous timeseries
+</blockquote>
+
+<p class="noindent"><code>CxAmbientSolarTs</code>
+<blockquote>
+ambient solar context based on exogenous timeseries
+</blockquote>
+
+<p class="noindent"><code>CxCommercialFix</code>
+<blockquote>
+commercial context using fixed data
+</blockquote>
+
+</blockquote>
+
+<h4 class="subheading">Domain controller</h4>
+
+<blockquote>
+
+<p class="noindent"><code>DomainController</code>
+<blockquote>
+a domain controller entity (the only one provided)
+which can take one of a number of commitment modes &mdash;
+but <em>requires</em> that the managed entities support
+the elected mode
+</blockquote>
+
+</blockquote>
+
+<h4 class="subheading">Gateways</h4>
+
+<blockquote>
+
+<p class="noindent"><code>GateStatedTariff:Work</code>
+<blockquote>
+this gateway entity used fixed (rather than stochastic,
+unilaterally set, or negotiated) tariffs
+</blockquote>
+
+</blockquote>
+
+<h4 class="subheading">Junctions</h4>
+
+<blockquote>
+
+<p class="noindent"><code>JuncDemand2Join:Elec</code>
+<blockquote>
+a two socket demand joining junction for given
+commodity
+</blockquote>
+
+<p class="noindent"><code>JuncDemand2Split:Elec</code>
+<blockquote>
+a two cable demand splitting junction for given
+commodity
+</blockquote>
+
+</blockquote>
+
+<h4 class="subheading">Nodes</h4>
+
+<blockquote>
+
+<p class="noindent"><code>Node1Inj:Elec</code>
+<blockquote>
+grid spur line node with injection
+</blockquote>
+
+<p class="noindent"><code>Node1Xit:Elec</code>
+<blockquote>
+grid spur line node with exit
+</blockquote>
+
+<p class="noindent"><code>Node2Inj:Elec</code>
+<blockquote>
+grid node with injection and support for two grid
+assets
+</blockquote>
+
+<p class="noindent"><code>Node2Nul:Elec</code>
+<blockquote>
+grid node to connect two grid assets
+</blockquote>
+
+<p class="noindent"><code>Node2Xit:Elec</code>
+<blockquote>
+grid node with exit and support for two grid assets
+</blockquote>
+
+</blockquote>
+
+<h4 class="subheading">Overseer</h4>
+
+<blockquote>
+
+<p class="noindent"><code>Overseer</code>
+<blockquote>
+the <code>Overseer</code> entity is <em>required</em> and the
+<code>overseer</code> identifier is <em>mandatory</em>
+
+   <p>the overseer does little more that invoke the various
+originating domains in nominated order at each new
+interval
+</blockquote>
+
+</blockquote>
+
+<h4 class="subheading">Technical assets</h4>
+
+<blockquote>
+
+<p class="noindent"><code>TeasHvTransmission</code>
+<blockquote>
+a HV transmission line entity, based on DC power flow
+and suitable for use under nodal pricing
+</blockquote>
+
+<p class="noindent"><code>TeasLoad:Elec</code>
+<blockquote>
+a load entity which is operator coupled for load
+definition, for example to <code>AsopInelasticTs</code>
+</blockquote>
+
+<p class="noindent"><code>TeasLoadElecTs</code>
+<blockquote>
+prescribed electricity load, lacking both flexibility
+and context dependency
+</blockquote>
+
+<p class="noindent"><code>TeasMineElec</code>
+<blockquote>
+flexible (and oversimplified) electricity commodity
+source, currently without an upper bound on capacity
+&mdash; somewhat similar to a battery
+</blockquote>
+
+<p class="noindent"><code>TeasMineOxid</code>
+<blockquote>
+flexible oxidizable commodity source, currently without
+an upper bound on capacity
+</blockquote>
+
+<p class="noindent"><code>TeasOxidToElec</code>
+<blockquote>
+a simple fuel to power (thermal, fuel cell, or
+otherwise) power plant, with support for shutdown mode
+operation &mdash; ancillary electricity demand is not
+included
+</blockquote>
+
+<p class="noindent"><code>TeasSource:Elec</code>
+<blockquote>
+an operator-coupled source entity with support for
+capacity bounds
+</blockquote>
+
+<p class="noindent"><code>TeasWindfarm</code>
+<blockquote>
+a windfarm comprising one or more identical turbines,
+which can also spill wind
+</blockquote>
+
+<p class="noindent"><code>TimeHorizon</code>
+<blockquote>
+the <code>TimeHorizon</code> entity is <em>required</em> and
+the <code>time-horizon</code> identifier is <em>mandatory</em>
+</blockquote>
+
+</blockquote>
+
+<!--  background} -->
+<div class="node">
+<a name="Background"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Tar-log">Tar log</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Entities">Entities</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
+
+</div>
+
+<h2 class="chapter">9 Further background</h2>
+
+<p>This chapter is used to provide additional background.
+
+<h3 class="section">9.1 Potential roles</h3>
+
+<p><a name="index-potential-roles-for-_0040emph_007bxeona_007d-58"></a><a name="index-roles_002c-potential_002c-for-_0040emph_007bxeona_007d-59"></a>
+The <em>xeona</em> energy systems modeling environment
+can potentially contribute to the following problems:
+
+     <ul>
+<li><strong>public policy development</strong>&nbsp;: modelers can
+run different policy scenarios against a common
+reference case and then determine the public interest
+envelopes for each &mdash; policy-makers can then interpret
+the trade-offs for each scenario and respond
+accordingly.
+
+     <li><strong>end-use efficiency</strong>&nbsp;: the method is suited
+to the exploration of end-use efficiency because final
+demand can be represented in terms of energy-service
+and adaptive end-users can be developed and evaluated.
+
+     <li><strong>smart peer-to-peer systems</strong>&nbsp;: because
+<em>xeona</em> is able to describe existing system in
+appropriate detail, it provides a good starting point
+for the systematic analysis of smarter systems and, in
+particular, peer-to-peer systems containing multiple
+domains of control.
+
+     <li><strong>additionality assessment</strong>&nbsp;: the evaluation
+of Kyoto-style additionalities in complex systems could
+benefit from simulation-based assessment of the type
+presented.
+
+     <li><strong>proactive competitive planning</strong>&nbsp;: a
+speculative use of literal simulation models is to
+support regulator-driven competitive planning.  Under
+this proposition, a regional energy system would be
+modeled in sufficient detail and projected forward to
+identify impending bottlenecks and high costs. 
+Solutions could then be sought from the public and
+private sectors and evaluated &ldquo;in&nbsp;situ&rdquo;.  The
+successful proposal would then be granted an operating
+license and incorporated permanently into the
+simulation &mdash; and the exercise repeated. 
+</ul>
+
+<h3 class="section">9.2 The underpinning model</h3>
+
+<p><a name="index-conceptual-model-60"></a><a name="index-underpinning-model-61"></a>
+This section sketches the model behind <em>xeona</em> in
+point form.  Not all features are necessarily
+implemented &mdash; in particular, gateways and the
+multi-domain solution algorithm are still under
+development (but nearing completion).  Refer to the tar
+distribution status log for more details on the state
+of this snapshot.
+
+<p class="noindent">The model underpinning <em>xeona</em> has the following
+attributes:
+
+     <ul>
+<li>high-resolution in terms of technical structure,
+surrounding context, and time base
+
+     <li>multi-player with support for individual rather than
+overarching system goals &mdash; unlike some other model
+types, an implicit socially-motivated super-actor is
+not required to guide the system
+
+     <li>founded on commodity demand connectivity and able to
+capture network effects and externalities &mdash; which are
+the characteristics and benefits of being connected,
+respectively
+
+     <li>energy-services (for example, indoor temperature)
+fulfillment is central and passive efficiency measures
+&mdash; defined as the component of demand satisfaction
+which does not directly consume energy commodities &mdash;
+can be modeled
+
+     <li>employs a patchwork of control domains, with support
+for the following commitment strategies:
+
+     <!-- nested -->
+          <ul>
+<li>locational marginal pricing &mdash; used in wholesale
+electricity markets
+
+          <li>short-run marginal cost optimization &mdash; more
+sophisticated operators
+
+          <li>prescribed merit order &mdash; less sophisticated operators
+
+          <li>impact proxy optimization &mdash; for instance, short-run
+CO_2-e<!-- /@w --> minimization
+
+          <li>first feasible solution
+</ul>
+
+     <li>technical assets (including power plant) which would
+otherwise be run at part-load can be tripped out
+(shutdown mode optimization)
+
+     <li>abutting control domains which are gatewayed <i>via</i>
+supply contracts, with support for the following
+contract types:
+
+     <!-- nested -->
+          <ul>
+<li>agreed price
+<li>take-or-pay
+<li>price-taking
+</ul>
+
+     <li>a mixed-integer linear solver is used to solve for unit
+commitment &mdash; with the guarantee that the optimums are
+global
+
+     <li>actors are used to make decisions, for instance:
+
+     <!-- nested -->
+          <ul>
+<li>consumers can vary their demand for energy-services
+
+          <li>operators can prepare bids, stipulate merit order,
+and/or define additional commitment penalties and
+constraints
+</ul>
+
+     <li>geographic locations are implicitly supported through
+contexts
+
+     <li>public policy measures can be introduced using contexts
+
+     <li>model output in the form of consolidated trade-off
+information is available for public interest analysis
+and policy-making
+
+     <li>the following commodity types (including financial
+instruments) are supported: carbon certificates, carbon
+sequestration services, electricity, fissile material,
+funds, heat, oxidizable material (usually combusted),
+recirculating thermal fluid (supporting heat transfer),
+and work (excluding electricity). 
+</ul>
+
+<h3 class="section">9.3 Should <em>xeona</em> have a GUI?</h3>
+
+<p>At present, <em>xeona</em> is firmly command-line.  But
+<em>xeona</em> does have a clean data-model &mdash; one which
+can also accommodate ancillary information.  And
+<em>xeona</em> will provide a list of supported entities
+and their associated data templates &mdash; although
+admittedly not in as robust a data interchange format
+as XML, but nonetheless with sufficient structure to be
+processed by script.
+
+   <p>The question of providing &ldquo;front-end&rdquo; tools to aid
+model preparation and analysis is never far away.  A
+basic text editor will suffice only for the very
+simplest of models.  The current set of model
+development tools &mdash; which includes the
+<code>xem-mode</code> for Emacs and the <code>xem.R</code>
+visualization script &mdash; have now been developed to
+near their full potential.  A dedicated class-browser
+style model editor could be written (perhaps in python
+and GTK+) with a tree view navigator in a side pane. 
+For completeness, the <code>xmole.sh</code> script can be
+used to extract and present meta information from a set
+of models in the current directory.
+
+   <p>The next step would be to create a visual programming
+front-end, similar to that used in chemical process
+simulation applications (like Aspen Plus).  These allow
+the user to drag-and-drop components onto a flow sheet
+and then open dialogs to set parameters and specify
+reporting.  Moreover, sets (subgraphs) of components
+can be &ldquo;collapsed&rdquo; if a model is getting too large to
+display.  Perhaps a similar GUI could be developed for
+<em>xeona</em>.
+
+   <p>In conclusion, <em>xeona</em> will probably remain a
+command-line application for the foreseeable future. 
+But there is considerable merit in designing and
+developing a GUI front-end for the visual entry of
+models, using either the current <code>.xem</code> format or
+its equivalent in XML as the bridge.
+
+<h3 class="section">9.4 Code quality</h3>
+
+<p><a name="index-code-quality-62"></a>
+Quality software begins with clear concepts translated
+into good design.  Together with a consideration for
+testability and perhaps articulated using UML (unified
+modeling language).  The next step is clean and careful
+coding, aided by informative console logging and, in
+the case of <em>xeona</em>, browser-based optimization
+problem visualization.  The next lines of defense are
+layered unit testing, memory validation with
+<code>valgrind</code> (<a href="http://valgrind.org">valgrind website</a>), and the automated running of test suites on
+each new build.  <em>xeona</em> employs all these
+strategies.  Independent code review and user testing
+are not undertaken at present.
+
+   <p>Formalized issues tracking is not being used at this
+point in development.  However significant bugs and
+issues are recorded in the following plain text file
+for reference:
+
+     <ul>
+<li><code>DOCS/BUGS.txt</code>
+</ul>
+
+<p class="noindent">Well-annotated version control under <code>subversion</code>
+(<a href="http://subversion.tigris.org">subversion website</a>, <a href="http://svnbook.red-bean.com">ebook</a>)
+with a local repository is being used.
+
+<!--  log -->
+<div class="node">
+<a name="Tar-log"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Terminology">Terminology</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Background">Background</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
+
+</div>
+
+<h2 class="chapter">10 Tar distribution status log</h2>
+
+<p><a name="index-tar-distributions-status-log-_0028chapter_0029-63"></a>
+This chapter logs the status of tar distributions.  SVN
+is the subversion revision number.  At present,
+<em>xeona</em> releases are notated by this number and
+not by an incremental version string.  Nor is a
+distribution change log kept, although every subversion
+commit is carefully annotated.
+
+   <p><table summary=""><tr align="left"><th valign="top" width="10%">SVN
+</th><th valign="top" width="20%">Date
+</th><th valign="top" width="70%">Comment
+<br></th></tr><tr align="left"><td valign="top" width="10%"></td><td valign="top" width="20%"></td><td valign="top" width="70%">
+
+<p><br></td></tr><tr align="left"><td valign="top" width="10%">r4250
+</td><td valign="top" width="20%">20-Jan-2010
+</td><td valign="top" width="70%">capabilities:
+     <ul>
+<li>suitable for <em>single</em> domain problems, that is,
+problems without gateway entities
+<li>includes support for demand splitting and joining,
+windfarms, synthetic wind, shut-down mode constant
+marginal efficiency plant, electricity markets with
+locational marginal pricing and pre-stated, adaptive,
+and interactive bidding
+<li>41 entity classes on offer:
+     <pre class="smallformat">AsopBasic AsopGrid AsopInelasticTs AsopInternalCosts
+     AsopLmpBidAdaptive1 AsopLmpBidDialog AsopLmpBidStatedTs1
+     AsopPrescribedOrder CmCarbonCert CmCarbonSeq CmElectricity
+     CmFission CmFunds CmHeat CmOxidBiocoal CmOxidize
+     CmThermalFluid CmWork CxAmbientAirSim CxAmbientAirTs
+     CxAmbientSolarTs CxCommercialFix DomainController
+     GateStatedTariff:Work JuncDemand2Join:Elec
+     JuncDemand2Split:Elec Node1Inj:Elec Node1Xit:Elec
+     Node2Inj:Elec Node2Nul:Elec Node2Xit:Elec Overseer
+     TeasHvTransmission TeasLoad:Elec TeasLoadElecTs TeasMineElec
+     TeasMineOxid TeasOxidToElec TeasSource:Elec TeasWindfarm
+     TimeHorizon
+</pre>
+     </ul>
+   <p><br></td></tr><tr align="left"><td valign="top" width="10%">r1497
+</td><td valign="top" width="20%">17-Apr-2008
+</td><td valign="top" width="70%">
+code evaluation issue
+
+<p><br></td></tr><tr align="left"><td valign="top" width="10%">r1493
+</td><td valign="top" width="20%">28-Feb-2008
+</td><td valign="top" width="70%">
+code evaluation issue
+   <br></td></tr></table>
+
+<!--  terminology -->
+<div class="node">
+<a name="Terminology"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#URLs">URLs</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Tar-log">Tar log</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
+
+</div>
+
+<!-- to squeeze the previous side -->
+<h2 class="chapheading">Terminology</h2>
+
+<p><table summary=""><tr align="left"><td valign="top" width="20%">C++                     </td><td valign="top" width="80%">a multi-paradigm programming language
+<br></td></tr><tr align="left"><td valign="top" width="20%">CO_2-e           </td><td valign="top" width="80%">carbon dioxide equivalent (emissions)
+<br></td></tr><tr align="left"><td valign="top" width="20%">CPU                     </td><td valign="top" width="80%">central processing unit, part of the system board
+<br></td></tr><tr align="left"><td valign="top" width="20%">DC                      </td><td valign="top" width="80%">direct current
+<br></td></tr><tr align="left"><td valign="top" width="20%">DEB                     </td><td valign="top" width="80%">Debian software package manager (also package)
+<br></td></tr><tr align="left"><td valign="top" width="20%">DOT                     </td><td valign="top" width="80%">a plain text graph description language
+<br></td></tr><tr align="left"><td valign="top" width="20%">GCC                     </td><td valign="top" width="80%">GNU compiler collection
+<br></td></tr><tr align="left"><td valign="top" width="20%">GLPK                    </td><td valign="top" width="80%">GNU Linear Programming Kit, an MIP solver
+<br></td></tr><tr align="left"><td valign="top" width="20%">GNU                     </td><td valign="top" width="80%">a mass-collaboration free software project founded by Richard Stallman
+<br></td></tr><tr align="left"><td valign="top" width="20%">GPL                     </td><td valign="top" width="80%">GNU public license
+<br></td></tr><tr align="left"><td valign="top" width="20%">GTK+                    </td><td valign="top" width="80%">a graphical user interface toolkit
+<br></td></tr><tr align="left"><td valign="top" width="20%">GUI                     </td><td valign="top" width="80%">graphical user interface
+<br></td></tr><tr align="left"><td valign="top" width="20%">HTML                    </td><td valign="top" width="80%">hypertext markup language
+<br></td></tr><tr align="left"><td valign="top" width="20%">HV                      </td><td valign="top" width="80%">high voltage
+<br></td></tr><tr align="left"><td valign="top" width="20%">IEEE                    </td><td valign="top" width="80%">Institute of Electrical and Electronics Engineers
+<br></td></tr><tr align="left"><td valign="top" width="20%">LMP                     </td><td valign="top" width="80%">locational marginal pricing
+<br></td></tr><tr align="left"><td valign="top" width="20%">MIP                     </td><td valign="top" width="80%">mixed-integer program
+<br></td></tr><tr align="left"><td valign="top" width="20%">OSP                     </td><td valign="top" width="80%">optimization sub-problem
+<br></td></tr><tr align="left"><td valign="top" width="20%">RCS                     </td><td valign="top" width="80%">revision control system
+<br></td></tr><tr align="left"><td valign="top" width="20%">RPM                     </td><td valign="top" width="80%">Red Hat software package manager (also package)
+<br></td></tr><tr align="left"><td valign="top" width="20%">SI                      </td><td valign="top" width="80%">the metric system
+<br></td></tr><tr align="left"><td valign="top" width="20%">SSH                     </td><td valign="top" width="80%">secure shell protocol
+<br></td></tr><tr align="left"><td valign="top" width="20%">SVN                     </td><td valign="top" width="80%">Subversion version control system
+<br></td></tr><tr align="left"><td valign="top" width="20%">UML                     </td><td valign="top" width="80%">unified modeling language, suited to object-oriented software design
+<br></td></tr><tr align="left"><td valign="top" width="20%">UNIX                    </td><td valign="top" width="80%">nowadays, an operating system standard (Linux complies)
+<br></td></tr><tr align="left"><td valign="top" width="20%">UOA                     </td><td valign="top" width="80%">unit of account and implying a generic currency
+<br></td></tr><tr align="left"><td valign="top" width="20%">XEM                     </td><td valign="top" width="80%"><em>xeona</em> model or <em>xeona</em> model file
+<br></td></tr><tr align="left"><td valign="top" width="20%">XML                     </td><td valign="top" width="80%">extensible markup language
+<br></td></tr><tr align="left"><td valign="top" width="20%">gzip                    </td><td valign="top" width="80%">a UNIX compression utility
+<br></td></tr><tr align="left"><td valign="top" width="20%">tar                     </td><td valign="top" width="80%">a UNIX archiving utility
+<br></td></tr><tr align="left"><td valign="top" width="20%">xem                     </td><td valign="top" width="80%"><em>xeona</em> model or <em>xeona</em> model file
+<br></td></tr></table>
+
+<!--  terminology -->
+<div class="node">
+<a name="URLs"></a>
+<p><hr>
+Next:&nbsp;<a rel="next" accesskey="n" href="#Concept-index">Concept index</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#Terminology">Terminology</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
+
+</div>
+
+<!-- to squeeze the previous side -->
+<h2 class="chapheading">URLs</h2>
+
+<p><table summary=""><tr align="left"><td valign="top" width="30%">Boost C++ libraries              </td><td valign="top" width="70%"><a href="http://www.boost.org">http://www.boost.org</a>
+<br></td></tr><tr align="left"><td valign="top" width="30%">Creative Commons                 </td><td valign="top" width="70%"><a href="http://www.creativecommons.org">http://www.creativecommons.org</a>
+<br></td></tr><tr align="left"><td valign="top" width="30%">GLPK solver library              </td><td valign="top" width="70%"><a href="http://www.gnu.org/software/glpk">http://www.gnu.org/software/glpk</a>
+<br></td></tr><tr align="left"><td valign="top" width="30%"><code>R</code> project official site   </td><td valign="top" width="70%"><a href="http://www.r-project.org">http://www.r-project.org</a>
+<br></td></tr><tr align="left"><td valign="top" width="30%"><code>fastdep</code> utility           </td><td valign="top" width="70%"><a href="http://www.irule.be/bvh/c++/fastdep">http://www.irule.be/bvh/c++/fastdep</a>
+<br></td></tr><tr align="left"><td valign="top" width="30%"><code>graphviz</code> utility          </td><td valign="top" width="70%"><a href="http://www.graphviz.org">http://www.graphviz.org</a>
+<br></td></tr><tr align="left"><td valign="top" width="30%"><code>subversion</code> utility        </td><td valign="top" width="70%"><a href="http://subversion.tigris.org">http://subversion.tigris.org</a>
+<br></td></tr><tr align="left"><td valign="top" width="30%"><code>subversion</code> ebook          </td><td valign="top" width="70%"><a href="http://svnbook.red-bean.com">http://svnbook.red-bean.com</a>
+<br></td></tr><tr align="left"><td valign="top" width="30%"><code>valgrind</code> utility          </td><td valign="top" width="70%"><a href="http://valgrind.org">http://valgrind.org</a>
+<br></td></tr></table>
+
+<!-- to squeeze this side -->
+<!--  concept index -->
+<div class="node">
+<a name="Concept-index"></a>
+<p><hr>
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#URLs">URLs</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
+
+</div>
+
+<h2 class="chapheading">Concept index                   <!-- was 'unnumbered', then 'heading' -->
+</h2>
+
+<ul class="index-cp" compact>
+<li><a href="#index-g_t_0040code_007bbeep_007d-utility-13"><code>beep</code> utility</a>: <a href="#Requirements">Requirements</a></li>
+<li><a href="#index-binary-file-naming-conventions-20">binary file naming conventions</a>: <a href="#Usage">Usage</a></li>
+<li><a href="#index-Boost-C_002b_002b-libraries-suite-10">Boost C++ libraries suite</a>: <a href="#Requirements">Requirements</a></li>
+<li><a href="#index-breadboard-plot-41">breadboard plot</a>: <a href="#Models">Models</a></li>
+<li><a href="#index-breadboard-plot_002c-example-56">breadboard plot, example</a>: <a href="#Example">Example</a></li>
+<li><a href="#index-build_002dtime-requirements-7">build-time requirements</a>: <a href="#Requirements">Requirements</a></li>
+<li><a href="#index-code-quality-62">code quality</a>: <a href="#Background">Background</a></li>
+<li><a href="#index-command_002dline-usage-32">command-line usage</a>: <a href="#Usage">Usage</a></li>
+<li><a href="#index-commodity-types-51">commodity types</a>: <a href="#Data-rules">Data rules</a></li>
+<li><a href="#index-conceptual-model-60">conceptual model</a>: <a href="#Background">Background</a></li>
+<li><a href="#index-console-reporting-28">console reporting</a>: <a href="#Usage">Usage</a></li>
+<li><a href="#index-creating-a-new-model-46">creating a new model</a>: <a href="#Models">Models</a></li>
+<li><a href="#index-data-considerations-_0028chapter_0029-48">data considerations (chapter)</a>: <a href="#Data-rules">Data rules</a></li>
+<li><a href="#index-debugging-models-47">debugging models</a>: <a href="#Models">Models</a></li>
+<li><a href="#index-demand-connectivity-52">demand connectivity</a>: <a href="#Data-rules">Data rules</a></li>
+<li><a href="#index-development-platform-4">development platform</a>: <a href="#Requirements">Requirements</a></li>
+<li><a href="#index-entity-class-library-_0028chapter_0029-57">entity class library (chapter)</a>: <a href="#Entities">Entities</a></li>
+<li><a href="#index-entity-class-prefix-conventions-49">entity class prefix conventions</a>: <a href="#Data-rules">Data rules</a></li>
+<li><a href="#index-example-model-_0028chapter_0029-53">example model (chapter)</a>: <a href="#Example">Example</a></li>
+<li><a href="#index-g_t_0040code_007bfastdep_007d-utility-8"><code>fastdep</code> utility</a>: <a href="#Requirements">Requirements</a></li>
+<li><a href="#index-g_t_0040code_007bgawk_007d-utility-12"><code>gawk</code> utility</a>: <a href="#Requirements">Requirements</a></li>
+<li><a href="#index-g_t_0040code_007bgdb_007d-command_002dline-debugger-14"><code>gdb</code> command-line debugger</a>: <a href="#Requirements">Requirements</a></li>
+<li><a href="#index-GLPK-solver-library-9">GLPK solver library</a>: <a href="#Requirements">Requirements</a></li>
+<li><a href="#index-g_t_0040code_007bgraphviz_007d-visualization-utility-44"><code>graphviz</code> visualization utility</a>: <a href="#Models">Models</a></li>
+<li><a href="#index-help-31">help</a>: <a href="#Usage">Usage</a></li>
+<li><a href="#index-link_002dtime-problems-with-Boost-libraries-11">link-time problems with Boost libraries</a>: <a href="#Requirements">Requirements</a></li>
+<li><a href="#index-MIP-problem-instance-visualization-39">MIP problem instance visualization</a>: <a href="#Models">Models</a></li>
+<li><a href="#index-model-example-54">model example</a>: <a href="#Example">Example</a></li>
+<li><a href="#index-model-file-naming-conventions-22">model file naming conventions</a>: <a href="#Usage">Usage</a></li>
+<li><a href="#index-model-file-processing-24">model file processing</a>: <a href="#Usage">Usage</a></li>
+<li><a href="#index-model-file-version-control-25">model file version control</a>: <a href="#Usage">Usage</a></li>
+<li><a href="#index-model-preparation-35">model preparation</a>: <a href="#Models">Models</a></li>
+<li><a href="#index-model-visualization-37">model visualization</a>: <a href="#Models">Models</a></li>
+<li><a href="#index-naming-conventions_002c-binary-files-21">naming conventions, binary files</a>: <a href="#Usage">Usage</a></li>
+<li><a href="#index-naming-conventions_002c-entity-class-prefixes-50">naming conventions, entity class prefixes</a>: <a href="#Data-rules">Data rules</a></li>
+<li><a href="#index-naming-conventions_002c-model-files-23">naming conventions, model files</a>: <a href="#Usage">Usage</a></li>
+<li><a href="#index-network-plot-42">network plot</a>: <a href="#Models">Models</a></li>
+<li><a href="#index-network-plot_002c-example-55">network plot, example</a>: <a href="#Example">Example</a></li>
+<li><a href="#index-options_002c-command_002dline-33">options, command-line</a>: <a href="#Usage">Usage</a></li>
+<li><a href="#index-output-streams-30">output streams</a>: <a href="#Usage">Usage</a></li>
+<li><a href="#index-overview-of-_0040emph_007bxeona_007d-1">overview of <em>xeona</em></a>: <a href="#Overview">Overview</a></li>
+<li><a href="#index-potential-roles-for-_0040emph_007bxeona_007d-58">potential roles for <em>xeona</em></a>: <a href="#Background">Background</a></li>
+<li><a href="#index-preparing-models-_0028chapter_0029-34">preparing models (chapter)</a>: <a href="#Models">Models</a></li>
+<li><a href="#index-g_t_0040code_007bR_007d-statistical-computing-language_002fenvironment-45"><code>R</code> statistical computing language/environment</a>: <a href="#Models">Models</a></li>
+<li><a href="#index-roles_002c-potential_002c-for-_0040emph_007bxeona_007d-59">roles, potential, for <em>xeona</em></a>: <a href="#Background">Background</a></li>
+<li><a href="#index-run_002dtime-output-29">run-time output</a>: <a href="#Usage">Usage</a></li>
+<li><a href="#index-run_002dtime-recommendations-6">run-time recommendations</a>: <a href="#Requirements">Requirements</a></li>
+<li><a href="#index-g_t_0040code_007bsdiff_007d-utility_002c-example-of-use-27"><code>sdiff</code> utility, example of use</a>: <a href="#Usage">Usage</a></li>
+<li><a href="#index-system-requirements-_0028chapter_0029-3">system requirements (chapter)</a>: <a href="#Requirements">Requirements</a></li>
+<li><a href="#index-system-requirements-_0028in-brief_0029-2">system requirements (in brief)</a>: <a href="#Overview">Overview</a></li>
+<li><a href="#index-tar-distributions-_0028chapter_0029-18">tar distributions (chapter)</a>: <a href="#Tar-distributions">Tar distributions</a></li>
+<li><a href="#index-tar-distributions-status-log-_0028chapter_0029-63">tar distributions status log (chapter)</a>: <a href="#Tar-log">Tar log</a></li>
+<li><a href="#index-g_t_0040code_007btextinfo_007d-software-documentation-system-15"><code>textinfo</code> software documentation system</a>: <a href="#Requirements">Requirements</a></li>
+<li><a href="#index-g_t_0040code_007bumbrello_007d-UML-modeler-16"><code>umbrello</code> UML modeler</a>: <a href="#Requirements">Requirements</a></li>
+<li><a href="#index-underpinning-model-61">underpinning model</a>: <a href="#Background">Background</a></li>
+<li><a href="#index-using-_0040emph_007bxeona_007d-_0028chapter_0029-19">using <em>xeona</em> (chapter)</a>: <a href="#Usage">Usage</a></li>
+<li><a href="#index-g_t_0040code_007bvalgrind_007d-memory-checker-17"><code>valgrind</code> memory checker</a>: <a href="#Requirements">Requirements</a></li>
+<li><a href="#index-version-control_002c-for-model-files-26">version control, for model files</a>: <a href="#Usage">Usage</a></li>
+<li><a href="#index-visualization_002c-MIP-problem-instance-40">visualization, MIP problem instance</a>: <a href="#Models">Models</a></li>
+<li><a href="#index-visualizing-models-38">visualizing models</a>: <a href="#Models">Models</a></li>
+<li><a href="#index-Windows-binary-port-5">Windows binary port</a>: <a href="#Requirements">Requirements</a></li>
+<li><a href="#index-g_t_0040code_007bxem_002dmode_007d_002c-custom-emacs-editing-mode-for-_0040emph_007bxeona_007d-36"><code>xem-mode</code>, custom emacs editing mode for <em>xeona</em></a>: <a href="#Models">Models</a></li>
+<li><a href="#index-g_t_0040code_007bxem_002eR_007d-visualization-script-43"><code>xem.R</code> visualization script</a>: <a href="#Models">Models</a></li>
+   </ul><!--  bye -->
+<div class="footnote">
+<hr>
+<a name="texinfo-footnotes-in-document"></a><h4>Footnotes</h4><p class="footnote"><small>[<a name="fn-1" href="#fnd-1">1</a>]</small> The author would like to express appreciation
+to the free software community for these tools and
+systems.</p>
+
+   <hr></div>
+
+</body></html>
+

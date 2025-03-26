@@ -1,0 +1,26 @@
+
+# role   = building stock
+# study  = trial-008
+# scens  = *
+# cut    = :
+# lines  = F
+# tall   = T
+# ymax   = 0
+# zero   = T
+
+  entity.teas-building-elec-f02.demands                     "building stock : f02 : electricity demand"
+  entity.teas-building-elec-f02.hvac-dutys                  "building stock : f02 : HVAC duty (cooling positive)"
+
+  entity.teas-building-elec-f02.floor-performance           "building stock : f02 : floor performance"
+  entity.teas-building-elec-f02.chiller-max-duty            "building stock : f02 : chiller maximum duty"
+  entity.teas-building-elec-f02.heater-max-duty             "building stock : f02 : heater maximum duty"
+
+##  emacs text editor settings
+##  local variables:
+##    mode: text
+##    make-backup-files: nil
+##    truncate-lines: t
+##    comment-start: "#"
+##    tab-stop-list: (02 12 60)
+##  end:
+

@@ -1,0 +1,864 @@
+
+#  file-purpose     : contain branch and unit-test specific information
+#  file-initiator   : Robbie Morrison <robbie@actrix.co.nz>
+#  file-create-date : Thu 26-Mar-2009 14:02 UTC
+#  file-status      : working (but ongoing)
+#  file-keywords    : xeona
+
+#  $Revision: 9259 $
+#  $Date: 2012-07-05 00:22:39 +0200 (Thu, 05 Jul 2012) $
+#  $Author: robbie $
+#  $URL: file:///home/robbie/svn-root/xeona/futz/trunk/xeona1/machunits $
+
+#  CAUTION: application builds the application build
+#  list is specified in the 'makefile' under the
+#  'sources' variable and is NOT defined here
+
+# ---------------------------------
+#  preamble
+# ---------------------------------
+
+SOURCES=""                              # output from this script fragment
+
+# ---------------------------------
+#  test some names
+# ---------------------------------
+
+# it is easier to recognize names as string literals
+# rather than uppercase variables -- but it is also a
+# good idea to test any local assumptions regarding
+# equivalence
+
+test_simple_name "$COMMON" "common"
+test_simple_name "$UTEST"  "ut"
+
+# ---------------------------------
+#  build sources list
+# ---------------------------------
+
+# CAUTION: for unit-testing, the default rules are:
+#
+#  * common.o, util*.o, and logger.o are normally always built
+#  * common.cc is not unit-tested
+#  * any sub-directories are stripped off later as needed
+
+UTILS="c/util1.cc c/util2.cc c/util3.cc c/util4.cc f/ospinfo.cc"
+EXCEPS="a/exbase.cc a/exapp.cc"
+
+ZERO=" ./common.cc $STEM.cc $STEM.ut0.cc $UTILS a/logger.cc $EXCEPS"
+ONE="  ./common.cc          $STEM.ut1.cc $UTILS a/logger.cc $EXCEPS"
+TWO="  ./common.cc          $STEM.ut2.cc $UTILS a/logger.cc $EXCEPS"
+THREE="./common.cc          $STEM.ut3.cc $UTILS a/logger.cc $EXCEPS"
+
+case "$STEM" in
+
+        # CODE NOT TREATED AS A UNIT
+
+    ./common|common)
+        report
+        report "ERROR" "$STEM unit test not supported"
+        report
+        exit $E_REFUSING_COMMON
+        ;;
+
+        # LEVEL 0 UNIT TESTS AS SPECIAL CASES
+
+    a/exitstat)
+        SOURCES="$ZERO"
+        ;;
+    a/exapp)
+        SOURCES="./common.cc $STEM.cc $STEM.ut0.cc a/logger.cc"
+        SOURCES="$SOURCES a/exbase.cc"
+        ;;
+    a/exent)
+        SOURCES="./common.cc $STEM.cc $STEM.ut0.cc a/logger.cc"
+        SOURCES="$SOURCES a/exbase.cc a/exapp.cc" # the latter for a 'xeona::kill_on_log' in unit 'a/logger'
+        ;;
+    a/floatstat)
+        SOURCES="$ZERO"
+        ;;
+    a/helpers)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES c/files.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        ;;
+    a/logger)                 # best to prevent 'logger.cc' from appearing twice
+        SOURCES="./common.cc $STEM.cc $STEM.ut0.cc"
+        SOURCES="$SOURCES a/exbase.cc a/exapp.cc"
+        ;;
+    a/recorder)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES"
+        ;;
+    a/xemopt)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES c/xemgen.cc"
+        ;;
+    a/yeek)
+        SOURCES="$ZERO"
+        ;;
+    b/asop)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/actor.cc b/commods.cc b/costreg.cc b/entity.cc b/optprob.cc b/tictoc.cc"
+        SOURCES="$SOURCES c/costs.cc c/extunits.cc c/files.cc c/fincalc.cc c/ghouse.cc c/label.cc c/linklog.cc"
+        SOURCES="$SOURCES c/recset.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        ;;
+    b/asop01)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES a/exent.cc"
+        SOURCES="$SOURCES b/actor.cc b/asop.cc b/auxs01.cc b/block.cc b/commods.cc b/costreg.cc b/entity.cc"
+        SOURCES="$SOURCES b/lmpbid.cc b/optctl.cc b/optprob.cc b/teas.cc b/tictoc.cc"
+        SOURCES="$SOURCES c/costs.cc c/extunits.cc c/files.cc c/fincalc.cc c/ghouse.cc c/label.cc c/linklog.cc"
+        SOURCES="$SOURCES c/recset.cc c/si3units.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        ;;
+    b/asop02)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES a/exent.cc"
+        SOURCES="$SOURCES b/actor.cc b/asop.cc b/block.cc b/commods.cc b/commods01.cc b/costreg.cc b/entity.cc b/lmpbid.cc"
+        SOURCES="$SOURCES b/optctl.cc b/optprob.cc b/teas.cc b/tictoc.cc"
+        SOURCES="$SOURCES c/costs.cc c/extunits.cc c/files.cc c/fincalc.cc c/ghouse.cc c/label.cc c/linklog.cc"
+        SOURCES="$SOURCES c/recset.cc c/si3units.cc c/tsops.cc"
+        SOURCES="$SOURCES c/hydro.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        # following required by AsopLmpBidHydro1
+        SOURCES="$SOURCES b/teas.cc b/teas07.cc"
+        SOURCES="$SOURCES b/optops1.cc b/optops2.cc"
+        SOURCES="$SOURCES c/conex.cc"
+        SOURCES="$SOURCES c/tsset.cc"
+        SOURCES="$SOURCES c/flowset.cc c/stats.cc"
+        SOURCES="$SOURCES e/context.cc e/cxamb03.cc"
+        SOURCES="$SOURCES i/gnuplot.cc"
+        ;;
+    b/asop03)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/actor.cc b/asop.cc b/bandtaf.cc b/block.cc b/commods.cc b/costreg.cc b/entity.cc b/lmpbid.cc"
+        SOURCES="$SOURCES b/optctl.cc b/optprob.cc b/teas.cc b/tictoc.cc"
+        SOURCES="$SOURCES c/costs.cc c/extunits.cc c/files.cc c/fincalc.cc c/ghouse.cc c/label.cc c/linklog.cc"
+        SOURCES="$SOURCES c/recset.cc c/si3units.cc c/tsops.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        ;;
+    b/asop04)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/actor.cc b/asop.cc b/bandtaf.cc b/block.cc b/commods.cc b/costreg.cc b/entity.cc b/lmpbid.cc"
+        SOURCES="$SOURCES b/optctl.cc b/optprob.cc b/teas.cc b/tictoc.cc"
+        SOURCES="$SOURCES c/costs.cc c/extunits.cc c/files.cc c/fincalc.cc c/ghouse.cc c/label.cc c/linklog.cc"
+        SOURCES="$SOURCES c/recset.cc c/si3units.cc"
+        SOURCES="$SOURCES c/opssched.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        ;;
+    b/asop05)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/actor.cc b/asop.cc b/bandtaf.cc b/block.cc b/commods.cc b/costreg.cc b/entity.cc b/lmpbid.cc"
+        SOURCES="$SOURCES b/optctl.cc b/optprob.cc b/teas.cc b/tictoc.cc"
+        SOURCES="$SOURCES b/teas12.cc c/conex.cc b/optops1.cc b/optops2.cc b/commods.cc b/commods01.cc" # could be reduced thru forward declarations
+        SOURCES="$SOURCES c/costs.cc c/extunits.cc c/files.cc c/fincalc.cc c/ghouse.cc c/label.cc c/linklog.cc"
+        SOURCES="$SOURCES c/recset.cc c/si3units.cc"
+        SOURCES="$SOURCES c/opssched.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        ;;
+    b/auxs01)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/entity.cc b/lmpbid.cc"
+        SOURCES="$SOURCES c/linklog.cc c/recset.cc"
+        ;;
+    b/builtins)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/entity.cc"
+        SOURCES="$SOURCES c/linklog.cc c/recset.cc"
+        ;;
+    b/block)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/entity.cc"
+        SOURCES="$SOURCES c/linklog.cc c/recset.cc c/si3units.cc"
+        ;;
+    b/commods)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/entity.cc b/propdata.cc"
+        SOURCES="$SOURCES c/extunits.cc c/ghouse.cc c/linklog.cc c/recset.cc"
+        ;;
+    b/commods01)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/commods.cc"
+        SOURCES="$SOURCES b/entity.cc b/propdata.cc"
+        SOURCES="$SOURCES c/extunits.cc c/ghouse.cc c/linklog.cc c/recset.cc"
+        ;;
+    b/costreg)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/entity.cc"
+        SOURCES="$SOURCES c/costs.cc c/linklog.cc"   # provided for future use
+        SOURCES="$SOURCES c/fincalc.cc c/recset.cc"
+        ;;
+    b/domcon)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES a/helpers.cc"
+        SOURCES="$SOURCES b/actor.cc b/asop.cc b/bandtaf.cc b/block.cc b/commods.cc b/commods01.cc b/costreg.cc b/entity.cc b/gate.cc"
+        SOURCES="$SOURCES b/optgate.cc b/optprob.cc b/teas.cc b/tictoc.cc"
+        SOURCES="$SOURCES c/conex.cc c/costs.cc c/extunits.cc c/files.cc c/fincalc.cc c/ghouse.cc c/label.cc c/linklog.cc"
+        SOURCES="$SOURCES c/recset.cc c/si3units.cc"
+        SOURCES="$SOURCES d/glpkviz.cc d/siglp.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        ;;
+    b/entity)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES c/linklog.cc c/recset.cc c/xeona_ptr.cc"
+        ;;
+    b/gate)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/bandtaf.cc b/block.cc b/commods.cc b/commods01.cc b/costreg.cc b/entity.cc b/optgate.cc b/optprob.cc b/tictoc.cc"
+        SOURCES="$SOURCES c/conex.cc c/costs.cc c/extunits.cc c/files.cc c/fincalc.cc c/ghouse.cc c/label.cc c/linklog.cc c/recset.cc"
+        SOURCES="$SOURCES c/si3units.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        ;;
+    b/gate01)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/bandtaf.cc b/block.cc b/commods.cc b/commods01.cc b/costreg.cc b/entity.cc b/gate.cc b/optgate.cc b/optprob.cc"
+        SOURCES="$SOURCES b/tictoc.cc"
+        SOURCES="$SOURCES c/conex.cc c/costs.cc c/extunits.cc c/files.cc c/fincalc.cc c/label.cc c/linklog.cc c/recset.cc c/ghouse.cc"
+        SOURCES="$SOURCES c/si3units.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        ;;
+    b/gate02)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/bandtaf.cc b/block.cc b/commods.cc b/commods01.cc b/costreg.cc b/entity.cc b/gate.cc b/optgate.cc b/optprob.cc"
+        SOURCES="$SOURCES b/tictoc.cc"
+        SOURCES="$SOURCES c/conex.cc c/costs.cc c/extunits.cc c/files.cc c/fincalc.cc c/label.cc c/linklog.cc c/recset.cc c/ghouse.cc"
+        SOURCES="$SOURCES c/si3units.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        ;;
+    b/junc)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/block.cc b/commods.cc b/commods01.cc b/entity.cc b/optprob.cc b/tictoc.cc"
+        SOURCES="$SOURCES c/conex.cc c/costs.cc c/extunits.cc c/files.cc c/ghouse.cc c/label.cc c/linklog.cc c/recset.cc"
+        SOURCES="$SOURCES c/si3units.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        ;;
+    b/junc01)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/block.cc b/commods.cc b/commods01.cc b/entity.cc b/junc.cc b/optjunc.cc b/optprob.cc b/tictoc.cc"
+        SOURCES="$SOURCES c/conex.cc c/costs.cc c/extunits.cc c/files.cc c/ghouse.cc c/label.cc c/linklog.cc c/recset.cc"
+        SOURCES="$SOURCES c/si3units.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        ;;
+    b/junc02)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/block.cc b/commods.cc b/commods01.cc b/entity.cc b/junc.cc b/optjunc.cc b/optprob.cc b/tictoc.cc"
+        SOURCES="$SOURCES c/conex.cc c/costs.cc c/extunits.cc c/files.cc c/ghouse.cc c/label.cc c/linklog.cc c/recset.cc"
+        SOURCES="$SOURCES c/si3units.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        ;;
+    b/junc03)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/block.cc b/commods.cc b/commods01.cc b/entity.cc b/junc.cc b/optjunc.cc b/optprob.cc b/tictoc.cc"
+        SOURCES="$SOURCES c/conex.cc c/costs.cc c/extunits.cc c/files.cc c/ghouse.cc c/label.cc c/linklog.cc c/recset.cc"
+        SOURCES="$SOURCES c/si3units.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        ;;
+    b/junc04)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/block.cc b/commods.cc b/commods01.cc b/entity.cc b/junc.cc b/optjunc.cc b/optprob.cc b/tictoc.cc"
+        SOURCES="$SOURCES c/conex.cc c/costs.cc c/extunits.cc c/files.cc c/ghouse.cc c/label.cc c/linklog.cc c/recset.cc"
+        SOURCES="$SOURCES c/si3units.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        ;;
+    b/node)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/block.cc b/commods.cc b/commods01.cc b/entity.cc b/optprob.cc b/tictoc.cc"
+        SOURCES="$SOURCES c/conex.cc c/costs.cc c/extunits.cc c/files.cc c/ghouse.cc c/label.cc c/linklog.cc c/recset.cc"
+        SOURCES="$SOURCES c/si3units.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        ;;
+    b/node01)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/block.cc b/commods.cc b/commods01.cc b/entity.cc b/node.cc b/optnode1.cc b/optnode2.cc b/optprob.cc b/tictoc.cc"
+        SOURCES="$SOURCES c/conex.cc c/costs.cc c/extunits.cc c/files.cc c/ghouse.cc c/label.cc c/linklog.cc c/recset.cc"
+        SOURCES="$SOURCES c/si3units.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        ;;
+    b/node02)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/block.cc b/commods.cc b/commods01.cc b/entity.cc b/node.cc b/optnode1.cc b/optnode2.cc b/optprob.cc b/tictoc.cc"
+        SOURCES="$SOURCES c/conex.cc c/costs.cc c/extunits.cc c/files.cc c/ghouse.cc c/label.cc c/linklog.cc c/recset.cc"
+        SOURCES="$SOURCES c/si3units.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        ;;
+    b/node03)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/block.cc b/commods.cc b/commods01.cc b/entity.cc b/node.cc b/optnode1.cc b/optnode2.cc b/optprob.cc b/tictoc.cc"
+        SOURCES="$SOURCES c/conex.cc c/costs.cc c/extunits.cc c/files.cc c/ghouse.cc c/label.cc c/linklog.cc c/recset.cc"
+        SOURCES="$SOURCES c/si3units.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        ;;
+    b/node04)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/block.cc b/commods.cc b/commods01.cc b/entity.cc b/node.cc b/optnode1.cc b/optnode2.cc b/optprob.cc b/tictoc.cc"
+        SOURCES="$SOURCES c/conex.cc c/costs.cc c/extunits.cc c/files.cc c/ghouse.cc c/label.cc c/linklog.cc c/recset.cc"
+        SOURCES="$SOURCES c/si3units.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        ;;
+    b/node05)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/block.cc b/commods.cc b/commods01.cc b/entity.cc b/node.cc b/optnode1.cc b/optnode2.cc b/optprob.cc b/tictoc.cc"
+        SOURCES="$SOURCES c/conex.cc c/costs.cc c/extunits.cc c/files.cc c/ghouse.cc c/label.cc c/linklog.cc c/recset.cc"
+        SOURCES="$SOURCES c/si3units.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        ;;
+    b/node06)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/block.cc b/commods.cc b/commods01.cc b/entity.cc b/node.cc b/optnode1.cc b/optnode2.cc b/optprob.cc b/tictoc.cc"
+        SOURCES="$SOURCES c/conex.cc c/costs.cc c/extunits.cc c/files.cc c/ghouse.cc c/label.cc c/linklog.cc c/recset.cc"
+        SOURCES="$SOURCES c/si3units.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        ;;
+    b/optctl)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/lmpbid.cc b/optprob.cc"
+        SOURCES="$SOURCES c/costs.cc c/files.cc c/label.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        ;;
+    b/optjunc)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/optprob.cc"
+        SOURCES="$SOURCES c/costs.cc c/files.cc c/label.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        ;;
+    b/optgate)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/bandtaf.cc b/optprob.cc"
+        SOURCES="$SOURCES c/costs.cc c/files.cc c/label.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        ;;
+    b/optnode1)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/optprob.cc"
+        SOURCES="$SOURCES c/costs.cc c/files.cc c/label.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        ;;
+    b/optnode2)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/optprob.cc"
+        SOURCES="$SOURCES c/costs.cc c/files.cc c/label.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        ;;
+    b/optops1)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/optprob.cc"
+        SOURCES="$SOURCES c/costs.cc c/files.cc c/label.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        ;;
+    b/optops2)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/optprob.cc"
+        SOURCES="$SOURCES c/costs.cc c/files.cc c/label.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        ;;
+    b/optprob)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES c/costs.cc c/files.cc c/label.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        ;;
+    b/overseer)
+        # no associated ut0 file
+        # previous trials ends up with the error:
+        #
+        #   makefile: linking binary: b/overseer
+        #   g++  -o b/overseer common.o ...
+        #   b/overseer.o: In function `__shared_ptr<Entity>':
+        #   /usr/include/c++/4.4/tr1/shared_ptr.h:470: undefined reference to `typeinfo for Context'
+        #
+        # looking at the file and a search on goggle revealed very little
+        :
+        ;;
+    b/teas)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/block.cc b/commods.cc b/commods01.cc b/costreg.cc b/entity.cc b/optprob.cc b/tictoc.cc"
+        SOURCES="$SOURCES c/conex.cc c/costs.cc c/extunits.cc c/files.cc c/fincalc.cc c/ghouse.cc c/label.cc c/linklog.cc"
+        SOURCES="$SOURCES c/recset.cc c/si3units.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        ;;
+    b/teas01)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/teas.cc"
+        SOURCES="$SOURCES b/block.cc b/commods.cc b/commods01.cc b/costreg.cc b/entity.cc b/optops1.cc b/optops2.cc b/optprob.cc b/tictoc.cc"
+        SOURCES="$SOURCES c/conex.cc c/costs.cc c/extunits.cc c/files.cc c/fincalc.cc c/ghouse.cc c/label.cc c/linklog.cc"
+        SOURCES="$SOURCES c/recset.cc c/si3units.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        ;;
+    b/teas02)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/teas.cc"
+        SOURCES="$SOURCES b/block.cc b/commods.cc b/commods01.cc b/costreg.cc b/entity.cc b/optops1.cc b/optops2.cc b/optprob.cc b/tictoc.cc"
+        SOURCES="$SOURCES c/conex.cc c/costs.cc c/extunits.cc c/files.cc c/fincalc.cc c/ghouse.cc c/label.cc c/linklog.cc"
+        SOURCES="$SOURCES c/tsset.cc"
+        SOURCES="$SOURCES c/recset.cc c/si3units.cc c/stats.cc c/xeona_ptr.cc"
+        SOURCES="$SOURCES c/tsops.cc"
+        SOURCES="$SOURCES c/wxinfo.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        SOURCES="$SOURCES e/context.cc e/cxamb01.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        SOURCES="$SOURCES i/gnuplot.cc"
+        ;;
+    b/teas03)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/teas.cc"
+        SOURCES="$SOURCES b/block.cc b/commods.cc b/commods01.cc b/costreg.cc b/entity.cc b/optops1.cc b/optops2.cc b/optprob.cc b/tictoc.cc"
+        SOURCES="$SOURCES c/conex.cc c/costs.cc c/extunits.cc c/files.cc c/fincalc.cc c/ghouse.cc c/label.cc c/linklog.cc"
+        SOURCES="$SOURCES c/recset.cc c/si3units.cc" # c/tsops.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        ;;
+    b/teas04)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/teas.cc"
+        SOURCES="$SOURCES b/block.cc b/commods.cc b/commods01.cc b/costreg.cc b/entity.cc b/gate.cc b/optops1.cc b/optops2.cc b/optprob.cc b/tictoc.cc"
+        SOURCES="$SOURCES c/conex.cc c/costs.cc c/extunits.cc c/files.cc c/fincalc.cc c/ghouse.cc c/label.cc c/linklog.cc"
+        SOURCES="$SOURCES c/recset.cc c/si3units.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        ;;
+    b/teas05)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES a/exent.cc"
+        SOURCES="$SOURCES b/teas.cc"
+        SOURCES="$SOURCES b/block.cc b/commods.cc b/commods01.cc b/costreg.cc b/entity.cc b/optops1.cc b/optops2.cc b/optprob.cc b/tictoc.cc"
+        SOURCES="$SOURCES c/conex.cc c/costs.cc c/extunits.cc c/files.cc c/fincalc.cc c/ghouse.cc c/label.cc c/linklog.cc"
+        SOURCES="$SOURCES c/recset.cc c/si3units.cc c/suncalc.cc c/tsops.cc c/wxinfo.cc c/yearcalc.cc"
+        SOURCES="$SOURCES c/tsset.cc"
+        SOURCES="$SOURCES c/opssched.cc"
+        SOURCES="$SOURCES c/buildinfo.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        SOURCES="$SOURCES e/context.cc e/cxamb01.cc e/cxamb02.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        SOURCES="$SOURCES h/thrmperf.cc h/plank.cc h/r134a.cc"
+        SOURCES="$SOURCES i/gnuplot.cc"
+        ;;
+    b/teas06)                 # not required: b/gate.cc c/xeona_ptr.cc
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/teas.cc"
+        SOURCES="$SOURCES b/block.cc b/commods.cc b/commods01.cc b/costreg.cc b/entity.cc b/optops1.cc b/optops2.cc b/optprob.cc b/tictoc.cc"
+        SOURCES="$SOURCES c/conex.cc c/costs.cc c/extunits.cc c/files.cc c/fincalc.cc c/ghouse.cc c/label.cc c/linklog.cc"
+        SOURCES="$SOURCES c/recset.cc c/si3units.cc c/suncalc.cc c/tsops.cc c/wxinfo.cc c/yearcalc.cc"
+        SOURCES="$SOURCES c/tsset.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        SOURCES="$SOURCES e/context.cc e/cxamb01.cc e/cxamb02.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        SOURCES="$SOURCES h/sandia.cc"
+        SOURCES="$SOURCES i/gnuplot.cc"
+        ;;
+    b/teas07)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES a/exent.cc"
+        SOURCES="$SOURCES b/teas.cc"
+        SOURCES="$SOURCES b/block.cc b/commods.cc b/commods01.cc b/costreg.cc b/entity.cc b/optops1.cc b/optops2.cc b/optprob.cc b/tictoc.cc"
+        SOURCES="$SOURCES b/lmpbid.cc"
+        SOURCES="$SOURCES c/conex.cc c/costs.cc c/extunits.cc c/files.cc c/fincalc.cc c/ghouse.cc c/label.cc c/linklog.cc"
+        SOURCES="$SOURCES c/recset.cc c/si3units.cc"
+        SOURCES="$SOURCES c/flowset.cc"
+        SOURCES="$SOURCES c/hydro.cc"
+        SOURCES="$SOURCES c/tsops.cc c/tsset.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        SOURCES="$SOURCES e/context.cc e/cxamb03.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        SOURCES="$SOURCES i/gnuplot.cc"
+        ;;
+    b/teas08)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/teas.cc"
+        SOURCES="$SOURCES b/block.cc b/commods.cc b/commods01.cc b/costreg.cc b/entity.cc b/optops1.cc b/optops2.cc b/optprob.cc b/tictoc.cc"
+        SOURCES="$SOURCES c/conex.cc c/costs.cc c/extunits.cc c/files.cc c/fincalc.cc c/ghouse.cc c/label.cc c/linklog.cc"
+        SOURCES="$SOURCES c/recset.cc c/si3units.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        ;;
+    b/teas09)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/teas.cc"
+        SOURCES="$SOURCES b/block.cc b/commods.cc b/commods01.cc b/costreg.cc b/entity.cc b/optops1.cc b/optops2.cc b/optprob.cc b/tictoc.cc"
+        SOURCES="$SOURCES c/conex.cc c/costs.cc c/extunits.cc c/files.cc c/fincalc.cc c/ghouse.cc c/label.cc c/linklog.cc"
+        SOURCES="$SOURCES c/recset.cc c/si3units.cc c/stats.cc c/xeona_ptr.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        ;;
+    b/teas10)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/teas.cc"
+        SOURCES="$SOURCES b/block.cc b/commods.cc b/commods01.cc b/costreg.cc b/entity.cc b/optops1.cc b/optops2.cc b/optprob.cc b/tictoc.cc"
+        SOURCES="$SOURCES c/conex.cc c/costs.cc c/extunits.cc c/files.cc c/fincalc.cc c/ghouse.cc c/label.cc c/linklog.cc"
+        SOURCES="$SOURCES c/recset.cc c/si3units.cc c/stats.cc c/xeona_ptr.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        ;;
+    b/teas11)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/teas.cc"
+        SOURCES="$SOURCES b/block.cc b/commods.cc b/commods01.cc b/costreg.cc b/entity.cc b/optops1.cc b/optops2.cc b/optprob.cc b/tictoc.cc"
+        SOURCES="$SOURCES c/conex.cc c/costs.cc c/extunits.cc c/files.cc c/fincalc.cc c/ghouse.cc c/label.cc c/linklog.cc"
+        SOURCES="$SOURCES c/recset.cc c/si3units.cc c/xeona_ptr.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        ;;
+    b/teas12)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/teas.cc"
+        SOURCES="$SOURCES b/block.cc b/commods.cc b/commods01.cc b/costreg.cc b/entity.cc b/optops1.cc b/optops2.cc b/optprob.cc b/tictoc.cc"
+        SOURCES="$SOURCES c/conex.cc c/costs.cc c/extunits.cc c/files.cc c/fincalc.cc c/ghouse.cc c/label.cc c/linklog.cc"
+        SOURCES="$SOURCES c/recset.cc c/si3units.cc c/xeona_ptr.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        ;;
+    b/teas13)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/teas.cc"
+        SOURCES="$SOURCES b/block.cc b/commods.cc b/commods01.cc b/costreg.cc b/entity.cc b/optops1.cc b/optops2.cc b/optprob.cc b/tictoc.cc"
+        SOURCES="$SOURCES c/conex.cc c/costs.cc c/extunits.cc c/files.cc c/fincalc.cc c/ghouse.cc c/label.cc c/linklog.cc"
+        SOURCES="$SOURCES c/tsset.cc"
+        SOURCES="$SOURCES c/recset.cc c/si3units.cc c/stats.cc c/xeona_ptr.cc"
+        SOURCES="$SOURCES c/tsops.cc"
+        SOURCES="$SOURCES c/wxinfo.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        SOURCES="$SOURCES e/context.cc e/cxamb01.cc"
+        SOURCES="$SOURCES i/gnuplot.cc"
+        ;;
+    b/teasdev)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/block.cc b/commods.cc b/commods01.cc b/costreg.cc b/entity.cc b/optops1.cc b/optops2.cc b/optprob.cc b/teas.cc b/tictoc.cc"
+        SOURCES="$SOURCES c/conex.cc c/costs.cc c/extunits.cc c/files.cc c/fincalc.cc c/ghouse.cc c/label.cc"
+        SOURCES="$SOURCES c/linklog.cc c/recset.cc c/si3units.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        ;;
+    b/tests)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/commods.cc b/commods01.cc b/entity.cc b/optprob.cc"
+        SOURCES="$SOURCES c/conex.cc c/costs.cc c/extunits.cc c/files.cc c/ghouse.cc c/label.cc c/linklog.cc c/recset.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        ;;
+    b/tictoc)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES c/costs.cc"
+        ;;
+    c/buildinfo)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES c/stats.cc c/tsops.cc c/tsset.cc"
+        SOURCES="$SOURCES h/thrmperf.cc"
+        SOURCES="$SOURCES h/plank.cc h/r134a.cc"
+        SOURCES="$SOURCES i/gnuplot.cc"
+        ;;
+    c/conex)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/commods.cc b/commods01.cc b/entity.cc b/optprob.cc"
+        SOURCES="$SOURCES c/costs.cc c/extunits.cc c/files.cc c/ghouse.cc c/label.cc c/linklog.cc c/recset.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        ;;
+    c/datio)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/entity.cc"
+        SOURCES="$SOURCES c/linklog.cc c/recset.cc"
+        ;;
+    c/debug)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/entity.cc"
+        SOURCES="$SOURCES c/linklog.cc c/recset.cc"
+        ;;
+    c/extunits)
+        SOURCES="$ZERO"
+        ;;
+    c/factory)
+        SOURCES="$ZERO"
+        ;;
+    c/fincalc)
+        SOURCES="$ZERO"       # some dependencies avoided thru '_XUTEST' disabled code
+        ;;
+    c/flowset)
+        SOURCES="$ZERO"
+        ;;
+    c/ghouse)
+        SOURCES="$ZERO"
+        ;;
+    c/hydro)
+        SOURCES="$ZERO"
+        ;;
+    c/inbuilt)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES a/xemopt.cc c/xemgen.cc"
+        ;;
+    c/label)                  # strictly speaking, 'util1.cc' not needed
+        SOURCES="$ZERO"
+        ;;
+    c/linklog)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/entity.cc"
+        SOURCES="$SOURCES c/recset.cc c/xeona_ptr.cc"
+        ;;
+    c/opssched)
+        SOURCES="$ZERO"
+        ;;
+    c/recset)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/entity.cc"
+        SOURCES="$SOURCES c/linklog.cc c/xeona_ptr.cc"
+        ;;
+    c/sample)                 # 'sample.cc' almost identical to GLPK 'sample.c'
+        SOURCES="c/sample.cc"
+        ;;
+    c/si3units)
+        SOURCES="$ZERO"
+        ;;
+    c/stats)
+        SOURCES="$ZERO"
+        ;;
+    c/suncalc)
+        SOURCES="$ZERO"
+        ;;
+    c/tsops)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/entity.cc"
+        SOURCES="$SOURCES c/linklog.cc c/recset.cc"
+        ;;
+    c/tsset)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/entity.cc"
+        SOURCES="$SOURCES c/files.cc c/linklog.cc c/recset.cc"
+        SOURCES="$SOURCES i/gnuplot.cc"
+        ;;
+    c/util1)                  # best to prevent 'util1.cc' from appearing twice
+        SOURCES="./common.cc $STEM.cc $STEM.ut0.cc a/logger.cc a/exbase.cc a/exapp.cc"
+        ;;
+    c/util2)                  # best to prevent 'util2.cc' from appearing twice
+        SOURCES="./common.cc $STEM.cc $STEM.ut0.cc a/logger.cc a/exbase.cc a/exapp.cc"
+        SOURCES="$SOURCES b/lmpbid.cc"
+        SOURCES="$SOURCES c/si3units.cc c/util3.cc c/util4.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        ;;
+    c/util3)                  # best to prevent 'util3.cc' from appearing twice
+        SOURCES="./common.cc $STEM.cc $STEM.ut0.cc a/logger.cc a/exbase.cc a/exapp.cc"
+        ;;
+    c/util3a)                 # best to prevent 'util3a.cc' from appearing twice, superseded unit
+        SOURCES="./common.cc $STEM.cc $STEM.ut0.cc a/logger.cc a/exbase.cc a/exapp.cc"
+        ;;
+    c/util4)                  # best to prevent 'util4.cc' from appearing twice
+        SOURCES="./common.cc $STEM.cc $STEM.ut0.cc a/logger.cc a/exbase.cc a/exapp.cc"
+        ;;
+    c/wxinfo)
+        SOURCES="$ZERO"
+        ;;
+    c/xemrun)
+        SOURCES="$ZERO"
+        ;;
+    c/xeona_ptr)
+        SOURCES="./common.cc $STEM.cc $STEM.ut0.cc c/util1.cc"
+        SOURCES="$SOURCES a/logger.cc a/exbase.cc a/exapp.cc"
+        ;;
+    c/yearcalc)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/entity.cc"
+        SOURCES="$SOURCES c/linklog.cc c/recset.cc"
+        ;;
+    d/glpkviz)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES c/files.cc"
+        SOURCES="$SOURCES d/siglp.cc"
+        ;;
+    d/siglp)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES c/files.cc"
+        ;;
+    e/context)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/entity.cc"
+        SOURCES="$SOURCES c/linklog.cc c/recset.cc"
+        ;;
+    e/cxamb01)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/entity.cc"
+        SOURCES="$SOURCES c/linklog.cc c/recset.cc c/tsops.cc c/tsset.cc"
+        SOURCES="$SOURCES c/wxinfo.cc"
+        SOURCES="$SOURCES e/context.cc"
+        SOURCES="$SOURCES i/gnuplot.cc"
+        ;;
+    e/cxamb02)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/entity.cc"
+        SOURCES="$SOURCES c/linklog.cc c/recset.cc c/suncalc.cc c/tsops.cc c/tsset.cc c/yearcalc.cc"
+        SOURCES="$SOURCES c/wxinfo.cc"
+        SOURCES="$SOURCES e/context.cc"
+        SOURCES="$SOURCES i/gnuplot.cc"
+        ;;
+    e/cxamb03)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES a/exent.cc"
+        SOURCES="$SOURCES b/entity.cc"
+        SOURCES="$SOURCES c/linklog.cc c/recset.cc c/stats.cc"
+        SOURCES="$SOURCES c/flowset.cc c/tsops.cc c/tsset.cc"
+        SOURCES="$SOURCES e/context.cc"
+        SOURCES="$SOURCES i/gnuplot.cc"
+        ;;
+    e/cxecon01)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/entity.cc"
+        SOURCES="$SOURCES c/linklog.cc c/recset.cc"
+        SOURCES="$SOURCES e/context.cc"
+        ;;
+    e/cxpol01)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/entity.cc"
+        SOURCES="$SOURCES c/linklog.cc c/recset.cc"
+        SOURCES="$SOURCES e/context.cc"
+        ;;
+    f/cta)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES a/helpers.cc a/recorder.cc"
+        SOURCES="$SOURCES b/actor.cc b/asop.cc b/bandtaf.cc b/block.cc b/commods.cc b/commods01.cc b/costreg.cc b/domcon.cc"
+        SOURCES="$SOURCES b/entity.cc b/gate.cc b/optgate.cc b/optprob.cc b/teas.cc b/tictoc.cc"
+        SOURCES="$SOURCES c/conex.cc c/costs.cc c/extunits.cc c/files.cc c/fincalc.cc c/ghouse.cc c/label.cc c/linklog.cc"
+        SOURCES="$SOURCES c/recset.cc c/si3units.cc"
+        SOURCES="$SOURCES d/glpkviz.cc d/siglp.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        ;;
+    f/gatesreg)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES a/helpers.cc"
+        SOURCES="$SOURCES b/actor.cc b/asop.cc b/block.cc b/commods.cc b/commods01.cc b/costreg.cc b/domcon.cc b/entity.cc"
+        SOURCES="$SOURCES b/gate.cc c/ghouse.cc b/optprob.cc b/tictoc.cc"
+        SOURCES="$SOURCES c/conex.cc c/costs.cc c/extunits.cc c/files.cc c/fincalc.cc c/label.cc c/linklog.cc c/recset.cc"
+        SOURCES="$SOURCES c/si3units.cc c/linklog.cc c/recset.cc c/si3units.cc"
+        SOURCES="$SOURCES d/glpkviz.cc d/siglp.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        ;;
+    f/ospinfo)
+        SOURCES="$ZERO"
+        ;;
+    f/trav)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES a/helpers.cc"
+        SOURCES="$SOURCES b/actor.cc b/asop.cc b/bandtaf.cc b/block.cc b/commods.cc b/commods01.cc b/costreg.cc b/domcon.cc"
+        SOURCES="$SOURCES b/entity.cc b/gate.cc b/optgate.cc b/optprob.cc b/teas.cc b/tictoc.cc"
+        SOURCES="$SOURCES c/conex.cc c/costs.cc c/extunits.cc c/files.cc c/fincalc.cc c/ghouse.cc c/label.cc c/linklog.cc"
+        SOURCES="$SOURCES c/recset.cc c/si3units.cc"
+        SOURCES="$SOURCES d/glpkviz.cc d/siglp.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        ;;
+    h/r134a)
+        SOURCES="$ZERO"
+        ;;
+    h/plank)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES h/r134a.cc"
+        ;;
+    h/sandia)
+        SOURCES="$ZERO"
+        ;;
+    h/thrmperf)
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES c/stats.cc c/tsops.cc c/tsset.cc"
+        SOURCES="$SOURCES c/buildinfo.cc"
+        SOURCES="$SOURCES c/wxinfo.cc"
+        SOURCES="$SOURCES h/plank.cc h/r134a.cc"
+        SOURCES="$SOURCES i/gnuplot.cc"
+        ;;
+    i/gnuplot)
+        SOURCES="$ZERO"
+        ;;
+    j/subents_)               # note underscore
+        SOURCES="$ZERO"
+        SOURCES="$SOURCES b/entity.cc"
+        SOURCES="$SOURCES c/recset.cc"
+        ;;
+
+        # LEVEL 1 UNIT TESTS
+
+    c/datrec)                 # datio + recset
+        SOURCES="$ONE"
+        SOURCES="$SOURCES b/entity.cc"
+        SOURCES="$SOURCES c/datio.cc c/linklog.cc c/recset.cc"
+        ;;
+    c/genrun)
+        SOURCES="$ONE     c/xemgen.cc c/xemrun.cc"
+        ;;
+    b/ospgate)
+        SOURCES="$ONE"
+        SOURCES="$SOURCES b/bandtaf.cc b/optgate.cc b/optprob.cc"
+        SOURCES="$SOURCES c/costs.cc c/files.cc c/label.cc"
+        SOURCES="$SOURCES d/glpkviz.cc d/siglp.cc"
+        SOURCES="$SOURCES f/ospinfo.cc"
+        ;;
+    d/siviz)
+        SOURCES="$ONE"
+        SOURCES="$SOURCES c/files.cc d/glpkviz.cc d/siglp.cc"
+        ;;
+
+        # LEVEL 2 UNIT TESTS
+
+    c/datfact)                # datio + recset + factory
+        SOURCES="$TWO"
+        SOURCES="$SOURCES b/entity.cc b/register.cc"
+        SOURCES="$SOURCES c/datio.cc c/factory.cc c/files.cc c/linklog.cc c/recset.cc"
+        SOURCES="$SOURCES a/exapp.cc"
+        ;;
+
+        # LEVEL 3 UNIT TESTS
+
+    c/simrun)                 # run simulation without 'main.cc' build overhead
+                              # and without makefile 'sources'
+        SOURCES="$THREE"
+        SOURCES="$SOURCES b/entity.cc b/register.cc"
+        SOURCES="$SOURCES c/datio.cc c/factory.cc c/files.cc c/recset.cc c/simcall.cc"
+        SOURCES="$SOURCES a/exapp.cc"
+        SOURCES="$SOURCES j/subents_.cc j/subent2_.cc"
+        ;;
+
+        # LEVEL 0 UNIT TESTS DEFAULT
+
+    *)
+        SOURCES="$ZERO"
+
+        # printf "\n%s\n\n" "machunits: ** unit test not supported (defaulting to ZERO dependencies): $STEM"
+        # beep
+        # sleep 5
+
+        ;;
+esac
+
+# ---
+
+# emacs text editor settings
+# local variables:
+#   mode: sh
+#   truncate-lines: t
+# end:
+
+#  $Id: machunits 9259 2012-07-04 22:22:39Z robbie $
+#  end of file
+

@@ -1,0 +1,334 @@
+#! /bin/bash
+
+#  file-purpose     : run a battery of unit tests using jede
+#  file-initiator   : Robbie Morrison <robbie@actrix.co.nz>
+#  file-create-date : Sat 30-Jun-2007 05:42 UTC
+#  file-status      : working
+#  file-keywords    : xeona
+
+#  $Revision: 4685 $
+#  $Date: 2010-07-08 18:57:15 +0200 (Thu, 08 Jul 2010) $
+#  $Author: robbie $
+#  $URL: file:///home/robbie/svn-root/xeona/futz/trunk/scripts/ganz $
+
+# the old user_confirm() code can be found in svn 689
+
+# ---------------------------------
+#  define jede calls
+# ---------------------------------
+
+host=$(hostname --short)
+case "$host" in
+    hinau) BASEDIR="$HOME/$SYNK/xeona/svn2/futz/trunk"  ;;  # base directory (repeated here)
+    sojus) BASEDIR="$HOME/$SYNK/xeona/svn/futz"         ;;  # base directory (repeated here)
+    *)     BASEDIR="$HOME/$SYNK/xeona/svn/futz"         ;;  # base directory (repeated here)
+esac
+
+MACRO="-D NEW_RANDOM"                   # used in 'utils' unit
+MACRO=""                                # CAUTION: mach needs a binary name with a macro
+
+declare -a cals                         # array of call strings
+declare -a rets                         # array of integer returns
+
+cals[1]="-fv $MACRO"
+cals[2]="-fp $MACRO"
+cals[3]="-fm $MACRO"
+
+# bash arrays (see above)
+#
+#  * one-based (as opposed to zero-based) array
+#    indexing is EMPLOYED in this script -- thus one
+#    is the lower bound index
+#
+#  * ${#array[@]} gives the number of array elements --
+#    NOT NECESSARILY the upper bound index, but is so here
+
+# ---------------------------------
+#  preamble
+# ---------------------------------
+
+JEDE="jede"                             # subsidiary script
+
+SCRIPT=$(basename $0)
+
+E_SUCCESS=0
+E_FAIL=1
+E_USAGE=2
+E_QUIT=3
+E_NO_BEEP_UTILITY=4
+
+# ---------------------------------
+#  display_help()
+# ---------------------------------
+
+function display_help
+{
+local count=${#cals[@]}
+local msg="$count loop"
+test $count -gt 0 && msg="${msg}s"
+
+echo
+echo "       usage: $SCRIPT [--ask  -A]         run $msg using hardcoded calls to: $JEDE"
+echo "              $SCRIPT  --list -l          print $JEDE calls and quit - for info"
+echo "              $SCRIPT  --dry  -d          disable external commands - for testing"
+echo "              $SCRIPT  --help             this message"
+echo "      option: ask: seek user response after each failed mach call"
+echo "     purpose: run a battery of unit tests using $JEDE"
+echo "        note: optional user comment sought on startup"
+echo "      alerts: three-tone"
+echo "    examples: view calls                 : \$ $SCRIPT -l"
+echo "              de-prioritize, interactive : \$ nice $SCRIPT -A"
+echo
+return 0
+}
+
+# ---------------------------------
+#  screen command-line
+# ---------------------------------
+
+cline="$*"                              # grab original command-line for reporting
+
+case "$1" in
+    --ask|-A)
+        ASK="--ask"
+        shift
+        ;;
+esac
+
+case "$1" in
+    --help|--hel|--he|--h|-help|-hel|-he|-h|"-?")
+        display_help
+        $JEDE --help
+        $SCRIPT --list
+        exit $E_SUCCESS
+        ;;
+    --list|-l)
+        type="list"
+        ;;
+    --dry|-d)
+        type="dry"
+        ;;
+    "")                                 # no arguments
+        type="real"
+        ;;
+    *)                                  # everything else
+        echo "$SCRIPT: incorrect usage, try --help"
+        exit $E_USAGE
+        ;;
+esac
+
+# ------------------------------
+#  report()
+# ------------------------------
+
+function report
+{
+    local tab=-30                       # the "-" means left justify
+    case "$#" in                        # argument count
+        0) printf "\n"                                   ;;
+        1)                              # one argument is colorized
+           # coloration
+           if [ "$TERM" != "dumb" ]
+               then
+               local tag=$(echo -e "\033[00;35m${1}\033[00m")
+               printf "$SCRIPT: $tag\n"
+           else
+               printf "$SCRIPT: %s\n" "$1"
+           fi
+           ;;
+        2)  printf "$SCRIPT: %${tab}s : %s\n" "$1" "$2"  ;;
+        *)
+            report "CODING ERROR" "more than two arguments given for report()"
+            exit $E_FAIL
+            ;;
+    esac
+    return 0
+}
+
+# ---------------------------------
+#  hhmmss()
+# ---------------------------------
+
+# transform [-]x.xx seconds to a [-]hh:mm:ss string
+# for example: -345.678 yields -00:05:45.678
+
+hhmmss_str="(not set)"                  # results string
+
+function hhmmss
+{
+    local val="$1"                      # time argument
+
+    local i                             # integer part
+    local d=""                          # decimal part
+    if [ $(expr index "$val" ".") -ne 0 ]  # search for "."
+        then
+        i=${val%\.*}                    # integer part
+        d=${val#*\.}                    # decimal part
+        d=".$d"                         # add back decimal separator
+    else
+        i=$val
+    fi
+
+    local hours=0
+    local mins=0
+    local secs=0
+    local sign=""
+    if [ $i -lt 0 ]
+        then
+        sign="-"
+        let "i *= -1"
+    fi
+    let "hours = i / 3600"              # integer division
+    let "i -= $hours * 3600"
+    let  "mins = i / 60"
+    let "i -= $mins * 60"
+    let "secs = i"
+    printf -v hhmmss_str "%s%02d:%02d:%02d%s" "$sign" $hours $mins $secs $d
+
+    return 0
+}
+
+# ---------------------------------
+#  controlled_exit()
+# ---------------------------------
+
+function controlled_exit
+{
+    local exitcode=$1                   # obtain exit code
+
+    report
+
+    # report background info
+
+    secs=$SECONDS                       # grab elapsed time
+    hhmmss $secs                        # function call
+
+    report "comment" "$comment"
+    report "elapsed time" "$secs seconds / $hhmmss_str"
+    report "command-line" "\$ $SCRIPT $cline"
+    report
+
+    # report svn status
+    #
+    #   if svnver_global contains : then an update is needed
+    #   if svnver_global contains M then a commit and update is needed
+
+    svnver_global=$(svnversion "$BASEDIR" 2>/dev/null)
+    report "global svn" "$svnver_global"
+    test $(expr index "$svnver_global" ":") -ne 0 && mess="update"
+    test $(expr index "$svnver_global" "M") -ne 0 && mess="commit and update"
+    test -n "$mess" && report "CAUTION" "global svn $mess required"
+    report
+
+    # report returns
+
+    for i in $(seq 1 $calc)             # 'seq' is a GNU coreutil
+      do
+      report "${cals[$i]}" "${rets[$i]}"
+    done
+    report
+
+    # beep
+
+    case "$type" in
+        real|dry)
+            sleep 2                             # separate from other scripts
+            beep -f 1000 -n -f 2000 -n -f 1500  # three tone beep
+            ;;
+    esac
+
+    # single point of exit
+
+    exit $exitcode
+}
+
+# ---------------------------------
+#  enter_comment()
+# ---------------------------------
+
+function enter_comment
+{
+    local NG="(none given)"             # default comment
+
+    echo -n "$SCRIPT: enter a comment without * (or hit return to skip): "
+    read comment
+    comment=$(echo $comment)            # strip newlines and surplus white-space
+    test -z "$comment" && comment="$NG" # use default comment
+    echo
+    return 0
+}
+
+# ---------------------------------
+#  intermediate_line()
+# ---------------------------------
+
+function intermediate_line
+{
+    case "$1" in
+        0)  report "--- call $(printf "%02d" $i) -------------------------------------" ;;
+        *)  report "--- call $(printf "%02d" $i) -------------------------- issues ---"
+    esac
+    return 0
+}
+
+# ---------------------------------
+#  active code
+# ---------------------------------
+
+function rtme { return $(( $1 - 1 )); } # function used in dryrun mode
+
+if [ ! $(which beep) ]
+    then
+    echo "$SCRIPT: beep utility not present, abandoning script"
+    exit $E_NO_BEEP_UTILITY
+fi
+
+report
+
+comment="(not set)"
+case "$type" in
+    real) enter_comment  ;;             # seek comment
+    dry)  enter_comment  ;;             # seek comment
+esac
+
+calc=${#cals[@]}                        # number of calls
+
+for i in $(seq 1 $calc)
+  do
+  cals[$i]="$JEDE $ASK ${cals[$i]}"     # create full call strings
+  cals[$i]=$(echo ${cals[$i]})          # clean up call strings
+  report "call $(printf "%02d" $i)" "${cals[$i]}"
+done
+
+case "$type" in
+    list)
+        report
+        exit $E_SUCCESS                 # exit on -l (list) option
+        ;;
+esac
+
+for i in $(seq 1 $calc)
+  do
+  case "$type" in
+      dry) echo; echo "${cals[$i]}"; echo; rtme $i  ;;
+      *)   ${cals[$i]}                              ;;
+  esac
+  ret=$?                                # grab return
+  rets[$i]=$ret                         # store in array
+  let "retsum += $ret"                  # update sum
+  intermediate_line $ret                # print intermediate line
+done
+
+controlled_exit $retsum
+
+# ---------------------------------
+#  housekeeping
+# ---------------------------------
+
+report "CODING ERROR" "at end of script"
+
+exit 255                                # should never get here
+
+#  $Id: ganz 4685 2010-07-08 16:57:15Z robbie $
+#  end of file
+

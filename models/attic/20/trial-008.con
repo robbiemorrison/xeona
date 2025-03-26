@@ -1,0 +1,1037 @@
+
+console capture starting
+
+  capture file : trial-008.con
+  host script  : runstudy.sh
+  timestamp    : Tue 03-Apr-2012 21:42:05 UTC
+
+  enter a comment describing this run: 
+  letas                     : + a b c d e f g h i j
+  call stub                 : xsenario.sh -R -m 8 008
+  scenarios                 : about to invoke GNU parallel with a maximum of -1 jobs
+  BE AWARE                  : output buffered until that job and all earlier jobs are complete
+
+     ----------------------------------------------------------------------
+
+  commencing                : xsenario.sh -R -m 8 008 +
+
+  xeona                     : /home/robbie/synk/xeona/svn2/futz/trunk/xeona1/xeona.r9218
+  file confirmed            : trial-008.xem
+  cp call                   : cp trial-008.xem trial-008.+.xem
+  copy complete (no patch required)
+  RES xem file              : trial-008.+.xem
+  RES xog file              : trial-008.+.xog
+  study-wide log file       : trial-008.log
+  about to run scenario     : trial-008.+.xem
+  xeona call                : '/home/robbie/synk/xeona/svn2/futz/trunk/xeona1/xeona.r9218 --mode 8 --file trial-008.+.xem'
+  about to invoke xeona
+
+  xeona
+
+     xeona energy systems modeling environment
+     copyright (c) 2007 - 2012 Robbie Morrison
+     show GPL v3 license with option --legal
+     all timestamps in UTC time
+
+  build information
+
+     compile date      :  2012-04-03
+     operating system  :  Linux
+     g++ compiler      :  4.4.3
+     glpk solver       :  4.47 static
+     boost c++ libs    :  1.48.0 static
+     build context     :  release
+     codebase status   :  first-pass complete and in testing phase
+     terminal width    :  166
+     _XDEBUG app       :  unset
+     NDEBUG c++ libs   :  set
+     svn revision      :  9218
+
+  run information
+
+     binary name       :  xeona.r9218
+     logname           :  robbie
+     locale            :  C
+     start date        :  2012-04-03
+     start time (UTC)  :  21:43:23
+     process ID        :  15990
+
+  command-line settings
+
+     command-line      :  /home/robbie/synk/xeona/svn2/futz/trunk/xeona1/xeona.r9218 --mode 8 --file trial-008.+.xem
+     defensive coding  :  exit cleanly on fault
+     beep behavior     :  silent (0)
+     reporting level   :  warnings (2)
+     no data           :  (no special action)
+     watch regex       :  (none)
+     nonzero exit trip :  report trips not enabled (0 thru 0)
+     simulation mode   :  year run (8760h) (8)
+     given model name  :  trial-008.+.xem
+
+  model details (backup made)
+
+     model file        :  /home/robbie/synk/xeona/svn2/futz/trunk/models/trial-008.+.xem
+     backup file       :  /home/robbie/synk/xeona/svn2/futz/trunk/models/trial-008.+.xem~
+
+  final information
+
+     command-line      :  /home/robbie/synk/xeona/svn2/futz/trunk/xeona1/xeona.r9218 --mode 8 --file trial-008.+.xem
+     start directory   :  "/home/robbie/synk/xeona/svn2/futz/trunk/models"
+     elapsed time      :  01:34:05
+     log calls to date :  info (157706) dbug (77932986) xtra (18138248) adhc (313960543)
+     simulation state  :  simulate() returned success
+     application exit  :  0 = success (relative to prevailing exit trip, the default is to accept warnings)
+
+  xeona exit status         : 0
+  xeona outcome             : full success
+  harvested data (despaced) : 0 5651 + "reference energy system" 8760 +1.090e+10 +3.026e+09 +0.000e+00 +4.818e+16 +0.000e+00 trial-008.+.xem
+  about to write to         : trial-008.log
+
+  cexit message             : script complete
+
+  command                   : xsenario.sh -R -m 8 008 +
+  elapsed (hms or seconds)  : 01:34:16
+  script exit               : 0
+
+     ----------------------------------------------------------------------
+
+  commencing                : xsenario.sh -R -m 8 008 a
+
+  xeona                     : /home/robbie/synk/xeona/svn2/futz/trunk/xeona1/xeona.r9218
+  file confirmed            : trial-008.xem
+  file confirmed            : trial-008.a.dif
+  cp call                   : cp trial-008.xem trial-008.a.xem
+  patch call                : patch --no-backup-if-mismatch trial-008.a.xem trial-008.a.dif
+
+patching file trial-008.a.xem
+
+  call                      : xgrab --quiet --unquote --failmsg="(xsenario.sh)" trial-008.a.xem "program.study-description.scenario-leta"
+  copy and patch complete
+  scenario xem file         : trial-008.a.xem
+  scenario xog file         : trial-008.a.xog
+  study-wide log file       : trial-008.log
+  about to run scenario     : trial-008.a.xem
+  xeona call                : '/home/robbie/synk/xeona/svn2/futz/trunk/xeona1/xeona.r9218 --mode 8 --file trial-008.a.xem'
+  about to invoke xeona
+
+  xeona
+
+     xeona energy systems modeling environment
+     copyright (c) 2007 - 2012 Robbie Morrison
+     show GPL v3 license with option --legal
+     all timestamps in UTC time
+
+  build information
+
+     compile date      :  2012-04-03
+     operating system  :  Linux
+     g++ compiler      :  4.4.3
+     glpk solver       :  4.47 static
+     boost c++ libs    :  1.48.0 static
+     build context     :  release
+     codebase status   :  first-pass complete and in testing phase
+     terminal width    :  166
+     _XDEBUG app       :  unset
+     NDEBUG c++ libs   :  set
+     svn revision      :  9218
+
+  run information
+
+     binary name       :  xeona.r9218
+     logname           :  robbie
+     locale            :  C
+     start date        :  2012-04-03
+     start time (UTC)  :  21:43:23
+     process ID        :  16001
+
+  command-line settings
+
+     command-line      :  /home/robbie/synk/xeona/svn2/futz/trunk/xeona1/xeona.r9218 --mode 8 --file trial-008.a.xem
+     defensive coding  :  exit cleanly on fault
+     beep behavior     :  silent (0)
+     reporting level   :  warnings (2)
+     no data           :  (no special action)
+     watch regex       :  (none)
+     nonzero exit trip :  report trips not enabled (0 thru 0)
+     simulation mode   :  year run (8760h) (8)
+     given model name  :  trial-008.a.xem
+
+  model details (backup made)
+
+     model file        :  /home/robbie/synk/xeona/svn2/futz/trunk/models/trial-008.a.xem
+     backup file       :  /home/robbie/synk/xeona/svn2/futz/trunk/models/trial-008.a.xem~
+
+  final information
+
+     command-line      :  /home/robbie/synk/xeona/svn2/futz/trunk/xeona1/xeona.r9218 --mode 8 --file trial-008.a.xem
+     start directory   :  "/home/robbie/synk/xeona/svn2/futz/trunk/models"
+     elapsed time      :  01:34:07
+     log calls to date :  info (157706) dbug (77930394) xtra (18138248) adhc (313952227)
+     simulation state  :  simulate() returned success
+     application exit  :  0 = success (relative to prevailing exit trip, the default is to accept warnings)
+
+  xeona exit status         : 0
+  xeona outcome             : full success
+  harvested data (despaced) : 0 5653 a "indoor temp now 18C was 21C" 8760 +1.089e+10 +2.992e+09 +0.000e+00 +4.752e+16 +0.000e+00 trial-008.a.xem
+  about to write to         : trial-008.log
+
+  cexit message             : script complete
+
+  command                   : xsenario.sh -R -m 8 008 a
+  elapsed (hms or seconds)  : 01:34:21
+  script exit               : 0
+
+     ----------------------------------------------------------------------
+
+  commencing                : xsenario.sh -R -m 8 008 b
+
+  xeona                     : /home/robbie/synk/xeona/svn2/futz/trunk/xeona1/xeona.r9218
+  file confirmed            : trial-008.xem
+  file confirmed            : trial-008.b.dif
+  cp call                   : cp trial-008.xem trial-008.b.xem
+  patch call                : patch --no-backup-if-mismatch trial-008.b.xem trial-008.b.dif
+
+patching file trial-008.b.xem
+
+  call                      : xgrab --quiet --unquote --failmsg="(xsenario.sh)" trial-008.b.xem "program.study-description.scenario-leta"
+  copy and patch complete
+  scenario xem file         : trial-008.b.xem
+  scenario xog file         : trial-008.b.xog
+  study-wide log file       : trial-008.log
+  about to run scenario     : trial-008.b.xem
+  xeona call                : '/home/robbie/synk/xeona/svn2/futz/trunk/xeona1/xeona.r9218 --mode 8 --file trial-008.b.xem'
+  about to invoke xeona
+
+  xeona
+
+     xeona energy systems modeling environment
+     copyright (c) 2007 - 2012 Robbie Morrison
+     show GPL v3 license with option --legal
+     all timestamps in UTC time
+
+  build information
+
+     compile date      :  2012-04-03
+     operating system  :  Linux
+     g++ compiler      :  4.4.3
+     glpk solver       :  4.47 static
+     boost c++ libs    :  1.48.0 static
+     build context     :  release
+     codebase status   :  first-pass complete and in testing phase
+     terminal width    :  166
+     _XDEBUG app       :  unset
+     NDEBUG c++ libs   :  set
+     svn revision      :  9218
+
+  run information
+
+     binary name       :  xeona.r9218
+     logname           :  robbie
+     locale            :  C
+     start date        :  2012-04-03
+     start time (UTC)  :  21:43:23
+     process ID        :  16008
+
+  command-line settings
+
+     command-line      :  /home/robbie/synk/xeona/svn2/futz/trunk/xeona1/xeona.r9218 --mode 8 --file trial-008.b.xem
+     defensive coding  :  exit cleanly on fault
+     beep behavior     :  silent (0)
+     reporting level   :  warnings (2)
+     no data           :  (no special action)
+     watch regex       :  (none)
+     nonzero exit trip :  report trips not enabled (0 thru 0)
+     simulation mode   :  year run (8760h) (8)
+     given model name  :  trial-008.b.xem
+
+  model details (backup made)
+
+     model file        :  /home/robbie/synk/xeona/svn2/futz/trunk/models/trial-008.b.xem
+     backup file       :  /home/robbie/synk/xeona/svn2/futz/trunk/models/trial-008.b.xem~
+
+  final information
+
+     command-line      :  /home/robbie/synk/xeona/svn2/futz/trunk/xeona1/xeona.r9218 --mode 8 --file trial-008.b.xem
+     start directory   :  "/home/robbie/synk/xeona/svn2/futz/trunk/models"
+     elapsed time      :  00:59:12
+     log calls to date :  info (166466) dbug (79835064) xtra (19294568) adhc (321944593)
+     simulation state  :  simulate() returned success
+     application exit  :  0 = success (relative to prevailing exit trip, the default is to accept warnings)
+
+  xeona exit status         : 0
+  xeona outcome             : full success
+  harvested data (despaced) : 0 3558 b "far-from-demand ranked-orig-domains" 8760 +1.090e+10 +3.026e+09 +0.000e+00 +4.818e+16 +0.000e+00 trial-008.b.xem
+  about to write to         : trial-008.log
+
+  cexit message             : script complete
+
+  command                   : xsenario.sh -R -m 8 008 b
+  elapsed (hms or seconds)  : 00:59:23
+  script exit               : 0
+
+     ----------------------------------------------------------------------
+
+  commencing                : xsenario.sh -R -m 8 008 c
+
+  xeona                     : /home/robbie/synk/xeona/svn2/futz/trunk/xeona1/xeona.r9218
+  file confirmed            : trial-008.xem
+  file confirmed            : trial-008.c.dif
+  cp call                   : cp trial-008.xem trial-008.c.xem
+  patch call                : patch --no-backup-if-mismatch trial-008.c.xem trial-008.c.dif
+
+patching file trial-008.c.xem
+
+  call                      : xgrab --quiet --unquote --failmsg="(xsenario.sh)" trial-008.c.xem "program.study-description.scenario-leta"
+  copy and patch complete
+  scenario xem file         : trial-008.c.xem
+  scenario xog file         : trial-008.c.xog
+  study-wide log file       : trial-008.log
+  about to run scenario     : trial-008.c.xem
+  xeona call                : '/home/robbie/synk/xeona/svn2/futz/trunk/xeona1/xeona.r9218 --mode 8 --file trial-008.c.xem'
+  about to invoke xeona
+
+  xeona
+
+     xeona energy systems modeling environment
+     copyright (c) 2007 - 2012 Robbie Morrison
+     show GPL v3 license with option --legal
+     all timestamps in UTC time
+
+  build information
+
+     compile date      :  2012-04-03
+     operating system  :  Linux
+     g++ compiler      :  4.4.3
+     glpk solver       :  4.47 static
+     boost c++ libs    :  1.48.0 static
+     build context     :  release
+     codebase status   :  first-pass complete and in testing phase
+     terminal width    :  166
+     _XDEBUG app       :  unset
+     NDEBUG c++ libs   :  set
+     svn revision      :  9218
+
+  run information
+
+     binary name       :  xeona.r9218
+     logname           :  robbie
+     locale            :  C
+     start date        :  2012-04-03
+     start time (UTC)  :  22:42:47
+     process ID        :  16088
+
+  command-line settings
+
+     command-line      :  /home/robbie/synk/xeona/svn2/futz/trunk/xeona1/xeona.r9218 --mode 8 --file trial-008.c.xem
+     defensive coding  :  exit cleanly on fault
+     beep behavior     :  silent (0)
+     reporting level   :  warnings (2)
+     no data           :  (no special action)
+     watch regex       :  (none)
+     nonzero exit trip :  report trips not enabled (0 thru 0)
+     simulation mode   :  year run (8760h) (8)
+     given model name  :  trial-008.c.xem
+
+  model details (backup made)
+
+     model file        :  /home/robbie/synk/xeona/svn2/futz/trunk/models/trial-008.c.xem
+     backup file       :  /home/robbie/synk/xeona/svn2/futz/trunk/models/trial-008.c.xem~
+
+  final information
+
+     command-line      :  /home/robbie/synk/xeona/svn2/futz/trunk/xeona1/xeona.r9218 --mode 8 --file trial-008.c.xem
+     start directory   :  "/home/robbie/synk/xeona/svn2/futz/trunk/models"
+     elapsed time      :  00:58:21
+     log calls to date :  info (157706) dbug (77927127) xtra (18138248) adhc (313954896)
+     simulation state  :  simulate() returned success
+     application exit  :  0 = success (relative to prevailing exit trip, the default is to accept warnings)
+
+  xeona exit status         : 0
+  xeona outcome             : full success
+  harvested data (despaced) : 0 3506 c "ambient air 2C warmer" 8760 +1.090e+10 +3.002e+09 +0.000e+00 +4.770e+16 +0.000e+00 trial-008.c.xem
+  about to write to         : trial-008.log
+
+  cexit message             : script complete
+
+  command                   : xsenario.sh -R -m 8 008 c
+  elapsed (hms or seconds)  : 00:58:32
+  script exit               : 0
+
+     ----------------------------------------------------------------------
+
+  commencing                : xsenario.sh -R -m 8 008 d
+
+  xeona                     : /home/robbie/synk/xeona/svn2/futz/trunk/xeona1/xeona.r9218
+  file confirmed            : trial-008.xem
+  file confirmed            : trial-008.d.dif
+  cp call                   : cp trial-008.xem trial-008.d.xem
+  patch call                : patch --no-backup-if-mismatch trial-008.d.xem trial-008.d.dif
+
+patching file trial-008.d.xem
+
+  call                      : xgrab --quiet --unquote --failmsg="(xsenario.sh)" trial-008.d.xem "program.study-description.scenario-leta"
+  copy and patch complete
+  scenario xem file         : trial-008.d.xem
+  scenario xog file         : trial-008.d.xog
+  study-wide log file       : trial-008.log
+  about to run scenario     : trial-008.d.xem
+  xeona call                : '/home/robbie/synk/xeona/svn2/futz/trunk/xeona1/xeona.r9218 --mode 8 --file trial-008.d.xem'
+  about to invoke xeona
+
+  xeona
+
+     xeona energy systems modeling environment
+     copyright (c) 2007 - 2012 Robbie Morrison
+     show GPL v3 license with option --legal
+     all timestamps in UTC time
+
+  build information
+
+     compile date      :  2012-04-03
+     operating system  :  Linux
+     g++ compiler      :  4.4.3
+     glpk solver       :  4.47 static
+     boost c++ libs    :  1.48.0 static
+     build context     :  release
+     codebase status   :  first-pass complete and in testing phase
+     terminal width    :  166
+     _XDEBUG app       :  unset
+     NDEBUG c++ libs   :  set
+     svn revision      :  9218
+
+  run information
+
+     binary name       :  xeona.r9218
+     logname           :  robbie
+     locale            :  C
+     start date        :  2012-04-03
+     start time (UTC)  :  23:17:40
+     process ID        :  16167
+
+  command-line settings
+
+     command-line      :  /home/robbie/synk/xeona/svn2/futz/trunk/xeona1/xeona.r9218 --mode 8 --file trial-008.d.xem
+     defensive coding  :  exit cleanly on fault
+     beep behavior     :  silent (0)
+     reporting level   :  warnings (2)
+     no data           :  (no special action)
+     watch regex       :  (none)
+     nonzero exit trip :  report trips not enabled (0 thru 0)
+     simulation mode   :  year run (8760h) (8)
+     given model name  :  trial-008.d.xem
+
+  model details (backup made)
+
+     model file        :  /home/robbie/synk/xeona/svn2/futz/trunk/models/trial-008.d.xem
+     backup file       :  /home/robbie/synk/xeona/svn2/futz/trunk/models/trial-008.d.xem~
+
+  final information
+
+     command-line      :  /home/robbie/synk/xeona/svn2/futz/trunk/xeona1/xeona.r9218 --mode 8 --file trial-008.d.xem
+     start directory   :  "/home/robbie/synk/xeona/svn2/futz/trunk/models"
+     elapsed time      :  01:34:08
+     log calls to date :  info (157706) dbug (77926530) xtra (18138248) adhc (313939149)
+     simulation state  :  simulate() returned success
+     application exit  :  0 = success (relative to prevailing exit trip, the default is to accept warnings)
+
+  xeona exit status         : 0
+  xeona outcome             : full success
+  harvested data (despaced) : 0 5654 d "uprated building performance" 8760 +1.091e+10 +2.937e+09 +0.000e+00 +4.642e+16 +0.000e+00 trial-008.d.xem
+  about to write to         : trial-008.log
+
+  cexit message             : script complete
+
+  command                   : xsenario.sh -R -m 8 008 d
+  elapsed (hms or seconds)  : 01:34:23
+  script exit               : 0
+
+     ----------------------------------------------------------------------
+
+  commencing                : xsenario.sh -R -m 8 008 e
+
+  xeona                     : /home/robbie/synk/xeona/svn2/futz/trunk/xeona1/xeona.r9218
+  file confirmed            : trial-008.xem
+  file confirmed            : trial-008.e.dif
+  cp call                   : cp trial-008.xem trial-008.e.xem
+  patch call                : patch --no-backup-if-mismatch trial-008.e.xem trial-008.e.dif
+
+patching file trial-008.e.xem
+
+  call                      : xgrab --quiet --unquote --failmsg="(xsenario.sh)" trial-008.e.xem "program.study-description.scenario-leta"
+  copy and patch complete
+  scenario xem file         : trial-008.e.xem
+  scenario xog file         : trial-008.e.xog
+  study-wide log file       : trial-008.log
+  about to run scenario     : trial-008.e.xem
+  xeona call                : '/home/robbie/synk/xeona/svn2/futz/trunk/xeona1/xeona.r9218 --mode 8 --file trial-008.e.xem'
+  about to invoke xeona
+
+  xeona
+
+     xeona energy systems modeling environment
+     copyright (c) 2007 - 2012 Robbie Morrison
+     show GPL v3 license with option --legal
+     all timestamps in UTC time
+
+  build information
+
+     compile date      :  2012-04-03
+     operating system  :  Linux
+     g++ compiler      :  4.4.3
+     glpk solver       :  4.47 static
+     boost c++ libs    :  1.48.0 static
+     build context     :  release
+     codebase status   :  first-pass complete and in testing phase
+     terminal width    :  166
+     _XDEBUG app       :  unset
+     NDEBUG c++ libs   :  set
+     svn revision      :  9218
+
+  run information
+
+     binary name       :  xeona.r9218
+     logname           :  robbie
+     locale            :  C
+     start date        :  2012-04-03
+     start time (UTC)  :  23:17:45
+     process ID        :  16203
+
+  command-line settings
+
+     command-line      :  /home/robbie/synk/xeona/svn2/futz/trunk/xeona1/xeona.r9218 --mode 8 --file trial-008.e.xem
+     defensive coding  :  exit cleanly on fault
+     beep behavior     :  silent (0)
+     reporting level   :  warnings (2)
+     no data           :  (no special action)
+     watch regex       :  (none)
+     nonzero exit trip :  report trips not enabled (0 thru 0)
+     simulation mode   :  year run (8760h) (8)
+     given model name  :  trial-008.e.xem
+
+  model details (backup made)
+
+     model file        :  /home/robbie/synk/xeona/svn2/futz/trunk/models/trial-008.e.xem
+     backup file       :  /home/robbie/synk/xeona/svn2/futz/trunk/models/trial-008.e.xem~
+
+  final information
+
+     command-line      :  /home/robbie/synk/xeona/svn2/futz/trunk/xeona1/xeona.r9218 --mode 8 --file trial-008.e.xem
+     start directory   :  "/home/robbie/synk/xeona/svn2/futz/trunk/models"
+     elapsed time      :  01:36:22
+     log calls to date :  info (192739) dbug (82417245) xtra (21379940) adhc (334031119)
+     simulation state  :  simulate() returned success
+     application exit  :  0 = success (relative to prevailing exit trip, the default is to accept warnings)
+
+  xeona exit status         : 0
+  xeona outcome             : full success
+  harvested data (despaced) : 0 5788 e "carbon capture added" 8760 +1.108e+10 +1.426e+09 +0.000e+00 +6.876e+16 +0.000e+00 trial-008.e.xem
+  about to write to         : trial-008.log
+
+  cexit message             : script complete
+
+  command                   : xsenario.sh -R -m 8 008 e
+  elapsed (hms or seconds)  : 01:36:38
+  script exit               : 0
+
+     ----------------------------------------------------------------------
+
+  commencing                : xsenario.sh -R -m 8 008 f
+
+  xeona                     : /home/robbie/synk/xeona/svn2/futz/trunk/xeona1/xeona.r9218
+  file confirmed            : trial-008.xem
+  file confirmed            : trial-008.f.dif
+  cp call                   : cp trial-008.xem trial-008.f.xem
+  patch call                : patch --no-backup-if-mismatch trial-008.f.xem trial-008.f.dif
+
+patching file trial-008.f.xem
+
+  call                      : xgrab --quiet --unquote --failmsg="(xsenario.sh)" trial-008.f.xem "program.study-description.scenario-leta"
+  copy and patch complete
+  scenario xem file         : trial-008.f.xem
+  scenario xog file         : trial-008.f.xog
+  study-wide log file       : trial-008.log
+  about to run scenario     : trial-008.f.xem
+  xeona call                : '/home/robbie/synk/xeona/svn2/futz/trunk/xeona1/xeona.r9218 --mode 8 --file trial-008.f.xem'
+  about to invoke xeona
+
+  xeona
+
+     xeona energy systems modeling environment
+     copyright (c) 2007 - 2012 Robbie Morrison
+     show GPL v3 license with option --legal
+     all timestamps in UTC time
+
+  build information
+
+     compile date      :  2012-04-03
+     operating system  :  Linux
+     g++ compiler      :  4.4.3
+     glpk solver       :  4.47 static
+     boost c++ libs    :  1.48.0 static
+     build context     :  release
+     codebase status   :  first-pass complete and in testing phase
+     terminal width    :  166
+     _XDEBUG app       :  unset
+     NDEBUG c++ libs   :  set
+     svn revision      :  9218
+
+  run information
+
+     binary name       :  xeona.r9218
+     logname           :  robbie
+     locale            :  C
+     start date        :  2012-04-03
+     start time (UTC)  :  23:41:19
+     process ID        :  16258
+
+  command-line settings
+
+     command-line      :  /home/robbie/synk/xeona/svn2/futz/trunk/xeona1/xeona.r9218 --mode 8 --file trial-008.f.xem
+     defensive coding  :  exit cleanly on fault
+     beep behavior     :  silent (0)
+     reporting level   :  warnings (2)
+     no data           :  (no special action)
+     watch regex       :  (none)
+     nonzero exit trip :  report trips not enabled (0 thru 0)
+     simulation mode   :  year run (8760h) (8)
+     given model name  :  trial-008.f.xem
+
+  model details (backup made)
+
+     model file        :  /home/robbie/synk/xeona/svn2/futz/trunk/models/trial-008.f.xem
+     backup file       :  /home/robbie/synk/xeona/svn2/futz/trunk/models/trial-008.f.xem~
+
+  final information
+
+     command-line      :  /home/robbie/synk/xeona/svn2/futz/trunk/xeona1/xeona.r9218 --mode 8 --file trial-008.f.xem
+     start directory   :  "/home/robbie/synk/xeona/svn2/futz/trunk/models"
+     elapsed time      :  00:58:09
+     log calls to date :  info (157710) dbug (77153162) xtra (17840198) adhc (310972905)
+     simulation state  :  simulate() returned success
+     application exit  :  0 = success (relative to prevailing exit trip, the default is to accept warnings)
+
+  xeona exit status         : 0
+  xeona outcome             : full success
+  harvested data (despaced) : 0 3495 f "nicad storage removed" 8760 +1.089e+10 +3.026e+09 +0.000e+00 +4.818e+16 +0.000e+00 trial-008.f.xem
+  about to write to         : trial-008.log
+
+  cexit message             : script complete
+
+  command                   : xsenario.sh -R -m 8 008 f
+  elapsed (hms or seconds)  : 00:58:20
+  script exit               : 0
+
+     ----------------------------------------------------------------------
+
+  commencing                : xsenario.sh -R -m 8 008 g
+
+  xeona                     : /home/robbie/synk/xeona/svn2/futz/trunk/xeona1/xeona.r9218
+  file confirmed            : trial-008.xem
+  file confirmed            : trial-008.g.dif
+  cp call                   : cp trial-008.xem trial-008.g.xem
+  patch call                : patch --no-backup-if-mismatch trial-008.g.xem trial-008.g.dif
+
+patching file trial-008.g.xem
+
+  call                      : xgrab --quiet --unquote --failmsg="(xsenario.sh)" trial-008.g.xem "program.study-description.scenario-leta"
+  copy and patch complete
+  scenario xem file         : trial-008.g.xem
+  scenario xog file         : trial-008.g.xog
+  study-wide log file       : trial-008.log
+  about to run scenario     : trial-008.g.xem
+  xeona call                : '/home/robbie/synk/xeona/svn2/futz/trunk/xeona1/xeona.r9218 --mode 8 --file trial-008.g.xem'
+  about to invoke xeona
+
+  xeona
+
+     xeona energy systems modeling environment
+     copyright (c) 2007 - 2012 Robbie Morrison
+     show GPL v3 license with option --legal
+     all timestamps in UTC time
+
+  build information
+
+     compile date      :  2012-04-03
+     operating system  :  Linux
+     g++ compiler      :  4.4.3
+     glpk solver       :  4.47 static
+     boost c++ libs    :  1.48.0 static
+     build context     :  release
+     codebase status   :  first-pass complete and in testing phase
+     terminal width    :  166
+     _XDEBUG app       :  unset
+     NDEBUG c++ libs   :  set
+     svn revision      :  9218
+
+  run information
+
+     binary name       :  xeona.r9218
+     logname           :  robbie
+     locale            :  C
+     start date        :  2012-04-04
+     start time (UTC)  :  00:39:39
+     process ID        :  16339
+
+  command-line settings
+
+     command-line      :  /home/robbie/synk/xeona/svn2/futz/trunk/xeona1/xeona.r9218 --mode 8 --file trial-008.g.xem
+     defensive coding  :  exit cleanly on fault
+     beep behavior     :  silent (0)
+     reporting level   :  warnings (2)
+     no data           :  (no special action)
+     watch regex       :  (none)
+     nonzero exit trip :  report trips not enabled (0 thru 0)
+     simulation mode   :  year run (8760h) (8)
+     given model name  :  trial-008.g.xem
+
+  model details (backup made)
+
+     model file        :  /home/robbie/synk/xeona/svn2/futz/trunk/models/trial-008.g.xem
+     backup file       :  /home/robbie/synk/xeona/svn2/futz/trunk/models/trial-008.g.xem~
+
+  final information
+
+     command-line      :  /home/robbie/synk/xeona/svn2/futz/trunk/xeona1/xeona.r9218 --mode 8 --file trial-008.g.xem
+     start directory   :  "/home/robbie/synk/xeona/svn2/futz/trunk/models"
+     elapsed time      :  01:24:54
+     log calls to date :  info (157708) dbug (76794449) xtra (17340957) adhc (308188608)
+     simulation state  :  simulate() returned success
+     application exit  :  0 = success (relative to prevailing exit trip, the default is to accept warnings)
+
+  xeona exit status         : 0
+  xeona outcome             : full success
+  harvested data (despaced) : 0 5100 g "large high-voltage windfarm removed" 8760 +1.090e+10 +3.029e+09 +0.000e+00 +4.824e+16 +0.000e+00 trial-008.g.xem
+  about to write to         : trial-008.log
+
+  cexit message             : script complete
+
+  command                   : xsenario.sh -R -m 8 008 g
+  elapsed (hms or seconds)  : 01:25:08
+  script exit               : 0
+
+     ----------------------------------------------------------------------
+
+  commencing                : xsenario.sh -R -m 8 008 h
+
+  xeona                     : /home/robbie/synk/xeona/svn2/futz/trunk/xeona1/xeona.r9218
+  file confirmed            : trial-008.xem
+  file confirmed            : trial-008.h.dif
+  cp call                   : cp trial-008.xem trial-008.h.xem
+  patch call                : patch --no-backup-if-mismatch trial-008.h.xem trial-008.h.dif
+
+patching file trial-008.h.xem
+
+  call                      : xgrab --quiet --unquote --failmsg="(xsenario.sh)" trial-008.h.xem "program.study-description.scenario-leta"
+  copy and patch complete
+  scenario xem file         : trial-008.h.xem
+  scenario xog file         : trial-008.h.xog
+  study-wide log file       : trial-008.log
+  about to run scenario     : trial-008.h.xem
+  xeona call                : '/home/robbie/synk/xeona/svn2/futz/trunk/xeona1/xeona.r9218 --mode 8 --file trial-008.h.xem'
+  about to invoke xeona
+
+  xeona
+
+     xeona energy systems modeling environment
+     copyright (c) 2007 - 2012 Robbie Morrison
+     show GPL v3 license with option --legal
+     all timestamps in UTC time
+
+  build information
+
+     compile date      :  2012-04-03
+     operating system  :  Linux
+     g++ compiler      :  4.4.3
+     glpk solver       :  4.47 static
+     boost c++ libs    :  1.48.0 static
+     build context     :  release
+     codebase status   :  first-pass complete and in testing phase
+     terminal width    :  166
+     _XDEBUG app       :  unset
+     NDEBUG c++ libs   :  set
+     svn revision      :  9218
+
+  run information
+
+     binary name       :  xeona.r9218
+     logname           :  robbie
+     locale            :  C
+     start date        :  2012-04-04
+     start time (UTC)  :  00:52:02
+     process ID        :  16389
+
+  command-line settings
+
+     command-line      :  /home/robbie/synk/xeona/svn2/futz/trunk/xeona1/xeona.r9218 --mode 8 --file trial-008.h.xem
+     defensive coding  :  exit cleanly on fault
+     beep behavior     :  silent (0)
+     reporting level   :  warnings (2)
+     no data           :  (no special action)
+     watch regex       :  (none)
+     nonzero exit trip :  report trips not enabled (0 thru 0)
+     simulation mode   :  year run (8760h) (8)
+     given model name  :  trial-008.h.xem
+
+  model details (backup made)
+
+     model file        :  /home/robbie/synk/xeona/svn2/futz/trunk/models/trial-008.h.xem
+     backup file       :  /home/robbie/synk/xeona/svn2/futz/trunk/models/trial-008.h.xem~
+
+  final information
+
+     command-line      :  /home/robbie/synk/xeona/svn2/futz/trunk/xeona1/xeona.r9218 --mode 8 --file trial-008.h.xem
+     start directory   :  "/home/robbie/synk/xeona/svn2/futz/trunk/models"
+     elapsed time      :  01:21:34
+     log calls to date :  info (157706) dbug (78169506) xtra (18155768) adhc (314608783)
+     simulation state  :  simulate() returned success
+     application exit  :  0 = success (relative to prevailing exit trip, the default is to accept warnings)
+
+  xeona exit status         : 0
+  xeona outcome             : full success
+  harvested data (despaced) : 0 4900 h "urban domain under 'fin' was 'ghg'" 8760 +1.090e+10 +3.026e+09 +0.000e+00 +4.818e+16 +0.000e+00 trial-008.h.xem
+  about to write to         : trial-008.log
+
+  cexit message             : script complete
+
+  command                   : xsenario.sh -R -m 8 008 h
+  elapsed (hms or seconds)  : 01:21:45
+  script exit               : 0
+
+     ----------------------------------------------------------------------
+
+  commencing                : xsenario.sh -R -m 8 008 i
+
+  xeona                     : /home/robbie/synk/xeona/svn2/futz/trunk/xeona1/xeona.r9218
+  file confirmed            : trial-008.xem
+  file confirmed            : trial-008.i.dif
+  cp call                   : cp trial-008.xem trial-008.i.xem
+  patch call                : patch --no-backup-if-mismatch trial-008.i.xem trial-008.i.dif
+
+patching file trial-008.i.xem
+
+  call                      : xgrab --quiet --unquote --failmsg="(xsenario.sh)" trial-008.i.xem "program.study-description.scenario-leta"
+  copy and patch complete
+  scenario xem file         : trial-008.i.xem
+  scenario xog file         : trial-008.i.xog
+  study-wide log file       : trial-008.log
+  about to run scenario     : trial-008.i.xem
+  xeona call                : '/home/robbie/synk/xeona/svn2/futz/trunk/xeona1/xeona.r9218 --mode 8 --file trial-008.i.xem'
+  about to invoke xeona
+
+  xeona
+
+     xeona energy systems modeling environment
+     copyright (c) 2007 - 2012 Robbie Morrison
+     show GPL v3 license with option --legal
+     all timestamps in UTC time
+
+  build information
+
+     compile date      :  2012-04-03
+     operating system  :  Linux
+     g++ compiler      :  4.4.3
+     glpk solver       :  4.47 static
+     boost c++ libs    :  1.48.0 static
+     build context     :  release
+     codebase status   :  first-pass complete and in testing phase
+     terminal width    :  166
+     _XDEBUG app       :  unset
+     NDEBUG c++ libs   :  set
+     svn revision      :  9218
+
+  run information
+
+     binary name       :  xeona.r9218
+     logname           :  robbie
+     locale            :  C
+     start date        :  2012-04-04
+     start time (UTC)  :  00:54:23
+     process ID        :  16435
+
+  command-line settings
+
+     command-line      :  /home/robbie/synk/xeona/svn2/futz/trunk/xeona1/xeona.r9218 --mode 8 --file trial-008.i.xem
+     defensive coding  :  exit cleanly on fault
+     beep behavior     :  silent (0)
+     reporting level   :  warnings (2)
+     no data           :  (no special action)
+     watch regex       :  (none)
+     nonzero exit trip :  report trips not enabled (0 thru 0)
+     simulation mode   :  year run (8760h) (8)
+     given model name  :  trial-008.i.xem
+
+  model details (backup made)
+
+     model file        :  /home/robbie/synk/xeona/svn2/futz/trunk/models/trial-008.i.xem
+     backup file       :  /home/robbie/synk/xeona/svn2/futz/trunk/models/trial-008.i.xem~
+
+  final information
+
+     command-line      :  /home/robbie/synk/xeona/svn2/futz/trunk/xeona1/xeona.r9218 --mode 8 --file trial-008.i.xem
+     start directory   :  "/home/robbie/synk/xeona/svn2/futz/trunk/models"
+     elapsed time      :  00:58:25
+     log calls to date :  info (157706) dbug (77932986) xtra (18138248) adhc (313960543)
+     simulation state  :  simulate() returned success
+     application exit  :  0 = success (relative to prevailing exit trip, the default is to accept warnings)
+
+  xeona exit status         : 0
+  xeona outcome             : full success
+  harvested data (despaced) : 0 3511 i "zero emissions smelter (experimental)" 8760 +1.090e+10 +2.300e+09 +0.000e+00 +4.818e+16 +0.000e+00 trial-008.i.xem
+  about to write to         : trial-008.log
+
+  cexit message             : script complete
+
+  command                   : xsenario.sh -R -m 8 008 i
+  elapsed (hms or seconds)  : 00:58:40
+  script exit               : 0
+
+     ----------------------------------------------------------------------
+
+  commencing                : xsenario.sh -R -m 8 008 j
+
+  xeona                     : /home/robbie/synk/xeona/svn2/futz/trunk/xeona1/xeona.r9218
+  file confirmed            : trial-008.xem
+  file confirmed            : trial-008.j.dif
+  cp call                   : cp trial-008.xem trial-008.j.xem
+  patch call                : patch --no-backup-if-mismatch trial-008.j.xem trial-008.j.dif
+
+patching file trial-008.j.xem
+
+  call                      : xgrab --quiet --unquote --failmsg="(xsenario.sh)" trial-008.j.xem "program.study-description.scenario-leta"
+  copy and patch complete
+  scenario xem file         : trial-008.j.xem
+  scenario xog file         : trial-008.j.xog
+  study-wide log file       : trial-008.log
+  about to run scenario     : trial-008.j.xem
+  xeona call                : '/home/robbie/synk/xeona/svn2/futz/trunk/xeona1/xeona.r9218 --mode 8 --file trial-008.j.xem'
+  about to invoke xeona
+
+  xeona
+
+     xeona energy systems modeling environment
+     copyright (c) 2007 - 2012 Robbie Morrison
+     show GPL v3 license with option --legal
+     all timestamps in UTC time
+
+  build information
+
+     compile date      :  2012-04-03
+     operating system  :  Linux
+     g++ compiler      :  4.4.3
+     glpk solver       :  4.47 static
+     boost c++ libs    :  1.48.0 static
+     build context     :  release
+     codebase status   :  first-pass complete and in testing phase
+     terminal width    :  166
+     _XDEBUG app       :  unset
+     NDEBUG c++ libs   :  set
+     svn revision      :  9218
+
+  run information
+
+     binary name       :  xeona.r9218
+     logname           :  robbie
+     locale            :  C
+     start date        :  2012-04-04
+     start time (UTC)  :  01:53:02
+     process ID        :  16514
+
+  command-line settings
+
+     command-line      :  /home/robbie/synk/xeona/svn2/futz/trunk/xeona1/xeona.r9218 --mode 8 --file trial-008.j.xem
+     defensive coding  :  exit cleanly on fault
+     beep behavior     :  silent (0)
+     reporting level   :  warnings (2)
+     no data           :  (no special action)
+     watch regex       :  (none)
+     nonzero exit trip :  report trips not enabled (0 thru 0)
+     simulation mode   :  year run (8760h) (8)
+     given model name  :  trial-008.j.xem
+
+  model details (backup made)
+
+     model file        :  /home/robbie/synk/xeona/svn2/futz/trunk/models/trial-008.j.xem
+     backup file       :  /home/robbie/synk/xeona/svn2/futz/trunk/models/trial-008.j.xem~
+
+  final information
+
+     command-line      :  /home/robbie/synk/xeona/svn2/futz/trunk/xeona1/xeona.r9218 --mode 8 --file trial-008.j.xem
+     start directory   :  "/home/robbie/synk/xeona/svn2/futz/trunk/models"
+     elapsed time      :  00:58:53
+     log calls to date :  info (157706) dbug (77961738) xtra (18138248) adhc (314063571)
+     simulation state  :  simulate() returned success
+     application exit  :  0 = success (relative to prevailing exit trip, the default is to accept warnings)
+
+  xeona exit status         : 0
+  xeona outcome             : full success
+  harvested data (despaced) : 0 3538 j "reduced inflows (dry year)" 8760 +1.090e+10 +3.185e+09 +0.000e+00 +5.135e+16 +0.000e+00 trial-008.j.xem
+  about to write to         : trial-008.log
+
+  cexit message             : script complete
+
+  command                   : xsenario.sh -R -m 8 008 j
+  elapsed (hms or seconds)  : 00:59:03
+  script exit               : 0
+
+  say study call            : saystudy.sh 008
+  comment                   : saystudy run directly offers extended reporting
+
+  command                   : saystudy.sh 008
+  reporting                 : mean
+  study name                : phd
+  letas                     : + a b c d e f g h i j
+  files                     : trial-008.+.xem trial-008.a.xem trial-008.b.xem trial-008.c.xem trial-008.d.xem trial-008.e.xem trial-008.f.xem trial-008.g.xem trial-008.h.xem trial-008.i.xem trial-008.j.xem
+  RES                       : trial-008.+.xem
+
+ xeona  time leta  scenario name                                     steps    fin        ghg        nox        dep        luc          xem file
+
+     0  5651   +   "reference energy system"                          8760   +1.090e+10 +3.026e+09 +0.000e+00 +4.818e+16 +0.000e+00    trial-008.+.xem
+     0  5653   a   "indoor temp now 18C was 21C"                      8760   +1.089e+10 +2.992e+09 +0.000e+00 +4.752e+16 +0.000e+00    trial-008.a.xem
+     0  3558   b   "far-from-demand ranked-orig-domains"              8760   +1.090e+10 +3.026e+09 +0.000e+00 +4.818e+16 +0.000e+00    trial-008.b.xem
+     0  3506   c   "ambient air 2C warmer"                            8760   +1.090e+10 +3.002e+09 +0.000e+00 +4.770e+16 +0.000e+00    trial-008.c.xem
+     0  5654   d   "uprated building performance"                     8760   +1.091e+10 +2.937e+09 +0.000e+00 +4.642e+16 +0.000e+00    trial-008.d.xem
+     0  5788   e   "carbon capture added"                             8760   +1.108e+10 +1.426e+09 +0.000e+00 +6.876e+16 +0.000e+00    trial-008.e.xem
+     0  3495   f   "nicad storage removed"                            8760   +1.089e+10 +3.026e+09 +0.000e+00 +4.818e+16 +0.000e+00    trial-008.f.xem
+     0  5100   g   "large high-voltage windfarm removed"              8760   +1.090e+10 +3.029e+09 +0.000e+00 +4.824e+16 +0.000e+00    trial-008.g.xem
+     0  4900   h   "urban domain under 'fin' was 'ghg'"               8760   +1.090e+10 +3.026e+09 +0.000e+00 +4.818e+16 +0.000e+00    trial-008.h.xem
+     0  3511   i   "zero emissions smelter (experimental)"            8760   +1.090e+10 +2.300e+09 +0.000e+00 +4.818e+16 +0.000e+00    trial-008.i.xem
+     0  3538   j   "reduced inflows (dry year)"                       8760   +1.090e+10 +3.185e+09 +0.000e+00 +5.135e+16 +0.000e+00    trial-008.j.xem
+
+ key : mean                                          +          a          b          c          d          e          f          g          h          i          j        
+
+ overseer.total-shortrun-financial                  +7.803e+09 +7.801e+09 +7.803e+09 +7.802e+09 +7.799e+09 +7.944e+09 +7.803e+09 +7.803e+09 +7.803e+09 +7.803e+09 +7.805e+09
+ overseer.total-shortrun-greenhouse                 +3.026e+09 +2.992e+09 +3.026e+09 +3.002e+09 +2.937e+09 +1.426e+09 +3.026e+09 +3.029e+09 +3.026e+09 +2.300e+09 +3.185e+09
+ teas-ccs-geological-c01.burials                                                                           +8.440e+01                                                       
+ teas-building-elec-f02.demands                     +8.144e+07 +6.813e+07 +8.144e+07 +7.218e+07 +4.671e+07 +8.144e+07 +8.144e+07 +8.144e+07 +8.144e+07 +8.144e+07 +8.144e+07
+ teas-windfarm-a09.spill                            +0.000e+00 +0.000e+00 +0.000e+00 +0.000e+00 +0.000e+00 +0.000e+00 +0.000e+00            +0.000e+00 +0.000e+00 +0.000e+00
+ teas-windfarm-e02.spill                            +0.000e+00 +0.000e+00 +0.000e+00 +0.000e+00 +0.000e+00 +0.000e+00 +0.000e+00 +0.000e+00 +0.000e+00 +0.000e+00 +0.000e+00
+ teas-hydro-scheme-a10.reservoir-storages           +5.806e-01 +5.893e-01 +5.806e-01 +5.868e-01 +6.019e-01 +4.827e-01 +5.806e-01 +5.800e-01 +5.806e-01 +5.806e-01 +4.626e-01
+ teas-load-all-elec-a11.loads                       +7.488e+07 +7.725e+07 +7.488e+07 +7.657e+07 +7.973e+07 +5.194e+07 +7.488e+07 +7.488e+07 +7.488e+07 +7.488e+07 +7.443e+07
+ gate-stated-tariff-elec-a01.quantitys              +8.660e+07 +7.244e+07 +8.660e+07 +7.675e+07 +4.968e+07 +8.660e+07 +8.660e+07 +8.660e+07 +8.660e+07 +8.660e+07 +8.660e+07
+ teas-source-all-oxidgas-d01.extractions            +2.829e+01 +2.790e+01 +2.829e+01 +2.801e+01 +2.726e+01 +4.038e+01 +2.829e+01 +2.833e+01 +2.829e+01 +2.829e+01 +3.016e+01
+ teas-pv-installation-f01.actual-productions        +1.388e+05 +1.388e+05 +1.388e+05 +1.374e+05 +1.388e+05 +1.388e+05 +1.388e+05 +1.388e+05 +1.388e+05 +1.388e+05 +1.388e+05
+ teas-simple-storage-elec-f03.closing-inventorys    +2.094e+07 +2.094e+07 +2.094e+07 +2.094e+07 +2.094e+07 +2.094e+07            +2.094e+07 +2.094e+07 +2.094e+07 +2.094e+07
+ teas-building-elec-f02.hvac-dutys                  -4.535e+03 -2.197e+03 -4.535e+03 -2.976e+03 -4.427e+02 -4.535e+03 -4.535e+03 -4.535e+03 -4.535e+03 -4.535e+03 -4.535e+03
+ cm-natural-gas-02.spec-combustion-enthalpy         +5.400e+07 +5.400e+07 +5.400e+07 +5.400e+07 +5.400e+07 +5.400e+07 +5.400e+07 +5.400e+07 +5.400e+07 +5.400e+07 +5.400e+07
+ teas-building-elec-f02.floor-performance           +3.525e+01 +2.785e+01 +3.525e+01 +3.010e+01 +1.595e+01 +3.525e+01 +3.525e+01 +3.525e+01 +3.525e+01 +3.525e+01 +3.525e+01
+
+  elapsed (hms or seconds)  : 00:02:08
+  exit code                 : 0 (success)
+
+  no patch failures detected
+  no problematic xeona invocations
+
+role       : study run information
+user       : robbie (Robbie Morrison)
+start      : Tue 03-Apr-2012 23:42 CEST +0200
+subversion : 9219
+comment    : new trial with new CCS tariffs and raised CCGT floor price
+used svn   : 9218
+finish     : Wed 04-Apr-2012 04:54 CEST +0200
+
+  command                   : runstudy.sh --jobs=-1 -R -m 8 008
+  runstudy.sh               : complete using 'xsenario.sh -R -m 8 008' and '+ a b c d e f g h i j'
+  elapsed (hms or seconds)  : 05:12:10
+
+console capture complete
+

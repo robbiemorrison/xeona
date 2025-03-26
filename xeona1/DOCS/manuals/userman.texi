@@ -1,0 +1,2904 @@
+\input texinfo
+
+@c  XEONA ENERGY SYSTEMS MODELING ENVIRONMENT
+@c
+@c  file-create-name : start.texi
+@c  file-create-date : Mon 18-Jan-2010 18:39 UTC
+@c  file-initiator   : Robbie Morrison <robbie@actrix.co.nz>
+@c
+@c  file-role        : xeona documentation / native texinfo
+@c  file-status      : ongoing
+@c  file-release-tag :
+@c
+@c  LEGAL NOTICE
+@c
+@c  Software  : This file is part of the source code for the xeona energy
+@c              systems modeling environment.
+@c  License   : This software is distributed under the GNU General Public
+@c              License version 3, a copy of which is provided in the text
+@c              file LICENSE_GPLv3.
+@c  Warranty  : There is no warranty for this software, to the extent permitted
+@c              by applicable law.  Refer to the license for further details.
+@c  Copyright : This software is copyright (c) 2007 - 2010 Robbie Morrison.
+@c  Request   : The software is distributed with the request that you forward
+@c              any modifications you make to the xeona project for possible
+@c              inclusion in the main codebase.
+@c
+@c  PROJECT CONTACT
+@c
+@c  Robbie Morrison
+@c  Institute for Energy Engineering
+@c  Technical University of Berlin
+@c  Marchstrasse 18, D-10587 Berlin, Germany
+@c  Email: robbie@actrix.co.nz
+@c
+@c  SVN VERSION CONTROL
+@c
+@c  $Author: robbie $
+@c  $URL: file:///home/robbie/svn-root/xeona/futz/trunk/xeona1/DOCS/manuals/userman.texi $
+@c
+@c  GENERAL NOTES FOR THIS FILE
+
+@c ------------------------------------------------------------------- junk
+@c
+@c  this file was developed using makeinfo (GNU texinfo) 4.8
+@c
+@c  useful command-lines
+@c
+@c  INFO format
+@c
+@c  $ makeinfo --no-split file.texi
+@c  $ info -f file.info
+@c
+@c  DVI format
+@c
+@c  $ texi2dvi file.texi
+@c  $ xdvi file.dvi &
+@c
+@c  PDF format
+@c
+@c  $ texi2pdf --quiet file.texi
+@c  $ evince file.pdf &
+@c
+@c  HTML format
+@c
+@c  $ makeinfo --html file.texi
+@c  $ firefox file/index.html &
+
+@c -------------------------------------------------------- document header
+
+@c %**start of header
+@setfilename userman.info
+@settitle xeona : an energy systems modeling environment
+@afourpaper                                  @c A4 paper
+@c %**end of header
+
+@c ----------------------------------------------------------------- macros
+
+@c  $LastChangedDate: 2011-11-16 20:15:21 +0100 (Wed, 16 Nov 2011) $
+@c  $LastChangedRevision: 8004 $
+@c  $HeadURL: file:///home/robbie/svn-root/xeona/futz/trunk/xeona1/DOCS/manuals/userman.texi $
+
+@c  DATE is the manual last modified date as per 'LastChangedDate' in form "00 Mon 0000"
+@c  SVN  is the subversion release as reported by 'svnversion'
+
+@set STUB    userman
+
+@c  @set STATUS  D R A F T
+@set STATUS  W O R K _ I N _ P R O G R E S S
+@c  @set STATUS
+
+@set DATE    00 Mon 2011
+@set YEAR    2011
+@set SVN     0000
+@set BOOST   1.48.0
+@set GLPK    4.47
+
+@c ------------------------------------------------------------------ legal
+
+@copying
+@iftex
+@format
+This manual documents the @emph{xeona} energy systems modeling environment.
+@end format
+@sp -1.5
+@float
+@image{by-nc-sa-robbie_003}
+@end float
+@format
+@sp -0.5                                     @c must follow format start
+Copyright @copyright{} @w{@value{YEAR}} Robbie Morrison.  Some rights reserved.
+This manual is licensed under a Creative Commons @w{BY--NC--SA}.
+@c  This manual is licensed under a Creative Commons Attribution--Noncommercial--Share@tie{}Alike.
+@uref{http://www.creativecommons.org/licenses/by-nc-sa/3.0/}
+@sp 0.5
+Robbie Morrison
+Institute for Energy Engineering
+Technical University of Berlin
+Marchstrasse 18, D--10587 Berlin, Germany
+Email: @email{robbie@@actrix.co.nz}
+@sp 0.5
+The software itself is distributed under the GNU General Public License version 3,
+a copy of which is provided in the text file @code{LICENSE_GPLv3}.
+@sp 0.5
+Source: $Id: userman.texi 8004 2011-11-16 19:15:21Z robbie $
+@end format
+@sp 4.0
+@end iftex
+@c ---------------------------
+@ifnottex                                      @c different layout required
+This manual documents the @emph{xeona} energy systems modeling environment.
+
+Copyright @copyright{} 2010 Robbie Morrison. Some rights reserved.
+
+This manual is licensed under a Creative Commons BY-NC-SA, a copy of which
+may be found at @uref{http://www.creativecommons.org/licenses/by-nc-sa/3.0/}
+
+Robbie Morrison
+Institute for Energy Engineering
+Technical University of Berlin
+Marchstrasse 18, D-10587 Berlin, Germany
+Email: @email{robbie@@actrix.co.nz}
+
+Source: $Id: userman.texi 8004 2011-11-16 19:15:21Z robbie $
+@end ifnottex
+@end copying
+
+@c ------------------------------------------------------------- title page
+
+@finalout                                    @c suppress overfull hbox marks
+@titlepage
+
+@sp -8.0
+@subtitle @code{@value{STATUS}}
+@sp 7.0
+@c @title @sl{xeona}
+@title xeona
+@subtitle An Energy Systems Modeling Environment
+@sp 2.0
+@subtitle @b{User manual}
+@subtitle Last updated @value{DATE}
+@subtitle Aligns with @emph{xeona} revision @value{SVN}
+@author @c Robbie Morrison
+
+@page
+@vskip 0pt plus 1filll
+
+@iftex
+Suggested citation:
+@sp 0.2
+Morrison, Robbie.  @value{YEAR}.  User manual
+for the @i{xeona} energy @* systems modeling
+environment --- revision @value{SVN}. PDF version. @*
+Available as @code{xeona.r@value{SVN}.@value{STUB}.pdf}.
+@sp 8.0
+@end iftex
+@insertcopying
+
+@end titlepage
+
+@c    Node, Next, Prev, Up
+@c --------------------------------------------------------------- top node
+
+@node Top, Overview, (dir), (dir)
+
+@ifinfo
+This info documentation covers:
+
+@example
+* the xeona energy systems modeling environment
+@end example
+
+More specifically:
+
+@example
+* binary revision : @value{SVN}
+* documentation last modified : @value{DATE}
+@end example
+
+@c TOFIX: confirm alignment
+@emph{xeona} is an energy systems modeling environment.
+It is designed to support @w{near-term} energy and
+climate policy development through comparative
+simulation.  The underpinning model employs demand
+networks, combines microeconomic and technical
+processes, and emphasizes operational decision-taking.
+The program is command-line, but its clean
+@w{data-model} encourages the use of scripted tools to
+prepare and visualize simulation scenarios.
+@end ifinfo
+
+@menu
+* Overview::                    About @emph{xeona}
+* Requirements::                System requirements for @emph{xeona}
+* Tar distributions::           Tar distributions
+* Usage::                       Using @emph{xeona}
+* Models::                      Preparing models
+* Data rules::                  Date considerations
+* Example::                     Model file example
+* Entities::                    List of entity classes
+* Background::                  Further background
+* Tar log::                     Tar distributions status log
+* Terminology::                 Terminology
+* URLs::                        URLs
+* Concept index::               Concept index
+@end menu
+
+@c --------------------------------------------------------------- contents
+
+@c @shortcontents
+@contents
+
+@c --------------------------------------------------------------- overview
+
+@node Overview, Requirements, Top, Top
+@chapter Overview of @emph{xeona}
+@cindex overview of @emph{xeona}
+
+@ifnotinfo                                   @c note the @w 'mbox's
+@emph{xeona} is an energy systems modeling environment.
+It is designed to support @w{near-term} @w{energy} and
+climate policy development through comparative
+simulation.  The underpinning model takes a web of
+demands, adds microeconomic and technical processes,
+and then solves the @w{resulting} patchwork of
+operational decisions for each timestep.  The program
+is command-line, but its clean @w{data-model}
+encourages the use of scripted tools to prepare and
+visualize simulation scenarios.
+@end ifnotinfo
+
+@unnumberedsec Some features
+
+To give a flavor of @emph{xeona}, the program is able
+to simulate multi-player systems by providing modelers
+with a range of:
+
+@itemize @bullet
+@item
+technologies
+@item
+commodity types
+@item
+plant operating policies
+@item
+supply contracts and tariff structures
+@item
+nodal auctions and bidding strategies
+@item
+weather instances and other forms of operating context
+@end itemize
+
+@noindent
+Structural entities are individually represented and
+can include operators, technical assets, gateways, and
+contexts.  A group of operators who coordinate their
+operations form a domain --- an example of which is a
+nodal electricity market.  A gateway spans adjacent
+domains and comprises a meter, contract, and tariff
+structure.  An operator may embed actor-based behavior,
+such as adaptive bidding.  A context captures some
+aspect of the physical or institutional environment
+
+A given simulation normally covers one year in steps of
+30 or @w{60 minutes}.  On each time step, the
+structural entities are recharacterized in relation to
+their state and context, transformed and combined into
+mixed-integer optimization problems, and solved
+accordingly.
+
+The software is intended for energy and climate policy
+analysis, both public and private.  To this end,
+@emph{xeona} collects and reports the following system
+performance criterion for further discussion and
+potential trade-off:
+
+@itemize @bullet
+@item
+financial costs [$]
+@item
+greenhouse gas emissions [kg]
+@item
+depletable energy resource use [J]
+@item
+NOx pollution [kg]
+@item
+land usage [m@math{^2}]
+@end itemize
+
+@unnumberedsec System requirements in brief
+@cindex system requirements (in brief)
+
+@emph{xeona} release binaries should run on any recent
+Linux or Windows system with Intel i386-compatible
+hardware.  The exact run-time and development
+requirements are covered elsewhere.
+
+@unnumberedsec Credits
+
+@emph{xeona} is being written by Robbie Morrison as
+part of his energy engineering PhD at the Technical
+University of Berlin.  The underlying model draws on
+and generalizes concepts from an earlier energy systems
+model, @emph{deeco}, authored by Thomas Bruckner and
+released in 1994.  @emph{xeona} links to the GNU GLPK
+linear programming library by Andrew Makhorin.
+
+@unnumberedsec Legal
+
+@emph{xeona} is distributed under the GNU General
+Public License version 3.  In addition, users are
+requested to forward any modifications they might make
+back to the @emph{xeona} project for possible inclusion
+in the main codebase. This manual is licensed under a
+Creative Commons @w{BY-NC-SA}.
+
+@c ----------------------------------------------------------- requirements
+
+@node Requirements, Tar distributions, Overview, Top
+@chapter System requirements
+@cindex system requirements (chapter)
+
+This chapter describes the system requirements for
+running and developing @emph{xeona}.  @emph{xeona} is
+being written using free software.
+@c all media, not just tex
+@footnote{The author would like to express appreciation
+to the free software community for these tools and
+systems.}
+
+@section Linux development platform
+@cindex development platform
+
+@emph{xeona} is being developed on a relatively common
+numerical computing environment.
+@iftex
+@footnote{The development platform was Ubuntu Linux
+6.10 / Intel Celeron@tie{}M 1.4@dmn{GHz} / 512@dmn{MiB}
+RAM.}
+@end iftex
+The minimum requirements are as follows:
+
+@quotation
+@multitable @columnfractions 0.20 0.05 0.75
+@item    hardware          @tab : @tab Intel 80386 instruction set
+@item @w{operating system} @tab : @tab 32-bit Linux kernel 2.6 (or better)
+@item    compiler          @tab : @tab GNU GCC 4.1 and 4.4
+@end multitable
+@end quotation
+
+@noindent
+@emph{xeona} has not been @emph{source-level} ported to
+Windows or MacOS.  That said, care has been taken to
+isolate system specific code and hence such ports are
+expected to be relatively straightforward for the same
+compiler.  Indeed, the GCC compiler and the third-party
+libraries used by @emph{xeona} are regularly deployed
+on these other platforms.
+
+@c  the file utility reports: MS-DOS executable PE for MS Windows (console) Intel 80386 32-bit
+
+@section Cross-compile to Microsoft Windows
+@cindex Windows binary port
+
+@emph{xeona} has been @emph{binary-level} ported
+(cross-compiled) to the following minimum environment:
+@iftex
+@footnote{Peter Sahlmann suggested and undertook this
+cross-compilation.}
+@end iftex
+
+@quotation
+@multitable @columnfractions 0.20 0.05 0.75
+@item    hardware          @tab : @tab Intel 80386 instruction set
+@item @w{operating system}
+@iftex
+@footnote{Users will need to confirm that their Windows
+system is suitable and has sufficient RAM.}
+@end iftex
+                           @tab : @tab Microsoft Win32 API --- Windows NT 4.0 or 95 (or better)
+@item    binary name       @tab : @tab @code{xeona.exe} or @code{xeona@value{SVN}.exe}
+@end multitable
+@end quotation
+
+@noindent
+This cross-compiled executable may lack some very minor
+system-related functionality when compared with the
+native version.  But this loss should be insignificant.
+Users will also need to convert Linux-based model files
+from UNIX (@code{LF}) to DOS (@code{CR}+@code{LF})
+newline conventions to properly view and edit them,
+although @emph{xeona} will accept either format.  The
+Windows executable is @strong{not} currently included
+in the tar distribution.
+
+@section Run-time recommendations
+@cindex run-time recommendations
+
+This section presumes Linux (or the same features on a
+Windows system).  Release versions of @emph{xeona} are
+now @emph{statically} linked.  This means that there
+are @emph{no} run-time system requirements beyond the
+CPU and kernel specifications listed above.  This is
+evidenced by the @code{file} and @code{ldd} utilities:
+
+@ifhtml
+@example
+$ file xeona.r@value{SVN}
+  xeona.r@value{SVN}: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV),
+  for GNU/Linux 2.6.0, statically linked, for GNU/Linux 2.6.0, notstripped
+@end example
+@end ifhtml
+@ifnothtml
+@example
+$ file xeona.r@value{SVN}
+  xeona.r@value{SVN}: ELF 32-bit LSB executable, Intel 80386,
+  version 1 (SYSV), for GNU/Linux 2.6.0, statically linked,
+  for GNU/Linux 2.6.0, notstripped
+@end example
+@end ifnothtml
+
+@example
+$ ldd xeona.r@value{SVN}
+  not a dynamic executable
+@end example
+
+@noindent
+If any of the @emph{xeona} shell scripts are to be
+used, a reasonably recent bash shell is required:
+@iftex
+@footnote{Usually accessed locally @i{via} an xterm
+(such as @code{xterm} or @code{gnome-terminal}) or
+remotely @i{via} an SSH session.}
+@end iftex
+
+@itemize
+@item the @code{bash} shell, version 3 or better
+@end itemize
+
+@need 500                                    @c visual formatting
+
+@noindent
+You can determine your shell as follows:
+
+@example
+$ echo $SHELL
+  /bin/bash
+$ echo $BASH_VERSION
+  3.1.17(1)-release
+@end example
+
+@noindent
+Although not strictly requirements, the following tools
+and packages may prove useful when working with
+@emph{xeona}:
+@iftex
+@footnote{@code{firefox} is often present on Linux by
+default.  @code{R} is best installed as a Linux
+package.  @code{graphviz} might need to be built from
+source.  @code{display} is part of the ImageMagick
+package.  @code{less} is normally present.  The emacs
+lisp file @code{xem.el} is available from Robbie
+Morrison.}
+@end iftex
+
+@itemize
+@item the @code{firefox} web browser --- for viewing
+mixed-integer problems
+
+@item the @code{R} statistical computing environment
+--- for plotting and visualization
+
+@item the @code{graphiz} network visualization utility
+--- for visualization
+
+@item the @code{display} bitmap viewer
+--- for visualization
+
+@item
+the @code{less} pager --- for paging and searching
+@emph{xeona} models
+
+@item the @code{emacs} editor --- particularly for the
+custom @code{xem-mode} editing mode @end itemize
+
+@noindent
+Finally @emph{xeona}, by default, expects to be run on
+a console with a width of @b{142 columns} or more.
+@iftex
+@footnote{This line length is set at compile-time.  It
+can be extended by defining the @emph{xeona}
+preprocessor macro @code{_XTCOLS} to something larger,
+say 180 columns: @code{$ g++
+-D_XTCOLS=180}@tie{}@i{etc}.  Reducing the line length
+to less than 142 will significantly truncate logging
+output and is not recommended.}
+@end iftex
+You may need to reduce the text size of your terminal
+(zoom out) to achieve this.  The current width can be
+found as follows:
+
+@example
+$ stty size        @r{# @i{reports lines columns}}
+  50 143           @r{# @i{143 is okay}}
+@end example
+
+@section Build-time requirements
+@cindex build-time requirements
+
+This section lists the build-time system requirements
+for @emph{xeona}.  These will probably require some
+work, for which you may also need superuser privileges.
+
+@subheading @code{fastdep} utility 0.16
+@cindex @code{fastdep} utility
+
+The @code{fastdep} utility, written by Bart
+Vanhauwaert, is used to identify source file
+dependencies
+(@uref{http://www.irule.be/bvh/c++/fastdep/, fastdep
+information}).
+@iftex
+@footnote{Note that @code{fastdep} is not strictly
+necessary.  If absent and a previously generated
+@code{dependsfile} is present, then that dependency
+information will be used.  If @code{#include} lines are
+added or removed then the existing @code{dependsfile}
+becomes stale and should be deleted.  If neither are
+present, each code change will provoke a full compile.
+Therefore @code{fastdep} is recommended for any
+significant development effort.}
+@end iftex
+Either build this program directly or
+hunt for an RPM or DEB package.  For instance, on
+Ubuntu Linux, simply install the following:
+
+@itemize
+@item fastdep (fast dependency generator for C/C++ files)
+@end itemize
+
+@subheading GNU GLPK solver library @value{GLPK}
+@cindex GLPK solver library
+
+The GNU GLPK linear programming library is maintained
+by its author Andrew Makhorin.  GLPK is often available
+as a Linux package but these may lag by several
+releases.  The GLPK library --- in static link form ---
+can normally be built from source without difficulty as
+follows:
+
+@example
+$ tar -xzvf glpk-@value{GLPK}.tar.gz
+$ cd glpk-@value{GLPK}/
+$ ./configure --disable-shared
+$ make
+$ make check
+$ sudo make install
+$ glpsol --version
+@end example
+
+@noindent
+The latest GLPK tarfile can be downloaded from the web
+(@uref{http://www.gnu.org/software/glpk, GLPK
+website}).  The GLPK help newsgroup is active and the
+postings archive can be a good source of information.
+For the record, @code{glpsol} is the command-line
+solver associated with GLPK.
+
+@subheading Boost C++ libraries @value{BOOST}
+@cindex Boost C++ libraries suite
+
+The Boost C++ libraries are designed to extend and
+compliment the C++ Standard Template Library.  These
+libraries can be built from source.  But it may be
+easier to install the suite as a metapackage.  If you
+choose the latter approach, be sure to download the
+@strong{dev} (header) files and the documentation.  The
+project website (@uref{http://www.boost.org, Boost
+website}) is extensive and the help newsgroup has high
+traffic.
+
+@cindex link-time problems with Boost libraries
+
+One issue you may well strike is that the g++ linker
+cannot find the required Boost libraries.  For
+instance, the linker might not know to look in
+@code{/usr/local/lib}.  There are several strategies
+for dealing with this all to common problem --- you
+might wish to consider the following:
+
+@itemize
+@item pass Boost @code{bootstrap.sh} the string @code{--prefix=/usr}
+at build-time
+
+@item set the environment variable @code{LIBRARY_PATH=/usr/local/lib}
+
+@item pass g++ the linker option @code{-L/usr/local/lib}
+
+@item add a symbolic link from @code{/dev/lib} to @code{/usr/local/lib}
+for each library
+@end itemize
+
+@subheading Other tools
+
+The section provides a list of tools which modelers and
+developers might find additionally useful.  Most if not
+all should be available as Linux packages.  First, the
+following utilities are sometimes used in bash scripts
+(@code{bash} version 3 or better):
+
+@itemize
+@item the @code{gawk} GNU awk utility
+@cindex @code{gawk} utility
+@item the @code{beep} ``beep the PC speaker any number of ways'' utility
+@cindex @code{beep} utility
+@end itemize
+
+@need 500                                    @c visual formatting
+
+@noindent
+The following tools are more directed toward
+significant development.
+
+@itemize
+@item @code{gdb} GNU command-line debugger
+@cindex @code{gdb} command-line debugger
+@item @code{texinfo} software documentation system
+@cindex @code{textinfo} software documentation system
+@item @code{umbrello} UML modeler
+@cindex @code{umbrello} UML modeler
+@item @code{valgrind} memory checker
+@cindex @code{valgrind} memory checker
+@end itemize
+
+@c ------------------------------------------------------------------- tars
+
+@node Tar distributions, Usage, Requirements, Top
+@chapter Tar distributions
+@cindex tar distributions (chapter)
+
+This chapter describes the so-called tar (or tarball)
+distribution method.  Tar distributions are intended to
+get potential @emph{xeona} modelers started, while
+simultaneously meeting the GPL license.
+
+@emph{xeona} does not have systematic versioning at
+present.  If need be, this can be implemented.  Until
+that time, the tar distributions merely encode the
+prevailing subversion revision.
+
+@section Introduction
+
+A tar distribution contains the current release binary,
+together with sufficient source files to build a
+similar (but not identical) binary using the
+@code{make} utility (given that the build-time
+requirements are met).  A tar distribution also
+includes plain text developer documentation, formatted
+user documentation, and a set of test models.  Note
+that the ``@code{r@value{SVN}}'' codes the subversion
+revision number at the time of packing.
+
+A tar distribution does @emph{not} provide a number of
+important but nonetheless ancillary files, including,
+but not limited to, build scripts, unit testing code
+and scripts, and design documentation.
+
+Nor does a tar distribution contain historical
+development information.  For the record, the best way
+to transmit all known information is to @emph{dump} the
+entire subversion version control repository:
+
+@example
+$ svnadmin dump @var{repository} > @var{dumpfile}
+@end example
+
+@section Unpack and test
+
+Release binaries (from @code{r4241} onward) are
+statically linked and do not require the presence of
+specific run-time libraries.
+
+@iftex
+@sp 0.5
+@end iftex
+
+@noindent
+First unpack the tar distribution:
+
+@example
+$ tar -xzvf xeona.r@value{SVN}.tar.gz
+$ ls
+  xeona.r@value{SVN}/
+  xeona.r@value{SVN}.tar.gz
+  xeona.r@value{SVN}.txt        @r{# @i{contains some pack-time details}}
+@end example
+
+@noindent
+Then run the test script:
+
+@example
+$ cd xeona.r@value{SVN}/
+$ ./testme.sh --help
+$ ./testme.sh
+$ ls *.log
+  testme.@i{000000}.log
+@end example
+
+@noindent
+The automated test normally runs one or more test
+models. The final line of console output should
+indicate @code{PASS} or @code{FAIL}.  The entire output
+stream is also written to the log file.
+
+@noindent
+Here are some trouble shooting calls (should you need
+to):
+@iftex
+@footnote{Please note that, on some systems, the use of
+@code{valgrind 3.2.0} with @emph{static} versions of
+@emph{xeona} produces an avalanche of memory errors.
+These can be disregarded.  The problem only presents
+when @code{-static} is employed at compile-time and the
+messages begin well before any @emph{xeona} code
+executes.}
+@end iftex
+
+@example
+$ ls -l xeona.r@value{SVN}
+$ file xeona.r@value{SVN}
+$ ldd xeona.r@value{SVN}
+$ ./xeona.r@value{SVN} --version
+@end example
+
+@section Run @emph{xeona} directly
+
+@noindent
+Run the supplied binary directly as follows.  Note that
+@emph{xeona} options can be abbreviated to @emph{two}
+dashes and the leading letter.
+
+@iftex
+@sp 0.5
+@end iftex
+
+@noindent
+First change directory (if not already there):
+
+@example
+$ cd xeona.r@value{SVN}/
+@end example
+
+@noindent
+Then explore some command-line information (piping the
+output through the @code{less} pager is simply for
+convenience):
+
+@example
+$ ./xeona.r@value{SVN} --help
+$ ./xeona.r@value{SVN} --usage | less
+@end example
+
+@noindent
+Then run the compiled-in model using 24 time steps:
+
+@example
+$ ./xeona.r@value{SVN} --inbuilt 24 --report 4
+@end example
+
+@noindent
+Then run one of the bundled models (note that
+@code{--file} is always implied and thereby optional):
+
+@example
+$ cd xeona-xmoks/
+$ ls *.guard.xem
+  submodel.00.guard.xem
+$ ../xeona.r@value{SVN} --guard [--file] submodel.00
+@end example
+
+@noindent
+The nested extensions @code{.guard} and @code{.xem} can
+be omitted on the command-line --- although they must
+be present in the underlying files.
+
+If you wish to continue using @emph{xeona}, you should
+probably make the binary more generally available.  One
+way to do this, assuming @code{~/bin} is on your
+@var{PATH}, is to link the binary relative to your bin
+directory:
+
+@example
+$ cd ~/bin/
+$ ln --symbolic ~/path-to/xeona.r@value{SVN} xeona
+@end example
+
+@section Build @emph{xeona} using @code{make}
+
+@emph{xeona} can be built from source using the
+@code{make} utility and the bundled @code{makefile}.
+All build-time requirements will need to be honored.
+This procedure will produce a somewhat different binary
+because the @code{mach} script normally used to build
+@emph{xeona} modifies some of the make flags.  The
+resulting binary is named @code{xeona.make}.
+
+@noindent
+First, some exploratory calls:
+
+@example
+$ cd xeona.r@value{SVN}/
+$ ls makefile
+  makefile
+$ make help                    @r{# @i{display usage message}}
+$ ./sysinfo.sh --help          @r{# @i{display usage message}}
+@end example
+
+@noindent
+Second, the build calls.  The @code{sysinfo.sh} script
+reports on your environment and attempts to flag
+potential problems.  There is no @code{sudo make
+install} command.  In other words, the intention is
+that @emph{xeona} binaries remain in the user-space.
+
+@example
+$ ./sysinfo.sh                 @r{# @i{passive reporting of environment}}
+$ make                         @r{# @i{the @code{all} option is implied}}
+@end example
+
+@noindent
+Third, calls to confirm the build:
+
+@example
+$ make check
+$ ./xeona.make --help
+@end example
+
+@page                                        @c visual formatting
+@c  @need 1500                                   @c visual formatting
+
+@noindent
+The exact command used to build the bundled release
+version is given in the @code{lastbuild} text file
+under the @code{make-call} field.  This can be
+recovered using:
+
+@ifnothtml
+@example
+$ grep "make-call" lastbuild
+@end example
+
+@noindent
+The call will be something like (the trailing @code{\}
+indicate line continuations):
+
+@example
+  make \
+  CPPFLAGS="-D_XTCOLS=142 -D_XSVNREV=@value{SVN} -D_XRELEASE -DNDEBUG" \
+  CXXFLAGS="-Wall -O3 -fno-strict-aliasing" \
+  LDFLAGS="-static" \
+  binary="xeona.r@value{SVN}" all
+@end example
+@end ifnothtml
+@ifhtml
+@example
+$ make CPPFLAGS="-D_XTCOLS=142 -D_XSVNREV=@value{SVN} -D_XRELEASE -DNDEBUG" \
+  CXXFLAGS="-Wall -O3 -fno-strict-aliasing" LDFLAGS="-static" binary="xeona.r@value{SVN}" all
+@end example
+@end ifhtml
+
+@noindent
+It is @emph{not} recommend that a tar distribution be
+used for significant development.
+@iftex
+@footnote{It is planned to move the @emph{xeona}
+codebase to an open source hosting site (like
+SourceForge) in due course, possibly in late-2010.}
+@end iftex
+
+@c ------------------------------------------------------------------ usage
+
+@node Usage, Models, Tar distributions, Top
+@chapter Using @emph{xeona}
+@cindex using @emph{xeona} (chapter)
+
+This chapter gives information on the run-time use of
+@emph{xeona}.
+
+@section File naming conventions
+
+@cindex binary file naming conventions
+@cindex naming conventions, binary files
+
+@strong{Binary files}@tie{}: the following binary file
+naming convention is adopted.  If you build your own
+binaries, please use a @emph{different} convention.
+
+@quotation
+@multitable @columnfractions 0.4 0.6
+@item @code{xeona.r0000} @tab revision @emph{0000} release build
+@item @code{xeona.mach}  @tab development build using the @code{mach} build script
+@item @code{xeona.make}  @tab development build using @code{make}
+@end multitable
+@end quotation
+
+@noindent
+A release build is one in which code optimizations are
+applied and static linking is employed.  A development
+build, on the other hand, has debugging information
+included and uses dynamic linking, except for the
+static GLPK solver library.
+
+@iftex
+@sp 0.5
+@end iftex
+
+@cindex model file naming conventions
+@cindex naming conventions, model files
+
+@noindent
+@strong{Model files}@tie{}: the following model file
+naming convention is adopted.  This convention is
+hard-coded into @emph{xeona} and is therefore
+mandatory.
+
+@quotation
+@multitable @columnfractions 0.4 0.6
+@item @code{mymodel.xem}       @tab model which may or may not have been run
+@item @code{mymodel.xem~}      @tab model backup retaining the un-run state
+@item @code{mymodel.guard.xem} @tab so-called guard model
+@end multitable
+@end quotation
+
+@noindent
+Hence @code{.xem} is used as the standard file
+extension for @emph{xeona} models.  The term XEM is
+also used as shorthand for @emph{xeona} model.  See the
+next section for details about the way in which
+@emph{xeona} processes model files.
+
+@section Model file processing and version control
+@cindex model file processing
+@cindex model file version control
+@cindex version control, for model files
+
+Unlike most programs, @emph{xeona} does not use
+distinct and separate input files and output files.
+Instead @emph{xeona} destructively reads its given
+model file, processes the information, and then writes
+new data back to the same file.  The original file is
+automatically backed up with a @w{trailing @code{~}}
+beforehand.  Hence the before and after state of a
+particular model can be determined by issuing, for
+example:
+@iftex
+@footnote{If the file has not been run, process it
+first with the option @code{--tidy}, so that the line
+ordering remains consistent.}
+@end iftex
+
+@cindex @code{sdiff} utility, example of use
+@example
+$ sdiff --suppress-common-lines mymodel.@{xem,xem~@}
+@end example
+
+@noindent
+A guard model is run using the @code{--guard} option
+--- in which case the guard model file is first copied
+without the ``@code{.guard}'' and then run under its
+new name as usual.  Hence, a guard file can never be
+modified by @emph{xeona}, not even accidentally.
+
+Guard model files therefore remain fixed and are
+generally used for test purposes.  Normal model files,
+on the other hand, naturally evolve.  Previous
+incarnations are therefore lost, but can be recovered
+if annotated version control is used.  In this regard,
+Emacs VC can provide a straightforward one file at a
+time solution,
+@iftex
+@footnote{Assuming that the @code{RCS} version control
+system or similar is present on your system.}
+@end iftex
+while Subversion offers a more integrated alternative.
+A model can, of course, be forked by assigning it a new
+filename.
+
+@section Console reporting
+@cindex console reporting
+@cindex run-time output
+@cindex output streams
+
+@emph{xeona} is currently configured to send run-time
+output to the following output streams:
+
+@quotation
+@multitable @columnfractions 0.15 0.05 0.80
+@item @code{stdout} @tab @tab splash screens @* exception reporting
+@item @code{stderr} @tab @tab run-time logging @* GLPK solver output
+@end multitable
+@end quotation
+
+@noindent
+These two streams would typically be combined before
+being piped elsewhere:
+@iftex
+@footnote{For more information on shell redirection
+(the @code{2>&1}), consult the @code{bash} manpage or
+any book on Linux.}
+@end iftex
+
+@example
+$ ./xeona.r@value{SVN} mymodel --report 6 2>&1 | grep [--color] "my-search-term"
+@end example
+
+@noindent
+In addition, the options @code{--report} and
+@code{--watch} can be used to control output.  And the
+option @code{--mode 6} can be used to limit a model run
+to just the first step.
+
+@section Help
+@cindex help
+
+Users should acquaint themselves with the output from
+the following options (the @code{less} pipe is
+optional).
+
+@example
+$ ./xeona.r@value{SVN} --usage | less
+$ ./xeona.r@value{SVN} --data  | less
+$ ./xeona.r@value{SVN} --output 8        @r{# @i{for example}}
+@end example
+
+@noindent
+The @code{--usage} option displays an expanded help
+message, with examples.  The @code{--data} option
+explains the basic rules governing the preparation and
+parsing of data.  The @code{--output} option describes
+the @emph{xeona} return code passed to it as an
+argument (intended for scripts).
+
+The @code{--class} option displays templates for the
+entities which match its case-sensitive regex (regular
+expression) argument.
+@iftex
+@footnote{This option uses the Boost.Regex library and
+its default regular expression syntax.}
+@end iftex
+Note also the special argument @code{+} which lists all
+currently supported entities by name and header file.
+This information then allows one to study the source
+code and author comments of the entity in question ---
+open source at its best!
+
+@example
+$ ./xeona.r@value{SVN} --class +           @r{# @i{interpreted character, not regex}}
+$ ./xeona.r@value{SVN} --class .           @r{# @i{dump all with match-any-char operator}}
+$ ./xeona.r@value{SVN} --class Windfarm    @r{# @i{case-sensitive}}
+@end example
+
+@section Command-line usage
+@cindex command-line usage
+@cindex options, command-line
+
+Command-line usage is as follows --- the file
+extensions @code{.xem} or @code{.guard.xem} can be
+omitted on the command-line but they @emph{must} be
+present in the underlying file:
+
+@example
+$ ./xeona.r@value{SVN} <options>         [--file] mymodel[.xem]
+$ ./xeona.r@value{SVN} <options> --guard [--file] mymodel[.guard][.xem]
+@end example
+
+@noindent
+The first form is used for scenario development and the
+model file gets ``consumed and reconstituted'' in the
+process (as described above).  The second form leaves
+the guard file untouched, and is primarily intended for
+application and entity development and also automated
+testing.  If no model name is passed, @emph{xeona}
+defaults to @code{test.xem} and @code{test.guard.xem}
+respectively.
+
+Command-line options are processed in order @emph{shown
+here} and not in the order @emph{encountered} on the
+command-line!  Options can also be abbreviated if they
+remain unambiguous.
+@iftex
+@footnote{Command-line parsing uses the Boost.Program_options library.}
+@end iftex
+
+@iftex
+@sp 1.0
+@end iftex
+
+@noindent
+The first block of options are @emph{informational}:
+
+@iftex
+@sp 1.0
+@end iftex
+
+@multitable @columnfractions 0.23 0.77
+@item @code{--help}
+@tab display command-line options and quit
+@item @code{--usage}
+@tab display longer usage message and quit
+@item @code{--output arg}
+@tab describe application return code @code{arg} and quit
+
+@item @code{--legal}
+@tab display copyright notice and license and quit
+@item @code{--svn}
+@tab display embedded source code revision number and quit
+@item @code{--version}
+@tab display version details in structured form and quit
+
+@item @code{--data}
+@tab display xem file data rules and quit
+@item @code{--class arg}
+@tab display fields for entity class regex @code{arg} and quit
+@item @code{--xem arg}
+@tab display @code{arg} head|mand|tail|comb xem file parts and quit
+@end multitable
+
+@iftex
+@sp 1.5
+@end iftex
+
+@noindent
+The second block of options determine how a @emph{model will be run}:
+
+@iftex
+@sp 1.0
+@end iftex
+
+@c  @item @code{--quiet}
+@c  @tab silence all output except the above (@strong{not implemented})
+@c
+
+@multitable @columnfractions 0.23 0.77
+@item @code{--beep arg}
+@tab set beep behavior 0--2 (silent to noisy) (default 0)
+@item @code{--report arg}
+@tab set report level 0--6 (nil to verbose) (default 6)
+@item @code{--nodata}
+@tab empty data fields generate warnings not debugs
+@item @code{--jumpy}
+@tab range failures and such generate warnings not debugs
+@item @code{--watch arg}
+@tab report fully from sources matching @code{arg} regex
+@item @code{--exittrip arg}
+@tab set nonzero exit trip to @code{arg} level logs (default 1)
+
+@item @code{--mode arg}
+@tab set run mode 1--7 (reduced to normal) (default 7)
+@item @code{--pepper}
+@tab reseed random number generators using time() return
+@item @code{--again}
+@tab continue when choked or hard problems encountered
+@item @code{--krazy}
+@tab omit defensive coding and try to run to failure
+@item @code{--yeek arg}
+@tab run non-standard code based on @code{arg} (changeable)
+@item @code{--zero}
+@tab disable close-to-zero solver output rounding
+
+@item @code{--inbuilt arg}
+@tab generate and run inbuilt test model using @code{arg} steps
+@item @code{--guard}
+@tab regenerate xem file from guard file if present
+@item @code{--tidy}
+@tab shallow reformat xem file (alias @code{--report 3 --mode 3})
+@end multitable
+
+@iftex
+@sp 1.5
+@end iftex
+
+@noindent
+Note also the @emph{implicit} option (implied in the
+sense that it can be and is often omitted):
+
+@iftex
+@sp 1.0
+@end iftex
+
+@multitable @columnfractions 0.23 0.77
+@item @code{--file arg}
+@tab process filename @code{arg}, perhaps lacking @code{.xem} and @code{.guard}
+@end multitable
+
+@c ----------------------------------------------------------------- models
+
+@node Models, Data rules, Usage, Top
+@chapter Preparing models
+@cindex preparing models (chapter)
+@cindex model preparation
+
+This chapter explains how to prepare @emph{xeona}
+models.  The underlying conceptualization is largely
+beyond the scope of this manual and will be documented
+elsewhere in due course.  Some material is nonetheless
+given in the chapter on background.
+
+@section Overview
+
+As already noted, @emph{xeona} uses structured plain
+text to define a model and its results within the one
+file.  This format is both human readable and
+relatively easy to edit.
+@iftex
+@footnote{XML was considered but its adoption would
+have slowed development.  That said, it would be
+possible to migrate to XML should the need arise.}
+@end iftex
+Model files should ideally be kept 8-bit clean (no @"a,
+@"o, @"u), notwithstanding @emph{xeona} will accept
+identifiers with umlauted characters.
+@iftex
+@footnote{The preferred way to add, for instance,
+@code{f@"ur} as a comment in source code or a model
+file is @code{f"ur}.}
+@end iftex
+
+A @emph{xeona} model is simply a collection of entity
+specifications, each with a unique identifier.  Each
+entity necessarily maps to a concrete entity class
+within the @emph{xeona} codebase.  Cross-references are
+then used to define the following kinds of directed
+association between entities:
+
+@itemize
+@item coordination relationships@tie{}: overseer @expansion{} domain @expansion{} operator @expansion{} asset (for instance)
+@item demand connectivity@tie{}: cable @expansion{} socket connections between technical assets
+@item commodity linkages@tie{}: which need to be consistent with the demand connectivity
+@item context linkages@tie{}: entity @expansion{} context (information channels, may be bi-directional)
+@end itemize
+
+@noindent
+The model file initially comprises input data
+describing the model together with placeholders for the
+results.  These placeholders are duly overwritten at
+run-time.  Input data (in-data) can be recognized by
+the > symbol and output data (out-data) by the <
+symbol.
+
+The single model file concept is designed to encourage
+model integrity and aid downstream analysis.  Model
+files under development can be placed under notated
+version control to limit disk usage and assist with
+back-tracking.  Where necessary, a new model can be
+forked by simply assigning it a new filename.
+
+A @emph{xeona} model file also holds meta-data related
+to the last run-time and may optionally contain
+configuration details for processing by third-party
+scripts.  In database terms, a @emph{xeona} model is a
+shallow set of hierarchical records with embedded
+cross-referenced primary keys.
+@c
+Three important sources of information in regards model
+preparation are:
+
+@itemize
+@item the @emph{xeona} options @code{--data} and @code{--class}
+
+@item the example models in the @code{xeona-xmoks/} subdirectory
+
+@item the plain text documentation as @code{DOCS/*.txt}
+@end itemize
+
+@section Emacs @code{xem-mode} major mode
+@cindex @code{xem-mode}, custom emacs editing mode for @emph{xeona}
+
+The emacs @code{xem-mode} major mode can be used to
+edit @emph{xeona} model files.  It is contained in the
+emacs lisp file @code{xem.el} and Emacs itself can be
+configured to automatically associate @code{*.xem}
+files with this mode.  The mode provides custom
+coloration, navigation, data entry, and reformatting
+calls.  Although not strictly necessary, this mode can
+substantially aid model editing.  A copy of
+@code{xem.el} is included in the tar distribution.
+
+@section Model visualization
+@cindex model visualization
+@cindex visualizing models
+
+Visualization can be a powerful tool for model
+debugging.  A missed demand connection is usually
+immediately evident on a network plot, but more
+circuitous to find by other means.  Some actual plots
+are given with the example model.
+
+@subheading Optimization problem visualization @i{via} HTML
+@cindex MIP problem instance visualization
+@cindex visualization, MIP problem instance
+
+For @emph{each} domain and time step, @emph{xeona}
+progressively generates and combines a number of
+so-called optimization sub-problems (OSP) into a single
+optimization problem.  The set of domain problems can
+be visualized for the first step only (designated step
+0) by passing @code{--yeek 1}.  This option writes HTML
+files for each domain to the current directory.  It
+should also open these files using the Firefox web
+browser if the hardcoded system call @code{"firefox"}
+succeeds (poor style).
+@iftex
+@footnote{The browser invocation string is set in
+@code{common.cc} as @code{xeona::webbrowser}.}
+@end iftex
+
+@subheading Model visualization using R
+@c  @cindex model visualization, breadboard plot
+@c  @cindex model visualization, network plot
+@cindex breadboard plot
+@cindex network plot
+@cindex @code{xem.R} visualization script
+@cindex @code{graphviz} visualization utility
+@cindex @code{R} statistical computing language/environment
+
+A small @code{R} statistical computing program named
+@code{xem.R} will, when passed a suitably notated model
+file, generate the following:
+@itemize
+@item
+conventional @var{xy} plots of nominated timeseries
+
+@item
+a breadboard plot showing the aforementioned
+associations of coordination, demand, commodity
+linkage, and context information
+
+@item
+a network plot of the above, assuming the
+@code{graphviz} utility is present
+@end itemize
+
+@section Creating a new model
+@cindex creating a new model
+
+The following represents one way of creating a new
+model file:
+
+@example
+$ ./xeona.r@value{SVN} --xem comb > newmodel.guard.xem
+$ nano newmodel.guard.xem          @r{# @i{or your preferred editor}}
+$ ./xeona.r@value{SVN} --guard newmodel [&& less newmodel.xem]
+@end example
+
+@noindent
+If using Emacs in @code{xem-mode}, simply issue the
+command @code{M-x xem-insert-new-model}.
+
+@section Debugging models
+@cindex debugging models
+
+The building up of models in small tested increments is
+recommended.  Notwithstanding, model debugging can
+often be advanced through the judicious use of the
+following options, either separately or in combination:
+
+@itemize
+@item @code{--jumpy}
+@item @code{--nodata}
+@item @code{--mode@tie{}@{@i{4,5,6,7}@}}
+@item @code{--report@tie{}@{@i{2,3,4,5,6}@}}
+@item @code{--watch @i{source-column-regex}}
+@end itemize
+
+@noindent
+Or, more dangerously:
+
+@itemize
+@item @code{--again}
+@item @code{--krazy}
+@end itemize
+
+@noindent
+And also:
+
+@itemize
+@item @code{--yeek 0|@i{n}}
+@end itemize
+
+@noindent
+The @code{--yeek @i{n}} option runs non-standard test
+and/or reporting code.  Passing @code{--yeek 0} to
+@emph{xeona} will print a list of currently supported
+values for @code{@i{n}}
+@iftex
+@math{\ge 1}.
+@end iftex
+@ifhtml
+@html
+&ge;
+@end html
+1.
+@end ifhtml
+@ifinfo
+>= 1.
+@end ifinfo
+
+All logged warnings and thrown exceptions should be
+carefully scrutinized.  Processing a model through
+@code{xem.R} (or some allied @code{R} wrapper script)
+to obtain breadboard and network plots can often be
+illuminating.
+
+@c ------------------------------------------------------------------- data
+
+@node Data rules, Example, Models, Top
+@chapter Data considerations
+@cindex data considerations (chapter)
+
+This chapter presents some rules governing the
+preparation of data.  These same rules are also
+available under the @code{--data} option.  The last
+part of this chapter looks at entity classes and
+commodity types.  A UML (unified modeling language)
+class diagram of the @emph{xeona} data-model is
+available on request.
+
+@section Rules governing data preparation
+
+@noindent
+@b{Text alignment}
+
+@itemize
+@item column 0 has no leading space, column 4 has four leading spaces
+@item record identifiers must start in column 0, data fields and comments may start anywhere
+@item the same alignment rule applies to the record and field disable character @code{#}
+@item by convention, data fields are placed in column 4 and comments in column 6
+@end itemize
+
+@noindent
+@b{Model file}
+
+@itemize
+@item a XEM file is a set of records
+@item the record order has no semantic significance
+@end itemize
+
+@noindent
+@b{Records}
+
+@itemize
+@item each record begins with an identifier placed in column 0 (otherwise line deemed a comment!)
+@item the leading dot-separated part of each identifier indicates the record kind (see below)
+@item processing ceases when the special @code{model-end} record identifier is met
+@item blank lines are not intrinsically significant
+@item column alignment is not significant, except for the placement of the record identifier
+@item a note record is treated as set of comment lines, with multiple blank lines removed on output
+@item records are written out in the order that they are read in
+@end itemize
+
+@noindent
+@b{Record kinds} (with identifiers)
+
+@quotation
+@multitable @columnfractions 0.15 0.15 0.03 0.67
+@item note      @tab @code{note}        @tab : @tab verbatim text (except multiple blank lines are squeezed)
+@item program   @tab @code{program.*}   @tab : @tab run information
+@item entity    @tab @code{entity.*}    @tab : @tab model entities
+@item model end @tab @code{model-end}   @tab : @tab processing stops (remaining text is lost)
+@end multitable
+@end quotation
+
+@noindent
+@b{Fields}
+
+@itemize
+@item a record is made up of zero or more data fields and/or comments
+@item any field containing a single angle bracket is a data field, otherwise it is a comment
+@item each data field has an identifier, followed optionally by @code{[unit]} and optionally by @code{a remark}
+@item a comment may possess matched angle brackets (for instance @code{<email@@address>} is legal)
+@end itemize
+
+@noindent
+@b{Data}
+
+@itemize
+@item a data field may hold:
+@quotation
+@multitable @columnfractions 1.0
+@item a single value
+@item a timeseries
+@item an individual entity identifier
+@item a list of identifiers
+@end multitable
+@end quotation
+@item single or timeseries values may be of data-type:
+@quotation
+@multitable @columnfractions 1.0
+@item string
+@item integer
+@item float
+@item boolean
+@end multitable
+@end quotation
+@item a string value is set in double quotes, a boolean value is either 0 (false) or 1 (true)
+@item a connectivity list comprises zero or more space-separated entity identifiers placed within one set of double quotes
+@item entities may disallow the use of null entity identifiers in some cases (as documented)
+@end itemize
+
+@noindent
+@b{Disabling records and fields}
+
+@itemize
+@item a record can be disabled by placing a leading @code{#} in column 0 (and nowhere else)
+@item a data field can be disabled by placing a leading @code{#} anywhere (but best to avoid column 0)
+@item a disabled field must appear @strong{after} its respective enabled field
+@item a leading @code{#} on a comment line is automatically removed and not replaced @* (think of this as a feature)
+@end itemize
+
+@noindent
+@b{Reformatting on write out}
+
+@itemize
+@item @emph{xeona} reformats the XEM file on write out
+@item most notably, in-data, out-data, and comments are grouped together in that order
+@item additional support is provided for Emacs text editor local variables if originally present
+@end itemize
+
+@noindent
+@b{Field kinds}
+
+@quotation
+@multitable @columnfractions 0.15 0.05 0.80
+@item comment     @tab : @tab no angle bracket (or alternatively matched angle brackets)
+@item in-data     @tab : @tab >
+@item out-data    @tab : @tab <
+@end multitable
+@end quotation
+
+@noindent
+@b{Data values}
+
+@itemize
+@item floats may be input in either decimal or exponent format: @code{-0.01234} or @code{-12.34e-03}
+@item a trailing @code{..} on timeseries input data means repeat that pattern as often as needed
+@item @emph{xeona} holds floats using the @emph{8-byte} @code{double} arithmetic type (assuming IEEE 754 support)
+@end itemize
+
+@noindent
+@b{Mandatory entities with preset identifiers}
+
+@quotation
+@multitable @columnfractions 0.33 0.65
+@item @code{TimeHorizon} @tab @code{entity.time-horizon}
+@item @code{Overseer}    @tab @code{entity.overseer}
+@end multitable
+@end quotation
+
+@noindent
+@b{Field value data-type prompts} (not actively parsed but provided to assist data preparation)
+
+@itemize
+@item entity connectivity (in-data only, both can be null in some circumstances)
+@quotation
+@multitable @columnfractions 0.05 0.95
+@item @code{l} @tab individual entity identifier within double quotes
+@item @code{L} @tab space-separated list of entity identifiers within one set of double quotes
+@end multitable
+@end quotation
+@item normal data (both in-data and out-data)
+@quotation
+@multitable @columnfractions 0.05 0.95
+@item @code{s} @tab single string in double quotes
+@item @code{S} @tab timeseries of strings with each element in double quotes
+@item @code{i} @tab single integer
+@item @code{I} @tab timeseries of integers
+@item @code{f} @tab single floating-point number
+@item @code{F} @tab timeseries of floating-point numbers
+@item @code{b} @tab single boolean
+@item @code{B} @tab timeseries of booleans
+@end multitable
+@end quotation
+@item reinterpreted data (entity-specific in-data)
+@quotation
+@multitable @columnfractions 0.05 0.95
+@item @code{x} @tab single character stream within double quotes (for instance, bidset data)
+@item @code{X} @tab timeseries of above with each element in double quotes
+@end multitable
+@end quotation
+@end itemize
+
+@need 2000                                   @c visual formatting
+
+@noindent
+@b{Field units} (enclosed in square brackets)
+
+@itemize
+
+@item physical quantities (unprefixed SI units are presumed unless otherwise documented)
+@quotation
+@multitable @columnfractions 0.18 0.82
+@item time              @tab @code{s}
+@item raw SI units      @tab @code{kg m ohm V} etc
+@item derived SI units  @tab @code{J Pa W} etc
+@item temperature       @tab @code{C} or @code{K} @ (@code{C} preferred unless calculation utilizes @code{K})
+@end multitable
+@end quotation
+@item economic quantities
+@quotation
+@multitable @columnfractions 0.18 0.82
+@item time              @tab @code{y} @ (year can be more intuitive than @code{s} in certain cases)
+@item generic currency  @tab @code{$} @ (representing, for example, EUR or USD)
+@end multitable
+@end quotation
+@item quantities lacking dimensionality
+@quotation
+@multitable @columnfractions 0.18 0.82
+@item unitless          @tab @code{@minus{}} @ (unitless normally preferred over @code{%})
+@item percentage        @tab @code{%}
+@end multitable
+@end quotation
+@item embedded costs
+@quotation
+@multitable @columnfractions 0.18 0.82
+@item reported          @tab @code{$} per-interval @ (not @code{$/s})
+@end multitable
+@end quotation
+
+@end itemize
+
+@noindent
+@b{Entity documentation}
+
+@itemize
+@item entity documentation can be obtained through @emph{xeona} option @code{--class +|regex}
+@item commodity-templated entities often use generic documentation, such that:
+@itemize
+@item base commodity in @{ @code{Cert}, @code{Cseq}, @code{Elec}, @code{Fiss}, @code{Fund}, @code{Heat}, @code{Oxid}, @code{Thrm}, @code{Work} @}
+@item stand-in quantifying extensity field unit: @code{*} in @{ kg, J, $ @} as appropriate
+@end itemize
+@end itemize
+
+@noindent
+@b{Compiled-in literals relating to data usage} (set in
+unit @code{common})
+
+@quotation
+@multitable @columnfractions 0.50 0.05 0.25
+@item ISO 4217 currency code                 @tab : @tab @code{EUR}
+@item record or field disable string         @tab : @tab @code{#}
+@item timeseries repeat indicator            @tab : @tab @code{..}
+@item pairwise delimiter for string values   @tab : @tab @code{"}
+@item nodal bid and tariff entry separator   @tab : @tab @code{*}
+@item model end marker                       @tab : @tab @code{model-end}
+@item separator string for OSP tag reporting @tab : @tab @code{.}
+@end multitable
+@end quotation
+
+@noindent
+@b{Data-related abbreviations}
+
+@quotation
+@multitable @columnfractions 0.10 0.90
+@item  EUR @tab euro
+@item  OSP @tab optimization sub-problem
+@item  XEM @tab @emph{xeona} model
+@end multitable
+@end quotation
+
+@noindent
+Please be aware that entity authors may not have
+respected these guidelines in their entirety --- that
+said, non-standard practice should be signaled @i{via}
+the @code{builtin-remark} field
+
+@section Entity classes, commodities, and connectivity
+
+This section covers entity classes, commodity types,
+and demand connectivity in more detail.  These
+descriptions also provide some insight into the
+object-oriented model on which @emph{xeona} is built.
+
+@subheading Entity class prefix conventions
+@cindex entity class prefix conventions
+@cindex naming conventions, entity class prefixes
+
+The following entity class prefix conventions are used.
+These can be useful when searching with the
+@code{--class} option:
+
+@need 2000                                   @c visual formatting
+
+@quotation
+@multitable @columnfractions 0.12 0.30 0.58
+@headitem Prefix
+@tab C++ parent class
+@tab General type
+@item @tab @tab
+@item
+@code{Asop}
+@tab @code{AssetOperator}
+@tab asset operator
+@item
+@code{Cm}
+@tab @code{Commodity}
+@tab commodity
+@item
+@code{Con}
+@tab @code{ContractManager}
+@tab @i{reserved for future use}
+@item
+@code{Cx}
+@tab @code{Context}
+@tab surrounding context
+@item
+@code{Gate}
+@tab @code{Gateway}
+@tab domain-spanning gateway
+@item
+@code{Junc}
+@tab @code{DemandJunction}
+@tab demand splitting and joining
+@item
+@code{Node}
+@tab @code{LmpNode}
+@tab nodal pricing node
+@item
+@code{Teas}
+@tab @code{TechnicalAsset}
+@tab hard asset or ``plant''
+@item
+---
+@tab @code{DomainController}
+@tab domain controller
+@item
+---
+@tab @code{Overseer}
+@tab hardcoded identifier @code{entity.overseer}
+@item
+---
+@tab @code{TimeHorizon}
+@tab hardcoded identifier @code{entity.time-horizon}
+@end multitable
+@end quotation
+
+@iftex
+@sp 1.0
+@end iftex
+
+@noindent
+Hence, the windfarm technical asset in @emph{xeona} is
+naturally named @code{TeasWindfarm} and derives
+internally from class @code{TechnicalAsset}.
+
+@subheading Commodity types
+@cindex commodity types
+
+Commodity entities associate with technical entities
+or, more precisely, their various sockets and cables.
+The term commodity @emph{type} simply refers to the
+underlying class of a commodity entity --- thus the
+terms type and class are broadly interchangeable.
+
+@emph{xeona} employs commodity entities for two
+reasons.  First, like any normal entity, commodities
+may embed state information --- either fixed at
+construction-time or changeable throughout a
+simulation.  And second, demand connectivity can be
+restricted on the basis of commodity type --- which
+means that the author of a thermal generator class can
+(and probably should) require that it can only be
+fueled with a commodity of class @code{CmOxidize} or,
+more restrictively, a particular subclass, like
+@code{CmOxidBiocoal}.
+
+The following commodity type aliases are supported:
+@iftex
+@footnote{Class aliases are implemented using C++
+@code{typedef} declarations.}
+@end iftex
+
+@quotation
+@multitable @columnfractions 0.12 0.25 0.63
+@headitem Alias
+@tab Base class
+@tab Comment
+@item @tab @tab
+@item
+@code{Cert}
+@tab @code{CmCarbonCert}
+@tab carbon certificate
+@item
+@code{Cseq}
+@tab @code{CmCarbonSeq}
+@tab carbon sequestration service (using supercritical CO@math{_2})
+@item
+@code{Elec}
+@tab @code{CmElectricity}
+@tab electricity (loss models are usually DC)
+@item
+@code{Fiss}
+@tab @code{CmFission}
+@tab fissile material
+@item
+@code{Fund}
+@tab @code{CmFunds}
+@tab funds (quantified in units of account)
+@item
+@code{Heat}
+@tab @code{CmHeat}
+@tab thermodynamic heat (in the sense of @math{Q})
+@item
+@code{Oxid}
+@tab @code{CmOxidize}
+@tab oxidizable (combustible) fuel
+@item
+@code{Thrm}
+@tab @code{CmThermalFluid}
+@tab recirculating thermal fluid (supporting heat transfer)
+@item
+@code{Work}
+@tab @code{CmWork}
+@tab non-electricity thermodynamic work (in the sense of @math{W})
+@end multitable
+@end quotation
+
+@iftex
+@sp 1.0
+@end iftex
+
+@noindent
+Some inherently flexible technical asset classes can be
+instantiated using some or all commodity types.
+@iftex
+@footnote{This feature is achieved using C++ class
+templates.}
+@end iftex
+The entity input data field @code{class}, in this case,
+takes the entity class name, then a colon@tie{}@code{:}
+and then a commodity alias.  For example, a generalized
+sink entity taking only electricity might be specified
+thus:
+
+@example
+class > TeasLoad:Elec
+@end example
+
+@noindent
+The example model file in the next chapter uses this
+same entity class --- identified as
+@code{entity.teas-load-elec-1}.
+
+@subheading Commodity demand connectivity
+@cindex demand connectivity
+
+Commodity demand connectivity is central to
+@emph{xeona}.  The reason being that the direction of
+demand can always be @emph{unequivocally} specified in
+advance --- unlike any of the candidate quantifying
+extensities, including energy and exergy.  Moreover,
+the revenue stream normally flows in reverse (negative
+pricing excepted).
+@c
+Therefore @emph{xeona} adopts a demand-based ``cable
+and socket'' analogy, the direct equivalent of plugging
+a household appliance into a wall plate.
+
+@c ---------------------------------------------------------------- example
+
+@node Example, Entities, Data rules, Top
+@chapter Example model
+@cindex example model (chapter)
+@cindex model example
+
+This following model is offered as an example.  It is
+included as @code{submodel.15.guard.xem}.
+
+@heading Model description
+
+This model contains a single windfarm asset supplying a
+single non-adaptive load.  The model comprises just one
+domain, operating under minimum financial cost.
+Admittedly the resulting optimization problem is
+trivial, but that should not detract from the example.
+
+@c omit extension, need { png, eps, pdf }
+
+@float Figure,fig1
+@image{xeona-manex}
+@shortcaption{submodel 15}
+@c
+@caption{Schematic for @code{submodel.15}.  This
+diagram contains the same information as the later
+network and breadboard plots --- except the arrow
+coloration has been simplified here.  Typical input
+data fields are shown in grey.  The windfarm socket
+label is also highlighted thus.}
+@end float
+
+@page                                        @c visual formatting
+@c  @noindent
+The windfarm is powered by synthetic wind, sampled from
+a Rayleigh distribution.  The load requirements of the
+demander are specified exogenously and passed to the
+load asset at each time step.  The demander is tagged
+``inelastic'' because this same entity class can also
+participate in electricity auctions.  The windfarm
+operator is tagged ``basic'' because it does not create
+or report costs in its own right --- if this is not
+suitable, a more sophisticated operator can be
+substituted.  The windfarm and load assets are
+connected @i{via} a 11@dmn{kV} interface.  As currently
+specified, the simulation runs for just two 3600@dmn{s}
+time steps.
+
+This example also hints at how a relatively small set
+of compatible technical assets, asset operators, and
+commitment modes can be combined to represent a diverse
+range of situations.
+
+@heading Model file structure
+
+First up, the model listing (given next) has @emph{not}
+been run --- as evidenced by the
+@code{program.last-run.*} fields being empty.
+
+Variable length dot-separated naming is used to
+identify entities, data fields, and other model
+elements.  For instance,
+@code{entity.teas-windfarm-1.actual-productions} refers
+to the timeseries of actual output from the given
+windfarm (this windfarm will spill wind if required).
+Scripts (such as @code{xem.R}) can parse a model file
+like that shown, and uniquely recover a particular
+timeseries or any other known data element.  Comments
+are, of course, not addressable in this manner.
+
+Much of the model specification is taken up with the
+creation of associations between model elements.  In
+this example, the input field
+@code{entity.asop-inelastic-ts-1.technical-assets} is
+set to @code{teas-load-elec-1} (the @code{entity.}
+prefix is implied) in order to ``couple'' the windfarm
+operator and the windfarm itself.
+
+Identifiers beginning @code{program.*} relate to
+run-time administration and do not influence the actual
+model in any way.  The same applies to the @code{note}
+element for verbatim text.
+
+A selection of results are given after the model file
+is presented.  Model visualization is discussed at the
+end of this chapter.  For more information on data
+preparation, consult the previous chapter.
+
+@heading Listing for @code{submodel.15.guard.xem}
+
+@iftex
+@sp 3.0                                      @c adjust here
+@end iftex
+
+@set XEMEX submodel.15.txt
+
+@ifnothtml
+@smallformat
+@verbatiminclude @value{XEMEX}
+@end smallformat
+@end ifnothtml
+@ifhtml
+@verbatiminclude @value{XEMEX}
+@end ifhtml
+
+@heading Selected results
+
+Selected results are shown after having run the model
+over two time steps, as defined by the in-data field
+@code{entity.time-horizon.steps}.  Fortunately, the
+demand in the second step was nil, because there was
+insufficient synthetic wind for the wind turbines to
+operate.  Some cost types also reported zero, because
+many of the input parameters were left at zero.
+
+@iftex
+@smallformat
+@end iftex
+@verbatim
+entity.overseer
+
+    total-financial [$] f                         < +3.24e+13
+
+entity.domain-controller-1
+
+    variable-costs-financial [$] F                < +8.64e+12 +7.92e+12
+    fixed-costs-financial [$] F                   < +7.92e+12 +7.92e+12
+
+entity.teas-windfarm-1
+
+    potential-productions [W] F                   < +1.17e+06 +0.00e+00
+    actual-productions [W] F                      < +1.00e+06 +0.00e+00
+    availability [-] f                            < +1.17e-01
+    spill [-] f                                   < +1.42e-01
+
+    embedded-costs-financial [$] F                < +1.50e+00 +1.50e+00
+
+entity.cx-ambient-air-sim-1
+
+    wind-speeds [m/s] F                           < +1.54e+01 +4.52e+00
+@end verbatim
+@iftex
+@end smallformat
+@end iftex
+
+@c  @page                                        @c visual formatting
+
+@heading Script-generated visualization
+
+Two forms of script-generated visualization are shown:
+network plots and breadboard plots.
+
+@ifhtml
+@sp 1.0
+@end ifhtml
+
+@c omit extension, need { png, eps, pdf }
+
+@float Figure,fig2
+@image{submodel.15.viz}
+@shortcaption{submodel 15}
+@caption{Network plot of @code{submodel.15}.}
+@end float
+@cindex network plot, example
+
+@noindent
+Demand flows from @b{teas-load-elec-1} to
+@b{teas-windfarm-1} along association @b{04}, which
+represents an 11@dmn{kV} electricity connection based
+on commodity @b{cm-elec-1}.  On solution, electricity
+flows in reverse.  The @b{ambient-air-sim-1} context
+generates synthetic wind data which is then accessed by
+the windfarm though association @b{08}.  The asset
+operator @b{asop-inelastic-ts-1} provides load
+information to its sink asset, while operator
+@b{asop-basic-1} is essentially hollow.  This single
+domain problem, coordinated by @b{domain-controller-1},
+is informed by financial least cost.  In this example,
+for each time step, the feasible space is a single
+point (the solution) and the optimization problem is
+indeed rather trivial.
+
+The numbering was added by @code{xem.R} and is not
+related to @emph{xeona}.  The plot itself was drawn by
+@code{graphviz} after @code{xem.R} wrote out an
+intermediate DOT file.  DOT is a plain text graph
+description language.
+
+@page                                        @c visual formatting
+
+@float Figure,fig3
+@image{submodel.15.bread}
+@shortcaption{submodel 15}
+@caption{Breadboard plot of @code{submodel.15}.}
+@end float
+@cindex breadboard plot, example
+
+@noindent
+This figure depicts the same association information as a breadboard plot.
+@iftex
+@footnote{Named after a somewhat similar looking device
+used for prototyping simple electronic circuits.}
+@end iftex
+The numbering and coloration is also identical to the
+previous figure.  The windfarm socket label
+@code{elec-1} was also added automatically.  The image
+itself was generated natively from @code{xem.R}.
+
+On occasion, @code{graphviz} hangs on relatively small
+@emph{xeona} problems which means visualization and
+model debugging must rely on breadboard plots.
+
+@c ------------------------------------------------------- entities classes
+@node Entities, Background, Example, Top
+@chapter Entity class library
+@cindex entity class library (chapter)
+
+This chapter lists and briefly describes the currently
+supported entity classes.  Consult the source code in
+subdirectory @code{b/} for more details and for
+up-to-date status information.
+
+@iftex
+@sp 1.0
+@end iftex
+
+@subheading Asset operators
+
+@quotation
+
+@noindent
+@code{AsopBasic}
+@quotation
+basic asset operator with a null control policy and
+without internal cost formation
+@end quotation
+
+@noindent
+@code{AsopGrid}
+@quotation
+asset operator which controls LMP nodes and
+transmission assets
+@end quotation
+
+@noindent
+@code{AsopInelasticTs}
+@quotation
+asset operator with stated demand and thereby
+price-inelastic behavior
+@end quotation
+
+@noindent
+@code{AsopInternalCosts}
+@quotation
+asset operator with internal cost formation
+@end quotation
+
+@noindent
+@code{AsopLmpBidAdaptive1}
+@quotation
+asset operator with automated nodal bidding based on
+the preceding and desired commitments and predetermined
+price change rules (read the source code for details)
+@end quotation
+
+@noindent
+@code{AsopLmpBidDialog}
+@quotation
+asset operator which interactively seeks a new bidset
+for each interval
+@end quotation
+
+@noindent
+@code{AsopLmpBidStatedTs1}
+@quotation
+asset operator using a single read-in (as apposed to
+stochastic or adaptive) nodal bidding timeseries
+(@code{Ts1})
+@end quotation
+
+@noindent
+@code{AsopPrescribedOrder}
+@quotation
+asset operator implementing prescribed order operations
+@end quotation
+
+@end quotation
+
+@subheading Commodities
+
+@quotation
+
+@noindent
+@code{CmCarbonCert}
+@quotation
+kg-quantified financial instrument
+@end quotation
+
+@noindent
+@code{CmCarbonSeq}
+@quotation
+kg-quantified pressure state-changeable
+sequestration-service commodity
+
+demand flow is antiparallel to physical flow, similar
+in behavior to that of a conventional fuel (like coal)
+@end quotation
+
+@noindent
+@code{CmElectricity}
+@quotation
+J-quantified electricity commodity
+
+technical assets using electricity adopt a DC-power
+flow model and thereby ignore shunt losses --- this
+commodity provides suitable support
+@end quotation
+
+@noindent
+@code{CmFission}
+@quotation
+kg-quantified state-invariant fissionable commodity
+
+caution: there is currently no support for
+nuclear-powered electricity generation
+@end quotation
+
+@need 1000
+
+@noindent
+@code{CmFunds}
+@quotation
+funds are quantified in UOA (units of account) and can
+be accounted using either the cash method (with actual
+transfers) or the accrual method (with legal transfers)
+@end quotation
+
+@noindent
+@code{CmHeat}
+@quotation
+J-quantified classic @var{Q} commodity
+
+currently lacking intensive state, but could
+specialized to include boundary temperature
+@end quotation
+
+@noindent
+@code{CmOxidBiocoal}
+@quotation
+biocoal as @code{CmOxidize} specialization with added
+data range checking
+@end quotation
+
+@noindent
+@code{CmOxidize}
+@quotation
+kg-quantified state-invariant oxidizable commodity
+@end quotation
+
+@noindent
+@code{CmThermalFluid}
+@quotation
+J-quantified temperature state-changeable recirculating
+thermal fluid commodity
+@end quotation
+
+@noindent
+@code{CmWork}
+@quotation
+J-quantified state-invariant classic @var{W} commodity,
+covering, among other things, shaft power
+@end quotation
+
+@end quotation
+
+@subheading Contexts
+
+@quotation
+
+@noindent
+@code{CxAmbientAirSim}
+@quotation
+an ambient air context with wind speeds sampled from a
+stateless Rayleigh distribution --- meaning that the
+prior values do not influence the current values
+@end quotation
+
+@noindent
+@code{CxAmbientAirTs}
+@quotation
+ambient air context based on exogenous timeseries
+@end quotation
+
+@noindent
+@code{CxAmbientSolarTs}
+@quotation
+ambient solar context based on exogenous timeseries
+@end quotation
+
+@noindent
+@code{CxCommercialFix}
+@quotation
+commercial context using fixed data
+@end quotation
+
+@end quotation
+
+@subheading Domain controller
+
+@quotation
+
+@noindent
+@code{DomainController}
+@quotation
+a domain controller entity (the only one provided)
+which can take one of a number of commitment modes ---
+but @emph{requires} that the managed entities support
+the elected mode
+@end quotation
+
+@end quotation
+
+@subheading Gateways
+
+@quotation
+
+@noindent
+@code{GateStatedTariff:Work}
+@quotation
+this gateway entity used fixed (rather than stochastic,
+unilaterally set, or negotiated) tariffs
+@end quotation
+
+@end quotation
+
+@subheading Junctions
+
+@quotation
+
+@noindent
+@code{JuncDemand2Join:Elec}
+@quotation
+a two socket demand joining junction for given
+commodity
+@end quotation
+
+@noindent
+@code{JuncDemand2Split:Elec}
+@quotation
+a two cable demand splitting junction for given
+commodity
+@end quotation
+
+@end quotation
+
+@subheading Nodes
+
+@quotation
+
+@noindent
+@code{Node1Inj:Elec}
+@quotation
+grid spur line node with injection
+@end quotation
+
+@noindent
+@code{Node1Xit:Elec}
+@quotation
+grid spur line node with exit
+@end quotation
+
+@noindent
+@code{Node2Inj:Elec}
+@quotation
+grid node with injection and support for two grid
+assets
+@end quotation
+
+@noindent
+@code{Node2Nul:Elec}
+@quotation
+grid node to connect two grid assets
+@end quotation
+
+@noindent
+@code{Node2Xit:Elec}
+@quotation
+grid node with exit and support for two grid assets
+@end quotation
+
+@end quotation
+
+@subheading Overseer
+
+@quotation
+
+@noindent
+@code{Overseer}
+@quotation
+the @code{Overseer} entity is @emph{required} and the
+@code{overseer} identifier is @emph{mandatory}
+
+the overseer does little more that invoke the various
+originating domains in nominated order at each new
+interval
+@end quotation
+
+@end quotation
+
+@subheading Technical assets
+
+@quotation
+
+@noindent
+@code{TeasHvTransmission}
+@quotation
+a HV transmission line entity, based on DC power flow
+and suitable for use under nodal pricing
+@end quotation
+
+@noindent
+@code{TeasLoad:Elec}
+@quotation
+a load entity which is operator coupled for load
+definition, for example to @code{AsopInelasticTs}
+@end quotation
+
+@noindent
+@code{TeasLoadElecTs}
+@quotation
+prescribed electricity load, lacking both flexibility
+and context dependency
+@end quotation
+
+@noindent
+@code{TeasMineElec}
+@quotation
+flexible (and oversimplified) electricity commodity
+source, currently without an upper bound on capacity
+--- somewhat similar to a battery
+@end quotation
+
+@noindent
+@code{TeasMineOxid}
+@quotation
+flexible oxidizable commodity source, currently without
+an upper bound on capacity
+@end quotation
+
+@noindent
+@code{TeasOxidToElec}
+@quotation
+a simple fuel to power (thermal, fuel cell, or
+otherwise) power plant, with support for shutdown mode
+operation --- ancillary electricity demand is not
+included
+@end quotation
+
+@noindent
+@code{TeasSource:Elec}
+@quotation
+an operator-coupled source entity with support for
+capacity bounds
+@end quotation
+
+@noindent
+@code{TeasWindfarm}
+@quotation
+a windfarm comprising one or more identical turbines,
+which can also spill wind
+@end quotation
+
+@noindent
+@code{TimeHorizon}
+@quotation
+the @code{TimeHorizon} entity is @emph{required} and
+the @code{time-horizon} identifier is @emph{mandatory}
+@end quotation
+
+@end quotation
+
+@c ------------------------------------------------------------- background}
+@node Background, Tar log, Entities, Top
+@chapter Further background
+
+This chapter is used to provide additional background.
+
+@section Potential roles
+@cindex potential roles for @emph{xeona}
+@cindex roles, potential, for @emph{xeona}
+
+The @emph{xeona} energy systems modeling environment
+can potentially contribute to the following problems:
+
+@itemize
+@item
+@strong{public policy development}@tie{}: modelers can
+run different policy scenarios against a common
+reference case and then determine the public interest
+envelopes for each --- policy-makers can then interpret
+the trade-offs for each scenario and respond
+accordingly.
+
+@item
+@strong{end-use efficiency}@tie{}: the method is suited
+to the exploration of end-use efficiency because final
+demand can be represented in terms of energy-service
+and adaptive end-users can be developed and evaluated.
+@iftex
+@footnote{An energy-service is an energy-derived
+amenity like indoor comfort or personal mobility.  An
+energy-service could potentially be treated as a
+virtual commodity and modeled as such --- although this
+approach has not been attempted in @emph{xeona}.}
+@end iftex
+
+@item
+@strong{smart peer-to-peer systems}@tie{}: because
+@emph{xeona} is able to describe existing system in
+appropriate detail, it provides a good starting point
+for the systematic analysis of smarter systems and, in
+particular, peer-to-peer systems containing multiple
+domains of control.
+
+@item
+@strong{additionality assessment}@tie{}: the evaluation
+of Kyoto-style additionalities in complex systems could
+benefit from simulation-based assessment of the type
+presented.
+
+@item
+@strong{proactive competitive planning}@tie{}: a
+speculative use of literal simulation models is to
+support regulator-driven competitive planning.  Under
+this proposition, a regional energy system would be
+modeled in sufficient detail and projected forward to
+identify impending bottlenecks and high costs.
+Solutions could then be sought from the public and
+private sectors and evaluated ``in@tie{}situ''.  The
+successful proposal would then be granted an operating
+license and incorporated permanently into the
+simulation --- and the exercise repeated.
+@end itemize
+
+@section The underpinning model
+@cindex conceptual model
+@cindex underpinning model
+
+This section sketches the model behind @emph{xeona} in
+point form.  Not all features are necessarily
+implemented --- in particular, gateways and the
+multi-domain solution algorithm are still under
+development (but nearing completion).  Refer to the tar
+distribution status log for more details on the state
+of this snapshot.
+
+@noindent
+The model underpinning @emph{xeona} has the following
+attributes:
+
+@itemize
+@item
+high-resolution in terms of technical structure,
+surrounding context, and time base
+
+@item
+multi-player with support for individual rather than
+overarching system goals --- unlike some other model
+types, an implicit socially-motivated super-actor is
+not required to guide the system
+
+@item
+founded on commodity demand connectivity and able to
+capture network effects and externalities --- which are
+the characteristics and benefits of being connected,
+respectively
+
+@item
+energy-services (for example, indoor temperature)
+fulfillment is central and passive efficiency measures
+--- defined as the component of demand satisfaction
+which does not directly consume energy commodities ---
+can be modeled
+
+@item
+employs a patchwork of control domains, with support
+for the following commitment strategies:
+
+@c nested
+@itemize
+@item
+locational marginal pricing --- used in wholesale
+electricity markets
+
+@item
+short-run marginal cost optimization --- more
+sophisticated operators
+
+@item
+prescribed merit order --- less sophisticated operators
+
+@item
+impact proxy optimization --- for instance, short-run
+@w{CO@math{_2}-e} minimization
+
+@item
+first feasible solution
+@end itemize
+
+@item
+technical assets (including power plant) which would
+otherwise be run at part-load can be tripped out
+(shutdown mode optimization)
+
+@item
+abutting control domains which are gatewayed @i{via}
+supply contracts, with support for the following
+contract types:
+
+@c nested
+@itemize
+@item agreed price
+@item take-or-pay
+@item price-taking
+@end itemize
+
+@item
+a mixed-integer linear solver is used to solve for unit
+commitment --- with the guarantee that the optimums are
+global
+
+@item
+actors are used to make decisions, for instance:
+
+@c nested
+@itemize
+@item
+consumers can vary their demand for energy-services
+
+@item
+operators can prepare bids, stipulate merit order,
+and/or define additional commitment penalties and
+constraints
+@end itemize
+
+@item
+geographic locations are implicitly supported through
+contexts
+
+@item
+public policy measures can be introduced using contexts
+
+@item
+model output in the form of consolidated trade-off
+information is available for public interest analysis
+and policy-making
+
+@item
+the following commodity types (including financial
+instruments) are supported: carbon certificates, carbon
+sequestration services, electricity, fissile material,
+funds, heat, oxidizable material (usually combusted),
+recirculating thermal fluid (supporting heat transfer),
+and work (excluding electricity).
+@end itemize
+
+@section Should @emph{xeona} have a GUI?
+
+At present, @emph{xeona} is firmly command-line.  But
+@emph{xeona} does have a clean data-model --- one which
+can also accommodate ancillary information.  And
+@emph{xeona} will provide a list of supported entities
+and their associated data templates --- although
+admittedly not in as robust a data interchange format
+as XML, but nonetheless with sufficient structure to be
+processed by script.
+
+The question of providing ``front-end'' tools to aid
+model preparation and analysis is never far away.  A
+basic text editor will suffice only for the very
+simplest of models.  The current set of model
+development tools --- which includes the
+@code{xem-mode} for Emacs and the @code{xem.R}
+visualization script --- have now been developed to
+near their full potential.  A dedicated class-browser
+style model editor could be written (perhaps in python
+and GTK+) with a tree view navigator in a side pane.
+For completeness, the @code{xmole.sh} script can be
+used to extract and present meta information from a set
+of models in the current directory.
+
+The next step would be to create a visual programming
+front-end, similar to that used in chemical process
+simulation applications (like Aspen Plus).  These allow
+the user to drag-and-drop components onto a flow sheet
+and then open dialogs to set parameters and specify
+reporting.  Moreover, sets (subgraphs) of components
+can be ``collapsed'' if a model is getting too large to
+display.  Perhaps a similar GUI could be developed for
+@emph{xeona}.
+@iftex
+@footnote{It is possible that some kind of block model
+editor could be adapted to suit.}
+@end iftex
+
+In conclusion, @emph{xeona} will probably remain a
+command-line application for the foreseeable future.
+But there is considerable merit in designing and
+developing a GUI front-end for the visual entry of
+models, using either the current @code{.xem} format or
+its equivalent in XML as the bridge.
+
+@section Code quality
+@cindex code quality
+
+@noindent
+Quality software begins with clear concepts translated
+into good design.  Together with a consideration for
+testability and perhaps articulated using UML (unified
+modeling language).  The next step is clean and careful
+coding, aided by informative console logging and, in
+the case of @emph{xeona}, browser-based optimization
+problem visualization.  The next lines of defense are
+layered unit testing, memory validation with
+@code{valgrind} (@uref{http://valgrind.org, valgrind
+website}), and the automated running of test suites on
+each new build.  @emph{xeona} employs all these
+strategies.  Independent code review and user testing
+are not undertaken at present.
+
+Formalized issues tracking is not being used at this
+point in development.  However significant bugs and
+issues are recorded in the following plain text file
+for reference:
+
+@itemize
+@item @code{DOCS/BUGS.txt}
+@end itemize
+
+@noindent
+Well-annotated version control under @code{subversion}
+(@uref{http://subversion.tigris.org, subversion
+website}, @uref{http://svnbook.red-bean.com, ebook})
+with a local repository is being used.
+
+@c -------------------------------------------------------------------- log
+
+@node Tar log, Terminology , Background, Top
+@chapter Tar distribution status log
+@cindex tar distributions status log (chapter)
+
+This chapter logs the status of tar distributions.  SVN
+is the subversion revision number.  At present,
+@emph{xeona} releases are notated by this number and
+not by an incremental version string.  Nor is a
+distribution change log kept, although every subversion
+commit is carefully annotated.
+
+@iftex
+@sp 1.0
+@end iftex
+
+@multitable @columnfractions 0.10 0.20 0.70
+@headitem SVN
+@tab Date
+@tab Comment
+@item @tab @tab
+
+@item r4250
+@tab 20-Jan-2010
+@tab capabilities:
+@itemize
+@item
+suitable for @emph{single} domain problems, that is,
+problems without gateway entities
+@item
+includes support for demand splitting and joining,
+windfarms, synthetic wind, shut-down mode constant
+marginal efficiency plant, electricity markets with
+locational marginal pricing and pre-stated, adaptive,
+and interactive bidding
+@item
+41 entity classes on offer:
+@smallformat @c set fill-column (C-u C-x f) to 60
+AsopBasic AsopGrid AsopInelasticTs AsopInternalCosts
+AsopLmpBidAdaptive1 AsopLmpBidDialog AsopLmpBidStatedTs1
+AsopPrescribedOrder CmCarbonCert CmCarbonSeq CmElectricity
+CmFission CmFunds CmHeat CmOxidBiocoal CmOxidize
+CmThermalFluid CmWork CxAmbientAirSim CxAmbientAirTs
+CxAmbientSolarTs CxCommercialFix DomainController
+GateStatedTariff:Work JuncDemand2Join:Elec
+JuncDemand2Split:Elec Node1Inj:Elec Node1Xit:Elec
+Node2Inj:Elec Node2Nul:Elec Node2Xit:Elec Overseer
+TeasHvTransmission TeasLoad:Elec TeasLoadElecTs TeasMineElec
+TeasMineOxid TeasOxidToElec TeasSource:Elec TeasWindfarm
+TimeHorizon
+@end smallformat
+@end itemize
+
+@item r1497
+@tab 17-Apr-2008
+@tab
+code evaluation issue
+
+@item r1493
+@tab 28-Feb-2008
+@tab
+code evaluation issue
+@end multitable
+
+@c ------------------------------------------------------------ terminology
+
+@node Terminology, URLs , Tar log, Top
+@page                                        @c to squeeze the previous side
+@headings off
+@everyheading Terminology @| @| @thispage                @c reinstate page numbers
+@chapheading Terminology
+
+@iftex
+@sp 2.0
+@end iftex
+
+@multitable @columnfractions 0.20 0.80
+@item C++                     @tab a multi-paradigm programming language
+@item CO@math{_2}-e           @tab carbon dioxide equivalent (emissions)
+@item CPU                     @tab central processing unit, part of the system board
+@item DC                      @tab direct current
+@item DEB                     @tab Debian software package manager (also package)
+@item DOT                     @tab a plain text graph description language
+@item GCC                     @tab GNU compiler collection
+@item GLPK                    @tab GNU Linear Programming Kit, an MIP solver
+@item GNU                     @tab a mass-collaboration free software project founded by Richard Stallman
+@item GPL                     @tab GNU public license
+@item GTK+                    @tab a graphical user interface toolkit
+@item GUI                     @tab graphical user interface
+@item HTML                    @tab hypertext markup language
+@item HV                      @tab high voltage
+@item IEEE                    @tab Institute of Electrical and Electronics Engineers
+@item LMP                     @tab locational marginal pricing
+@item MIP                     @tab mixed-integer program
+@item OSP                     @tab optimization sub-problem
+@item RCS                     @tab revision control system
+@item RPM                     @tab Red Hat software package manager (also package)
+@item SI                      @tab the metric system
+@item SSH                     @tab secure shell protocol
+@item SVN                     @tab Subversion version control system
+@item UML                     @tab unified modeling language, suited to object-oriented software design
+@item UNIX                    @tab nowadays, an operating system standard (Linux complies)
+@item UOA                     @tab unit of account and implying a generic currency
+@item XEM                     @tab @emph{xeona} model or @emph{xeona} model file
+@item XML                     @tab extensible markup language
+@item gzip                    @tab a UNIX compression utility
+@item tar                     @tab a UNIX archiving utility
+@item xem                     @tab @emph{xeona} model or @emph{xeona} model file
+@end multitable
+
+@c ------------------------------------------------------------ terminology
+
+@node URLs, Concept index , Terminology, Top
+@page                                        @c to squeeze the previous side
+@headings off
+@everyheading URLs @| @| @thispage           @c reinstate page numbers
+@chapheading URLs
+
+@iftex
+@sp 2.0
+@end iftex
+
+@multitable @columnfractions 0.3 0.7
+@item Boost C++ libraries              @tab @uref{http://www.boost.org}
+@item Creative Commons                 @tab @uref{http://www.creativecommons.org}
+@item GLPK solver library              @tab @uref{http://www.gnu.org/software/glpk}
+@item @code{R} project official site   @tab @uref{http://www.r-project.org}
+@item @code{fastdep} utility           @tab @uref{http://www.irule.be/bvh/c++/fastdep}
+@item @code{graphviz} utility          @tab @uref{http://www.graphviz.org}
+@item @code{subversion} utility        @tab @uref{http://subversion.tigris.org}
+@item @code{subversion} ebook          @tab @uref{http://svnbook.red-bean.com}
+@item @code{valgrind} utility          @tab @uref{http://valgrind.org}
+@end multitable
+
+@page                                        @c to squeeze this side
+
+@c ---------------------------------------------------------- concept index
+
+@node Concept index,  , URLs, Top
+@headings off
+@everyheading Concept index @| @| @thispage                @c reinstate page numbers
+@chapheading Concept index                   @c was 'unnumbered', then 'heading'
+
+@printindex cp
+
+@c -------------------------------------------------------------------- bye
+
+@bye
+
+---------------------------------
+ TODO
+---------------------------------
+
+* occur on TOFIX
+
+---
+
+  emacs text editor settings
+  note the jumpy auto-save settings in order to better interact with 'texime.sh'
+  local variables:
+    mode: texinfo
+    make-backup-files: t
+    fill-column: 55
+    truncate-lines: nil
+    tab-stop-list: (04 08)
+    auto-save-default: t
+    auto-save-interval: 1
+    auto-save-timeout: 1
+  end:
+
+#  end of file
+

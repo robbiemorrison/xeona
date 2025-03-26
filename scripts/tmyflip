@@ -1,0 +1,302 @@
+#! /bin/bash
+
+#  file-purpose     : transpose TMY (typical meteorological year) files from NIWA
+#  file-initiator   : Robbie Morrison <robbie@actrix.co.nz>
+#  file-create-date : Tue 26-Jun-2007 11:16 UTC
+#  file-status      : working
+#  file-keywords    : xeona
+
+#  $Revision: 5462 $
+#  $Date: 2010-11-15 12:55:39 +0100 (Mon, 15 Nov 2010) $
+#  $Author: robbie $
+#  $URL: file:///home/robbie/svn-root/xeona/futz/trunk/scripts/tmyflip $
+
+# ---------------------------------
+#  notes
+# ---------------------------------
+
+#  Developed on Ubuntu 10.04 / Linux 2.6.32.
+#
+#  The TMY data uses elevation angle and not zenith angle.
+#
+#  This code probably relies on bash 4.0 features.
+
+# ---------------------------------
+#  license
+# ---------------------------------
+
+#  Waiver: To the extent possible under law, Robbie Morrison
+#  <robbie@actrix.co.nz> has waived all copyright and related
+#  or neighboring rights to this script. This work is published
+#  from Germany.  http://creativecommons.org/publicdomain/zero/1.0/
+
+# ---------------------------------
+#  preamble
+# ---------------------------------
+
+date=$(date)                            # timestamp
+user=$(id --user --name)                # username as string
+host=$(hostname --fqdn)                 # fully-qualified domain name
+
+SCRIPT=$(basename "$0")                 # used for reporting
+
+E_SUCCESS=0
+E_FAILURE=1
+E_USAGE=2
+
+# ---------------------------------
+#  TMY metadata
+# ---------------------------------
+
+tags="\"station\" \"year\" \"month\" \"hour\" \"day\" \"dry-bulb-temperature\" \
+      \"absolute-humidity\" \"air-pressure\" \"wind-speed\" \"wind-direction\" \
+      \"cloud-cover\" \"temperature-flag\"\"humidity-flag\" \"pressure-flag\" \
+      \"wind-flag\" \"cloud-flag\" \"BLANK\" \"global-solar\" \"diffuse-irradiation\" \
+      \"direct-irradiation\" \"solar-altitude\" \"solar-azimuth\" \"unspecified\""
+
+ranges="01-02 03-04 05-06 07-08 09-10 11-14 15-17 18-21 22-24 25-26 27 28 29 30 31 32 33 34-37 38-40 41-44 45-46 47-49 50-56"
+
+# ---------------------------------
+#  help message
+# ---------------------------------
+
+case "$1" in
+    --help|--hel|--he|--h|-help|-hel|-he|-h|"-?")
+        echo
+        echo "      usage : $SCRIPT  [-als]    <tmy.txt>    transpose columns to rows"
+        echo "      usage : $SCRIPT   -x [-l]  <tmy.txt>    transpose columns to rows for 'xeona'"
+        echo "              $SCRIPT --help                  display this message and exit"
+        echo "    default : comma separators and compact format"
+        echo "    options :   -a    align columns for readability"
+        echo "                -l    show output using 'less'"
+        echo "                -s    use space separators"
+        echo "                -x    format to 'xeona' source code requirements (takes precedence)"
+        echo "    purpose : reformat TMY (typical meteorological year) files from NIWA, New Zealand"
+        echo "      notes : clobbers any existing file"
+        echo "              alignment increases filesize"
+        echo "              automatically divides temperature, humidity, pressure, and speed by 10"
+        echo
+        exit $E_SUCCESS
+        ;;
+esac
+
+# ---------------------------------
+#  'getopts' processing
+# ---------------------------------
+
+#  '-x' takes priority
+
+pad=0                                   # pad level
+sep=','                                 # comma separate
+ext="csv"                               # output file extension
+lessflag=0
+xeonaflag=0
+
+while getopts ":alsx" option
+do
+    case "$option" in
+        a)                              # align
+            pad=6
+            ;;
+        l)                              # align
+            lessflag=1
+            ;;
+        s)                              # space separate
+            sep=' '
+            ext="dat"
+            ;;
+        x)                              # space separate
+            xeonaflag=1
+            ;;
+        *)
+            echo "  $SCRIPT: faulty option, try --help for usage"
+            exit $E_USAGE
+            ;;
+    esac
+done
+
+shift $(($OPTIND - 1))                  # part of 'getopts' scan code
+
+test $xeonaflag -eq 1 && ext="xat"
+
+# ---------------------------------
+#  filename processing
+# ---------------------------------
+
+infile="$1"
+
+if [ -z "$infile" ]
+then
+    echo "  $SCRIPT: input file not given"
+    exit $E_USAGE
+fi
+
+if [ ! -f "$infile"  ]
+then
+    echo "  $SCRIPT: input file not found: $infile"
+    exit $E_FAILURE
+fi
+
+stub=$(basename "$infile" ".txt")       # strip path and "txt" extension
+outfile="$stub.$ext"                    # add extension
+
+# ---------------------------------------------------------
+#  rowize2()  for xeona
+# ---------------------------------------------------------
+
+# employs UNIX utilities 'cut' and 'awk' (probably 'gawk')
+
+# the following code looks a little inelegant but the
+# alternative of processing fixed field data from
+# within 'awk' using 'FIELDWIDTHS' is probably worse
+
+function rowize2
+{
+    local range="$1"
+
+    local pad=6
+
+    echo "$range"
+    local col=$(cut --byte="$range" "$infile")
+    case "$range" in
+        34-37)                          # explicit omit: global
+            :
+            ;;
+        01-02|03-04|05-06|07-08|09-10|33|28|29|30|31|32|33|50-56)     # junk
+            :                           # do nothing is correct
+            ;;
+        11-14|15-17|18-21|22-24)        # dry bulb, absol humid, pressure, wind direction
+            awk --assign sep="$sep" \
+                --assign pad="$pad" \
+                '{ printf("%*+.1f%s", pad, $1/10,      sep) } END { printf("\n") }' \
+                <<< "$col"
+            ;;
+        45-46)                          # altitude angle
+            awk --assign sep="$sep" \
+                --assign pad="$pad" \
+                '{ printf("%*d%s",    pad, (90 - $1),  sep) } END { printf("\n") }' \
+                <<< "$col"
+            ;;
+        47-49)                          # azimuth angle
+            awk --assign sep="$sep" \
+                --assign pad="$pad" \
+                '{ printf("%*d%s",    pad, $1,         sep) } END { printf("\n") }' \
+                <<< "$col"
+            ;;
+        25-26)                          # wind direction
+            awk --assign sep="$sep" \
+                --assign pad="$pad" \
+                '{ printf("%*d%s",    pad, $1 * 22.5,  sep) } END { printf("\n") }' \
+                <<< "$col"
+            ;;
+        27)                             # cloud cover
+            awk --assign sep="$sep" \
+                --assign pad="$pad" \
+                '{ printf("%*.3f%s",  pad, $1 * 0.125, sep) } END { printf("\n") }' \
+                <<< "$col"
+            ;;
+        34-37|38-40|41-44)              # global, diffuse, direct
+            awk --assign sep="$sep" \
+                --assign pad="$pad" \
+                '{ printf("%*+d%s",   pad, $1,         sep) } END { printf("\n") }' \
+                <<< "$col"
+            ;;
+    esac
+}
+
+# ---------------------------------------------------------
+#  action2()  for xeona
+# ---------------------------------------------------------
+
+# CAUTION: constituted as function because the block
+# redirects to 'outfile'
+
+# employs UNIX utilities 'fold' and 'sed'
+
+# next time use: sed indent = 6, width = 75
+
+function action2
+{
+    # sed indent is 8
+
+    local width=63
+    local width=77
+
+    echo
+    for range in $ranges
+    do
+        rowize2 "$range" | sed 's/,$//' | fold --width="$width" | sed 's/^/        /'
+        echo
+    done
+
+} >> "$outfile"                         # CAUTION: note file redirection
+
+# ---------------------------------------------------------
+#  rowize1()
+# ---------------------------------------------------------
+
+# employs UNIX utilities 'cut' and 'awk' (probably 'gawk')
+
+# the following code looks a little inelegant but the
+# alternative of processing fixed field data from
+# within 'awk' using 'FIELDWIDTHS' is probably worse
+
+function rowize1
+{
+    local range="$1"
+
+    local col=$(cut --byte="$range" "$infile")
+    case "$range" in
+        11-14|15-17|18-21|22-24)      # integer values but requires divide by 10
+            awk --assign sep="$sep" \
+                --assign pad="$pad" \
+                '{ printf("%*.1f%s", pad, $1/10,   sep) } END { printf("\n") }' \
+                <<< "$col"
+            ;;
+        *)                              # string or integer values
+            awk --assign sep="$sep" \
+                --assign pad="$pad" \
+                '{ printf("%*s%s",   pad, $1,      sep) } END { printf("\n") }' \
+                <<< "$col"
+            ;;
+    esac
+}
+
+# ---------------------------------------------------------
+#  action1()
+# ---------------------------------------------------------
+
+# CAUTION: constituted as function because the block
+# redirects to 'outfile'
+
+function action1
+{
+    echo "# converted : $infile / timestamp : $date / user: $user / host: $host"
+    echo "# "$tags                      # soft-quote usage is correct
+
+    for range in $ranges
+    do
+        rowize "$range"
+    done
+
+} >> "$outfile"                         # CAUTION: note file redirection
+
+# ---------------------------------
+#  active code
+# ---------------------------------
+
+echo "  $SCRIPT:  infile: $infile"      # explain
+echo -n "" >| "$outfile"                # clobber or create file
+case "$xeonaflag" in
+    0) action1 ;;                        # function call
+    1) action2 ;;
+esac
+echo "  $SCRIPT: outfile: $outfile"     # explain
+
+test $lessflag -eq 1 && less --chop-long-line "$outfile"    # show results ('q' to quit)
+
+exit $E_SUCCESS
+
+#  $Source: /home/robbie/synk/temp11/script-devel/RCS/tmy-flip.sh,v $
+#  end of file
+

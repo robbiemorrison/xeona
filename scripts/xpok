@@ -1,0 +1,477 @@
+#! /bin/bash
+
+#  file-purpose     : test the proof-of-concept 'poc.000' models en-masse
+#  file-initiator   : Robbie Morrison <robbie@actrix.co.nz>
+#  file-create-date : Tue 05-Apr-2011 19:43 UTC
+#  file-status      : working
+#  file-keywords    : xeona
+
+#  $Revision: 7583 $
+#  $Date: 2011-10-17 11:48:00 +0200 (Mon, 17 Oct 2011) $
+#  $Author: robbie $
+#  $URL: file:///home/robbie/svn-root/xeona/futz/trunk/scripts/xpok $
+
+# ---------------------------------
+#  modifiable
+# ---------------------------------
+
+REPLEVEL="3"                                 # default report level
+
+DEFBIN="xeona.mach"                          # default binary name
+BINSDIR="xeona1"                             # binary subdirectory, relative to 'START'
+MODSDIR="pocmods"                            # proof-of-concept model directory, relative to 'START'
+START="$HOME/synk/xeona/svn2/futz/trunk"     # starting point (do no use a "~")
+
+LOOPS="-2 -2z -2k -2j -2v"
+
+# ---------------------------------
+#  preamble
+# ---------------------------------
+
+STUB="poc"
+TAG="guard"
+EXT="xem"
+
+VALGRIND="valgrind"
+VALGRIND="valgrind --leak-check=full --show-reachable=yes"
+VALGRIND="valgrind --leak-check=full"
+
+SCRIPT=$(basename "$0")
+
+E_SUCCESS=0
+E_FAILURE=1
+E_USAGE=2
+E_SUBDIR_NOT_FOUND=3
+E_NO_BINARY=4
+E_RESIDUAL_CLINE_ARGS=4
+E_OTHER=64
+
+# ---------------------------------
+#  display_help()
+# ---------------------------------
+
+function display_help
+{
+    echo
+    cat << EOM
+           usage: $SCRIPT                 run using defaults
+                  $SCRIPT --              run using defaults (for convenience)
+                  $SCRIPT --loop <num>    invoke first 'num' loops in: $LOOPS
+                  $SCRIPT --help          display this message and exit (takes priority)
+   xeona options:  -0-7          use --report 0 to 7  quiet thru loud (-2 is warnings plus "CTA (00): status")
+                   -8            use --mode 8         8760 hours (try -28) *
+                   -9            use --mode 9         8760 hours and 1800s (try -29) *
+                   -a            use --again          ignore chokes
+                   -j            use --jumpy          sometimes upgrade to warnings
+                   -k            use --krazy          ignore defensive coding
+                   -x            use --exittrip 1     warn logs succeed (care needed)
+                   -z            use --zero           disable any close-to-zero rounding
+                   -G            use --tout           enable gnuplot (q to close)
+     run options:  -K            keep associated XEM files (otherwise clean up)
+                   -r            use highest 'xeona.r0000' binary instead
+                   -v            apply valgrind, slow (try -2v) by say factor 100
+                   -y            dry run
+   other options:  -h            display this message and exit (takes priority)
+                   -H            pipe 'xeona' usage thru less  (takes priority)
+         purpose: test proof-of-concept models en masse
+           notes: options can be combined
+                  will not run from '$BINSDIR' directory
+                  model file 'program.run-script-settings' are ignored
+         capture: \$ $SCRIPT -2 2>&1 | tee temp.xog
+         caution: option -rv may cause avalanche of memory errors (not from 'xeona' code)
+        defaults: binary        = $BINSDIR/$DEFBIN
+                  guard pattern = $MODSDIR/$STUB.000.$TAG.$EXT
+                  valgrind      = $VALGRIND
+                  report level  = $REPLEVEL
+        see also: xmok (test submodels en masse)
+           notes: * = depends on how 'xeona' has been configured, the 8760 may be disabled
+EOM
+    echo
+    return 0
+}
+
+# ---------------------------------
+#  loopme()
+# ---------------------------------
+
+function loopme
+{
+    # preamble
+    local num="$1"
+    test -z "$num" && num=5             # default value
+
+    # integrity check
+    local dummy
+    printf -v dummy "%d" "$num" 2>/dev/null  # effectively confirms 'input' is an integer
+    if [ $? -ne 0 ]                          # non-zero exit status from 'printf'
+    then
+        echo "$SCRIPT: $FUNCNAME(): FATAL: integer argument required (try --help): $num"
+        return $E_USAGE
+    fi
+
+    # loop code
+    local loop=0
+    local rets=0
+    local loops=""                      # options used
+    local roops=""                      # returns obtained
+
+    for op in $LOOPS
+    do
+        let "loop++"
+        test $loop -gt $num && break
+        $SCRIPT $op                     # add " -y" when testing
+        local ret=$?
+        let "rets += $ret"
+        printf -v loops "$loops %4s" "$op"
+        printf -v roops "$roops   %2d" $ret  # was "02d"
+        echo "==="
+    done
+    echo
+
+    # completion reporting
+    local arg="none given, using $num"
+    test -n "$1" && arg=$num
+    local elapsed=$SECONDS
+    test $(which hms) && elapsed=$(hms $elapsed)  # 'hms' is a my (user-local) utility
+
+    echo "$SCRIPT: $FUNCNAME(): user argument   : $arg"
+    echo "$SCRIPT: $FUNCNAME(): options used    :$loops"
+    echo "$SCRIPT: $FUNCNAME(): returns used    :$roops"
+    echo "$SCRIPT: $FUNCNAME(): elapsed time    : $elapsed"
+    echo "$SCRIPT: $FUNCNAME(): combined return : $rets"
+    echo
+
+    # housekeeping
+    return $rets
+}
+
+# ---------------------------------
+#  process command-line
+# ---------------------------------
+
+case "$1" in
+    --help|--hel|--he|--h|-help|-hel|-he|-h|"-?")
+        display_help
+        exit $E_SUCCESS
+        ;;
+    --loop|-l)
+        shift
+        loopme "$1"
+        exit
+        ;;
+    "")                                 # enforces the use of at least the '--' argument
+        echo "$SCRIPT: incorrect usage (try --help or perhaps --)"
+        exit $E_USAGE
+        ;;
+esac
+
+# ------------------------------
+#  process options
+# ------------------------------
+
+# capture command-line
+
+cline=$(echo $SCRIPT $*)
+
+# set defaults
+
+helpflag="0"
+toutflag="0"
+keepflag="0"
+valgflag="0"
+exittrip="2"
+jumpflag="0"
+mod8flag="0"
+mod9flag="0"
+dryrflag="0"
+rbinflag="0"
+krazflag="0"
+gainflag="0"
+xuseflag="0"
+zeroflag="0"
+replevel="$REPLEVEL"
+
+# process options
+
+while getopts ":aGhHjkKrvxyz0123456789" option  # CAUTION: the leading : should be correct
+do
+    case "$option" in
+        a)  gainflag="1"               ;;
+        G)  toutflag="1"               ;;
+        h)  helpflag="1"               ;;
+        H)  xuseflag="1"               ;;
+        j)  jumpflag="1"               ;;
+        k)  krazflag="1"               ;;
+        K)  keepflag="1"               ;;
+        r)  rbinflag="1"               ;;
+        v)  valgflag="1"               ;;
+        x)  exittrip="1"               ;;
+        y)  dryrflag="1"               ;;
+        z)  zeroflag="1"               ;;
+        0)  replevel="0"               ;;
+        1)  replevel="1"               ;;
+        2)  replevel="2"               ;;
+        3)  replevel="3"               ;;
+        4)  replevel="4"               ;;
+        5)  replevel="5"               ;;
+        6)  replevel="6"               ;;
+        7)  replevel="7"               ;;
+        8)  mod8flag="1"               ;;
+        9)  mod9flag="1"               ;;
+        *)
+            echo "$SCRIPT: incorrect usage, try --help"
+            exit $E_USAGE
+            ;;
+    esac
+done
+shift $(($OPTIND - 1))
+
+#  the above decrements the argument pointer so it points to next
+#  argument, hence $1 now references the first non-option supplied
+#  on the command-line, in the event that substantive arguments
+#  were given
+
+# protection against omitted leading dashes
+
+if [ $# -ne 0 ]                         # number of (remaining) positional parameters
+then
+    echo "$SCRIPT: usage: some or all arguments lack a leading dash: $@"
+    echo "$SCRIPT: abandoning task: submitted command-line: $cline"
+    exit $E_RESIDUAL_CLINE_ARGS
+fi
+
+# ---------------------------------
+#  process various help messages
+# ---------------------------------
+
+case "$helpflag" in
+    1)
+        display_help
+        exit $E_SUCCESS
+        ;;
+esac
+case "$xuseflag" in
+    1)
+        $START/$BINSDIR/$DEFBIN --usage | less
+        exit
+        ;;
+esac
+
+# ---------------------------------
+#  report() - formatted output
+# ---------------------------------
+
+function report
+{
+    case "$#" in
+        0)                 printf "\n"                        ;;
+        1)                 printf "  %s\n"         "$1"       ;;
+        2) test -n "$2" && printf "  %-20s : %s\n" "$1" "$2"  ;; # skip if value is blank
+    esac
+}
+
+# ---------------------------------
+#  cexit() - controlled exit
+# ---------------------------------
+
+function cexit
+{
+    local xval=$1                       # exit value
+    local msg="$2"                      # exit message
+
+    local elapsed=$SECONDS
+    test $(which hms) && elapsed=$(hms $elapsed) # 'hms' is a my (user-local) utility
+
+    local corecall=${basecall#$START/$BINSDIR/}
+
+    report "---"
+
+    test -n "$msg" && report "$msg"
+    test -n "$msg" && report
+
+    report "command-line"      "$cline"
+    report "principal call"    "$corecall"
+    test "$valgflag" == "1" && report "valgrind call" "$VALGRIND"
+    test "$keepflag" == "1" && report "keep files"    "yes"
+    report "elapsed (seconds)" "$elapsed"
+    case "$exitval" in
+        0) report "script exit value" "$exitval"                        ;;
+        *) report "script exit value" "$exitval (problems encountered)" ;;
+    esac
+    report
+
+    exit $xval
+}
+
+# ---------------------------------
+#  check_sdir()
+# ---------------------------------
+
+function check_sdir
+{
+    local sdir="$1"
+    if [ -d "$sdir" ]
+    then
+        report "subdirectory found" "$sdir"
+    else
+        report "subdirectory not found" "$sdir"
+        let "errors++"
+    fi
+}
+
+# ---------------------------------
+#  highest_release_binary()
+# ---------------------------------
+
+# for 'find', both work, the second removes the "./"
+# %p  file's name
+# %P  file's name with the name of the command line argument under which it was found removed
+
+function highest_release_binary
+{
+    local start="$START"
+
+    # CAUTION: note the outer "()" on the 'glob' assignment line
+    local glob
+    local bin
+    glob=($(find -P $start -maxdepth 2 -name "xeona.r[0-9][0-9][0-9][0-9]" -type f -printf "%P\n" | sort --reverse))
+    bin=${glob[0]}                      # grab highest release number
+    bin=${bin#./}                       # strip any leading "./"
+    test -n "$bin" && XEONA="$bin"
+}
+
+# ---------------------------------
+#  locate_xeona()
+# ---------------------------------
+
+function locate_xeona
+{
+    test "$rbinflag" == "1" && highest_release_binary
+    test "$rbinflag" == "1" || XEONA="$BINSDIR/$DEFBIN"
+    binary="$START/$XEONA"
+    test -x "$binary" || cexit $E_NO_BINARY "binary not found or not executable by you: $binary"
+}
+
+# ---------------------------------
+#  xeona_run()
+# ---------------------------------
+
+summary=""
+test "$dryrflag" == "0" && printf -v summary "%s\n\n" "  ---"  # not needed on a dry run
+
+function xeona_run
+{
+    local file="$1"
+
+    local mode=""
+
+    case "$gainflag" in
+        0) again=""          ;;
+        1) again="--again"   ;;
+    esac
+    case "$krazflag" in
+        0) krazy=""          ;;
+        1) krazy="--krazy"   ;;
+    esac
+    case "$jumpflag" in
+        0) jumpy=""          ;;
+        1) jumpy="--jumpy"   ;;
+    esac
+    case "$mod8flag" in
+        0) mode8=""          ;;
+        1) mode8="--mode 8"  ;;
+    esac
+    case "$mod9flag" in
+        0) mode9=""          ;;
+        1) mode9="--mode 9"  ;;
+    esac
+    case "$zeroflag" in
+        0) zero=""           ;;
+        1) zero="--zero"     ;;
+    esac
+    case "$toutflag" in
+        0) tout=""           ;;
+        1) tout="--tout"     ;;
+    esac
+
+    test -n "$mode9" && mode8=""        # protection against -89
+
+    basecall="$START/$XEONA --report $replevel $again $jumpy $krazy --exittrip $exittrip $mode8 $mode9 $zero $tout"
+    basecall=$(echo $basecall)          # cheap way of stripping space, care with leading: -e -E -n
+
+    local call="$basecall --file $file"
+    test "$valgflag" == "1" && call="$VALGRIND $call"
+    report "call = $call"
+    test "$dryrflag" == "1" && return   # early return
+    eval "$call"
+    local ret=$?
+    printf -v summary "%s  %s  %2d\n" "$summary" "$file" $ret
+    test $ret -ne 0 && exitval=$E_FAILURE
+}
+
+# ---------------------------------
+#  active code
+# ---------------------------------
+
+exitval=$E_SUCCESS                      # presume success
+
+report
+
+test "$dryrflag" == "1" || report "type" "active"
+test "$dryrflag" == "1" && report "type" "dry run"
+
+# ---------------------------------
+#  confirm environment
+# ---------------------------------
+
+report
+
+errors=0
+test "$PWD" == "$START/$BINSDIR" && cexit $E_FAILURE "FATAL: refusing to run in xeona directory '$PWD'"
+check_sdir "$START/$BINSDIR"
+check_sdir "$START/$MODSDIR"
+test $errors -ne 0 && cexit $E_SUBDIR_NOT_FOUND "FATAL: essential subdirectories missing"
+
+locate_xeona
+
+# ---------------------------------
+#  abandon if valgrind + release
+# ---------------------------------
+
+report
+
+test "$rbinflag" == "1" -a "$valgflag" == "1" && cexit 3 "FATAL: no point in running $XEONA under $VALGRIND (option -rv)"
+
+# ---------------------------------
+#  process model files
+# ---------------------------------
+
+files=$(find -P $START -name "$STUB.[0-9][0-9][0-9].$TAG.$EXT" -type f -printf "%P\n")
+files=$(sort <<< "$files")              # reorder files using 'sort'
+
+for file in $files
+do
+    target=$(basename "$file")          # trim the path
+    target=${target%.$TAG.$EXT}         # trim the trailing ".guard.xem"
+    target="$target.$EXT"               # add back the ".xem" extension
+    cp --force $START/$file $target
+    xeona_run "$target"
+    test "$keepflag" == "1" || rm --force "$target"
+    test "$keepflag" == "1" || rm --force "$target~"
+done
+
+# ---------------------------------
+#  completion reporting
+# ---------------------------------
+
+echo "$summary"
+
+# ---------------------------------
+#  housekeeping
+# ---------------------------------
+
+cexit $exitval                          # controlled exit function
+
+#  $Id: xpok 7583 2011-10-17 09:48:00Z robbie $
+#  end of file
+

@@ -1,0 +1,50 @@
+--- poc.008.guard.xem	2012-04-07 18:35:26.568409879 +0200
++++ sen.04.xem	2012-04-07 18:35:46.468357292 +0200
+@@ -33,18 +33,18 @@
+     script-option-jumpy b                         > 0
+ 
+ program.study-description
+ 
+     study-name s                                  > "phd"
+-    scenario-name s                               > "reference energy system"
++    scenario-name s                               > "uprated building performance"
+     scenario-author s                             > "robbie"
+-    scenario-leta s (+,a-z)                       > "+"
++    scenario-leta s (+,a-z)                       > "d"
+ 
+ program.r-processing
+ 
+     r-policy i                                    > 31
+-    r-title s                                     > "mainline model"
++    r-title s                                     > "scenario d"
+     r-plot-list s                                 > ""
+     r-highlight-output s                          > ""
+ 
+ program.post-processing
+ 
+@@ -3735,11 +3735,11 @@
+     activity-loads [W] F                          < 0.0 ..
+     electricity-demands [W] F                     < 0.0 ..
+ 
+     header: b/asop04.h
+ 
+-# entity.teas-building-elec-f02
++entity.teas-building-elec-f02
+ 
+       good energy performance building stock
+ 
+       building stock entity providing housing and workplaces to
+       around 45 000 individuals
+@@ -3847,11 +3847,11 @@
+       DCF annuity method over the economic life of the entity
+       in question
+ 
+     header: b/teas05.h
+ 
+-entity.teas-building-elec-f02
++# entity.teas-building-elec-f02
+ 
+       poor energy performance building stock
+ 
+       building stock entity providing housing and workplaces to
+       around 45 000 individuals

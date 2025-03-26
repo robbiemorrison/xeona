@@ -1,0 +1,627 @@
+#! /bin/bash
+
+#  file-purpose     : interactively delete stale secondary files / script
+#  file-initiator   : Robbie Morrison <robbie@actrix.co.nz>
+#  file-create-date : Thu 19-Mar-2009 07:04 UTC
+#  file-status      : ongoing
+#  file-keywords    : xeona
+
+#  $Revision: 8779 $
+#  $Date: 2012-01-11 13:34:33 +0100 (Wed, 11 Jan 2012) $
+#  $Author: robbie $
+#  $URL: file:///home/robbie/svn-root/xeona/futz/trunk/scripts/xtidy $
+
+#  Notes
+#
+#    * place new subdirectories and filename patterns
+#      in the active code section
+#
+#    * any 'rm' alias (such as rm --interactive) is
+#      bypassed thru full use of the path
+#
+#    * this script was quite well written (but could be
+#      consolidated now)
+
+# ---------------------------------
+#  settings
+# ---------------------------------
+
+RM_VERBOSE=""                           #  'rm' verbose setting, add "--verbose" as required
+MODELS_DIR="../models"
+POCMODS_DIR="../pocmods"
+
+# ---------------------------------
+#  preamble
+# ---------------------------------
+
+MAINCC="main.cc"                        # name of main file, used to confirm base directory
+
+SCRIPT=$( basename "$0" )               # script leafname
+
+E_SUCCESS=0
+E_FAILURE=1
+E_USAGE=2
+E_NO_MAIN=64
+
+# ---------------------------------
+#  display_help()
+# ---------------------------------
+
+function display_help
+{
+    echo
+    cat <<EOM
+      usage: $SCRIPT                       delete files with bunched prompting only
+             $SCRIPT  --fussy        -f    as above but search specifically for ELF files rather than *.o files
+             $SCRIPT  --interactive  -i    delete files with individual 'rm' prompting
+             $SCRIPT  --remacs       -r    run 'remacs' recursively two directories down and exit
+             $SCRIPT  --stale        -s    delete stale files exceeding two days (otherwise as per default)
+             $SCRIPT  --All          -A    run -r then -f
+             $SCRIPT  --help         -h    show this message and exit
+    purpose: traverse hardcoded subdirectories and delete depth one matching files after user prompting
+   requires: file '$MAINCC' be present in the current directory
+    comment: option --fussy is necessary to locate unit test binaries (after calls to pruf)
+EOM
+    echo
+    return 0
+}
+
+# -------------------------
+#  process command-line
+# -------------------------
+
+case "$1" in
+    --help|--hel|--he|--h|-help|-hel|-he|-h|"-?")
+        display_help
+        exit $E_SUCCESS
+        ;;
+    --All|-A)
+        shift
+        $SCRIPT --remacs && printf "\n---\n" && $SCRIPT --fussy && printf -- "---\n\nsuccess\n\n" && exit
+        ;;
+    --fussy|-f)
+        mtime=""
+        rmmode="force"
+        lookmode="fussy"
+        shift
+        ;;
+    --interactive|-i)
+        mtime=""
+        rmmode="interactive"
+        lookmode="quick"
+        shift
+        ;;
+    --remacs|-r)
+        echo "$SCRIPT: interatively removing 'emacs-backups' directories two layers down"
+        (                               # run in subshell
+            cd ../..
+            find . -type d -exec remacs '{}' \;
+        )
+        exit
+        ;;
+    --stale|-s)
+        mtime="-mtime +1"
+        rmmode="normal"
+        lookmode="quick"
+        shift
+        ;;
+    "")
+        mtime=""
+        rmmode="force"
+        lookmode="quick"
+        shift
+        ;;
+    *)
+        echo "$SCRIPT: incorrect usage (try --help): $1"
+        exit $E_USAGE
+        ;;
+esac
+
+# ---------------------------------
+#  deport()
+# ---------------------------------
+
+# debug reporting function
+
+function deport
+{
+    return 1                            # comment-out to action
+
+    local tab=22                        # console alignment
+    case $# in
+        0) printf "\n"                                         ;;
+        1) printf "$SCRIPT: debug: %*s\n"      $tab "$1"       ;;
+        2) printf "$SCRIPT: debug: %*s : %s\n" $tab "$1" "$2"  ;;
+    esac
+    return 0
+}
+
+# ---------------------------------
+#  global counters
+# ---------------------------------
+
+mats=0                                  # matched files
+dels=0                                  # attempted deletes
+abdirs=0                                # absent subdirectories
+rmfails=0                               # 'rm' failures
+
+# ---------------------------------
+#  check_models_dir()
+# ---------------------------------
+
+function check_models_dir
+{
+    # check for directory
+    if [ ! -d "$MODELS_DIR" ]
+    then
+        echo "$SCRIPT: models directory not found: $MODELS_DIR"
+        return 1
+    fi
+
+    # count
+    local totz=0
+    # performs addition, "-0" for non-captured files
+    local filz=$(( $(find -P $MODELS_DIR -maxdepth 1 \
+        -not -name "*.sh" \
+        -not -name "*.txt" \
+        -type f -printf "1+") -0 ))
+    # performs addition, "-2" for '.' and '..' I guess
+    local dirz=$(( $(find -P $MODELS_DIR -maxdepth 1 -type d \
+        -not -name "attic" \
+        -not -name "scripts" \
+        -not -name "analysis" \
+        -not -name "catalogs" \
+        -printf "1+") -2 ))
+    let "totz = filz + dirz"
+
+    # report if required
+    if [ $totz -ne 0 ]
+    then
+        local filzplur=""
+        test $filz -ne 1 && filzplur="s"
+        local dirzplur=""
+        test $dirz -ne 1 && dirzplur="s"
+        echo "may need to clean out $MODELS_DIR"
+        echo "the directory contains $filz file$filzplur and $dirz subdir$dirzplur"
+        echo
+    fi
+}
+
+# ---------------------------------
+#  check_pocmods_dir()
+# ---------------------------------
+
+function check_pocmods_dir
+{
+    # check for directory
+    if [ ! -d "$POCMODS_DIR" ]
+    then
+        echo "$SCRIPT: models directory not found: $POCMODS_DIR"
+        return 1
+    fi
+
+    # count
+    local totz=0
+    # performs addition, "-0" for any other known files
+    local filz=$(( $(find -P $POCMODS_DIR -maxdepth 1 \
+        -not -name "*guard.xem" \
+        -not -name "*.xem" \
+        -not -name "*.txt" \
+        -not -name "*.pdf" \
+        -not -name "*.sh" \
+        -not -name "*.gp" \
+        -not -name "*.dat" \
+        -not -name "*.png" \
+        -not -name "*.gz" \
+        -not -name "*.tgz" \
+        -not -name "*.dif" \
+        -type f -printf "1+") -0 ))
+    # performs addition, "-2" for '.' and '..' I guess
+    local dirz=$(( $(find -P $POCMODS_DIR -maxdepth 1 -type d \
+        -not -name "attic" \
+        -printf "1+") -2 ))
+    let "totz = filz + dirz"
+
+    # report if required
+    if [ $totz -ne 0 ]
+    then
+        local filzplur=""
+        test $filz -ne 1 && filzplur="s"
+        local dirzplur=""
+        test $dirz -ne 1 && dirzplur="s"
+        echo "may need to clean out $POCMODS_DIR"
+        echo "the directory contains $filz file$filzplur and $dirz subdir$dirzplur"
+        echo
+    fi
+}
+
+# ---------------------------------
+#  rmcore()
+# ---------------------------------
+
+function rmcore
+{
+    deport "entering rmcore()"
+
+    # a normal core dump is simply 'core', a valgrind
+    # dump is 'vgcore.PID' where PID is the process ID
+
+    # $ file --brief core
+    #   ELF 32-bit LSB core file Intel 80386, version 1 (SYSV), SVR4-style, from 'VQd'
+    # $ file --brief vgcore.0000
+    #   <to add>
+
+    local list=""                       # delete list
+    local files=""                      # 'find' matches
+    local filetype=""                   # 'file' console reporting
+
+    call="find -P \".\" \( -name \"core\" -o -name \"vgcore.*\" \) -type f -print"
+    files=$( eval "$call" )
+
+    deport " find call" "$call"
+
+    for filename in $files
+      do
+      filetype=$( file --brief "$filename" )     # 'file' is a Unix utility, '--brief' is no filename
+      test $? -eq 0 || continue              # 'file' encountered problems
+      test $( expr index "$filetype" "ELF" ) -eq 0 && continue   # CAUTION: ONE-based indexing for 'expr'
+      list="$list $filename"
+    done
+
+    test -n "$list" && list="${list:1}" # strip leading space, CAUTION: ZERO-based indexing
+
+    # check for hits
+
+    test -z "$list" && return 1         # test for hits
+
+    # display files
+
+    deport "about to list files"
+    echo
+    for file in $list
+      do
+      let "mats++"
+      echo "$file"
+    done
+
+    # seek confirmation if appropriate
+
+    echo
+    test "$rmmode" == "interactive" ||
+    {
+        local prompt="  $SCRIPT: hit 'y' to delete: "
+        read -n 1 -p "$prompt" response # "-n 1" is read one character and return
+        echo
+        test "$response" == "y" || return 2
+    }
+
+    # delete files
+    # CAUTION: interactive reporting under 'rm' uses file descriptor 2 (weird?)
+
+    for file in $list
+      do
+      let "dels++"
+      case $rmmode in
+          interactive)  /bin/rm --interactive $RM_VERBOSE -- $file  ;;   # prompt for all files
+          normal)       /bin/rm               $RM_VERBOSE -- $file  ;;
+          force)        /bin/rm --force       $RM_VERBOSE -- $file  ;;   # no prompt for write-protected files
+      esac
+      test $? -eq 0 || let "rmfails++"  # record 'rm' exit failure
+    done
+
+    # return normally
+
+    return 0
+}
+
+# ---------------------------------
+#  rmfpat()
+# ---------------------------------
+
+test -n "$mtime" && mtime="$mtime "     # add trailing space
+
+function rmfpat
+{
+    deport "entering rmfpat()"
+
+    # process the input
+
+    local sdir="$1"                     # subdirectory
+    local fpat="$2"                     # filename pattern
+
+    test -d "$sdir" || let "abdirs++"   # test for subdirectory
+    test -d "$sdir" || return 1         # test for subdirectory
+    test -n "$fpat" || return 2         # test for filename pattern
+
+    # create call
+
+    test $( expr index "$fpat" " " ) -eq 0 && fpat="-name \"$fpat\""
+    local call="find -P \"$sdir\" -maxdepth 1 $mtime$fpat -type f -print"
+
+    deport " find call" "$call"
+
+    # seek hits
+
+    local list=$( eval "$call" )
+
+    test -z "$list" && return 3         # test for hits
+
+    # display files
+
+    echo
+    for file in $list
+      do
+      let "mats++"
+      echo "$file"
+    done
+
+    # seek confirmation if appropriate
+
+    echo
+    test "$rmmode" == "interactive" ||
+    {
+        local prompt="  $SCRIPT: hit 'y' to delete: "
+        read -n 1 -p "$prompt" response # "-n 1" is read one character and return
+        echo
+        test "$response" == "y" || return 4
+    }
+
+    # delete files
+    # CAUTION: interactive reporting under 'rm' uses file descriptor 2 (weird?)
+
+    for file in $list
+      do
+      let "dels++"
+      case $rmmode in
+          interactive)  /bin/rm --interactive $RM_VERBOSE -- $file  ;;   # prompt for all files
+          normal)       /bin/rm               $RM_VERBOSE -- $file  ;;
+          force)        /bin/rm --force       $RM_VERBOSE -- $file  ;;   # no prompt for write-protected files
+      esac
+      test $? -eq 0 || let "rmfails++"  # record 'rm' exit failure
+    done
+
+    # return normally
+
+    return 0
+}
+
+# ---------------------------------
+#  rmbins()
+# ---------------------------------
+
+# note {.,[a-z]}/* also captures the build targets
+# whereas {./*.o,[a-z]/*} does not
+
+function rmbins
+{
+    deport "entering rmbins()"
+    SECONDS=0                           # reset
+
+    # grab argument
+
+    local trigger="$1"                  # 'file' utility output match string
+
+    deport "file trigger" "$trigger"
+
+    # seek hits
+
+    local list=""
+    for file in {./*.o,[a-z]/*}         # CAUTION: no quotes
+      do
+      file $file | grep "$trigger" 1>/dev/null && printf -v list "%s %s" "$list" "$file"
+    done
+
+    # seek hits
+
+    test -z "$list" && return 1         # test for hits
+
+    # display files
+
+    echo
+    local localmats=0
+    for file in $list
+      do
+      let "mats++"
+      let "localmats++"
+      echo "$file"
+    done
+
+    # seek confirmation if appropriate
+
+    echo
+    test "$rmmode" == "interactive" ||
+    {
+        local prompt="  $SCRIPT: hit 'y' to delete ($localmats files, elapsed $SECONDS seconds): "
+        read -n 1 -p "$prompt" response # "-n 1" is read one character and return
+        echo
+        test "$response" == "y" || return 4
+    }
+
+    # delete files
+    # CAUTION: interactive reporting under 'rm' uses file descriptor 2 (weird?)
+
+    for file in $list
+      do
+      let "dels++"
+      case $rmmode in
+          interactive)  /bin/rm --interactive $RM_VERBOSE -- $file  ;;   # prompt for all files
+          normal)       /bin/rm               $RM_VERBOSE -- $file  ;;
+          force)        /bin/rm --force       $RM_VERBOSE -- $file  ;;   # no prompt for write-protected files
+      esac
+      test $? -eq 0 || let "rmfails++"  # record 'rm' exit failure
+    done
+
+    # return normally
+
+    return 0
+}
+
+# ---------------------------------
+#  rmkwik()
+# ---------------------------------
+
+# fast alternative to 'rmbins'
+
+function rmkwik
+{
+    deport "entering rmkwik()"
+
+    # seek hits
+
+    local list
+    for file in {.,[a-z]}/*.o
+      do
+      unit="${file%.ut[0-9].o}"                 # strip trailing ".o"
+      test -f "$file" && list="$list $file"
+      test "$unit" == "$file" && continue
+      test -f "$unit" && list="$list $unit"
+    done
+
+    test -z "$list" && return 1         # test for hits
+
+    # display files
+
+    echo
+    local localmats=0
+    for file in $list
+      do
+      let "mats++"
+      let "localmats++"
+      echo "$file"
+    done
+
+    # seek confirmation if appropriate
+
+    echo
+    test "$rmmode" == "interactive" ||
+    {
+        local prompt="  $SCRIPT: hit 'y' to delete ($localmats files): "
+        read -n 1 -p "$prompt" response # "-n 1" is read one character and return
+        echo
+        test "$response" == "y" || return 4
+    }
+
+    # delete files
+    # CAUTION: interactive reporting under 'rm' uses file descriptor 2 (weird?)
+
+    for file in $list
+      do
+      let "dels++"
+      case $rmmode in
+          interactive)  /bin/rm --interactive $RM_VERBOSE -- $file  ;;   # prompt for all files
+          normal)       /bin/rm               $RM_VERBOSE -- $file  ;;
+          force)        /bin/rm --force       $RM_VERBOSE -- $file  ;;   # no prompt for write-protected files
+      esac
+      test $? -eq 0 || let "rmfails++"  # record 'rm' exit failure
+    done
+
+    # return normally
+
+    return 0
+}
+
+# ---------------------------------
+#  confirm context
+# ---------------------------------
+
+if [ ! -f "$MAINCC" ]                   # file exists (not)
+    then
+    echo "$SCRIPT: context failure: file not found (as proxy for base directory): $MAINCC "
+    exit $E_NO_MAIN
+fi
+
+# ---------------------------------
+#  active code
+# ---------------------------------
+
+# new call, requires testing, the following 'rmfpat' core calls should now be redundant
+
+rmcore
+
+# in order noting 'rmfpat' uses 'find' syntax and searches give subdirectory to maxdepth 1
+#
+#    local core dumps
+#    core dumps in 'xeona-mach' directory
+
+# rmfpat "."            "\( -name \"core\" -o -name \"vgcore.*\" \)"
+# rmfpat "xeona-mach"   "\( -name \"core\" -o -name \"vgcore.*\" \)"
+
+# in order noting 'rmbins' uses 'grep' syntax and searches branch
+#
+#   ELF 32 and 64 bit binaries within branch (will also pick up any missed core files)
+
+case "$lookmode" in
+    quick) rmkwik                        ;;
+    fussy) rmbins "ELF [36][24]-bit LSB" ;; # CAUTION: relatively specific to the development environment
+esac
+
+# in order noting 'rmfpat' uses 'find' syntax and searches give subdirectory to maxdepth 1
+#
+#    local core dumps
+#    core dumps in 'xeona-mach' directory
+#   'mach' temporary files including (in 'ls' syntax) '*-{cal,mak,val,xmk}.txt'
+#   local --inbuilt XEMS
+#   local 'signoff.sh' files
+#   other --inbuilt XEMS
+#   anything in the 'xeona-mach' directory
+#   non-guard files in the 'xeona-xmoks' directory
+
+rmfpat "../models"    "\( -name \"*.glpk\" -o -name \"*.prob\" -o -name \"*.soln\" \)"
+rmfpat "../pocmods"   "\( -name \"*.glpk\" -o -name \"*.prob\" -o -name \"*.soln\" \)"
+rmfpat "."            "\( -name \"*.glpk\" -o -name \"*.prob\" -o -name \"*.soln\" \)"
+
+rmfpat "."            "_????????-[cmvx][am][kl].txt"
+rmfpat "."            "inbuilt.xem*"
+rmfpat "."            "signoff-*.txt"
+
+rmfpat "xeona-rbin"   "inbuilt.xem*"
+
+rmfpat "xeona-mach"   "\( -name \"*.help.html\" \)"
+rmfpat "xeona-mach"   "*"
+
+rmfpat "xeona-xmoks"  "\( -name \"*.xem*\" -a ! -name \"*.guard.*\" \)"
+rmfpat "xeona-xmoks"  "\( -name \"*.dot\" -o -name \"*.eps\" -o -name \"*.pdf\" -o -name \"*.svg\" \)"
+rmfpat "xeona-xmoks"  "\( -name \"*.png\" -a ! -name \"submodel.*.viz.png\" \)"  # exclude submodel pngs (was "*.png")
+rmfpat "xeona-xmoks"  "\( -name \"*.help.html\" \)"
+rmfpat "xeona-xmoks"  "\( -name \"*.help.html\" -o -name \"*-[0-9][0-9][0-9][0-9][0-9][0-9]-[0-9][0-9].html\" \)"
+rmfpat "xeona-xmoks"  "\( -name \"*.prob\" -o -name \"*.soln\" \)"    # problem and solution exports
+
+# ---------------------------------
+#  completion reporting
+# ---------------------------------
+
+echo
+test $mats    -eq 0 || echo "---"
+test $abdirs  -eq 0 || echo "absent subdirs : $abdirs"
+echo                        "matched files  : $mats"
+echo                        "deleted files  : $dels"
+test $rmfails -eq 0 || echo "rm fails       : $rmfails"
+echo
+
+# ---------------------------------
+#  helpful remark
+# ---------------------------------
+
+case "$lookmode" in
+    quick)
+        check_models_dir
+        check_pocmods_dir
+        ;;
+    fussy)
+        check_models_dir
+        check_pocmods_dir
+        ;;
+esac
+
+# ---------------------------------
+#  housekeeping
+# ---------------------------------
+
+case $rmfails in
+    0) exit $E_SUCCESS  ;;
+    *) exit $E_FAILURE  ;;
+esac
+
+#  $Id: xtidy 8779 2012-01-11 12:34:33Z robbie $
+#  end of file
+

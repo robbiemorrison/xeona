@@ -1,0 +1,511 @@
+#! /bin/bash
+
+#  file-purpose     : simplified interface to the GLPK GLPSOL command-line solver
+#  file-initiator   : Robbie Morrison <robbie@actrix.co.nz>
+#  file-create-date : Tue 19-Apr-2011 11:39 UTC
+#  file-status      : working
+#  file-keywords    : xeona
+
+#  $Revision: 7516 $
+#  $Date: 2011-10-12 18:59:53 +0200 (Wed, 12 Oct 2011) $
+#  $Author: robbie $
+#  $URL: file:///home/robbie/svn-root/xeona/futz/trunk/scripts/xglpsol $
+
+#  LEGAL
+#
+#  Copyright: (c) 2011 Robbie Morrison. Some rights reserved.
+#  License: this code is licensed under a Creative Commons BY-SA.
+#  http://www.creativecommons.org/licenses/by-sa/3.0/
+#  Version: $Id: xglpsol 7516 2011-10-12 16:59:53Z robbie $
+
+#  OVERVIEW
+#
+#  This script provides a simplified interface to the
+#  GLPK GLPSOL command-line solver.  It pumps out
+#  GLPSOL command-lines, can diff recent output, and
+#  generally facilitates experimentation with GLPK
+#  options.
+#
+#  The script was developed on Linux Ubuntu 10.04 using
+#  Bash 4.1.5.  It should work on older versions of
+#  Bash too.
+
+# ---------------------------------
+#  user modifiable
+# ---------------------------------
+
+EXTN="glpk"                             # assumed extension if no extension given
+
+WIDTH=$(stty size | awk '{ print $2 }') # the 'diff' default is often 130 but my screen is wider
+DIFF="diff --side-by-side --suppress-common-lines --width=$WIDTH"
+
+# ---------------------------------
+#  preamble
+# ---------------------------------
+
+GLPSOL="glpsol"                         # GLPSOL call
+LOG="term"                              # terminal capture extension
+
+SCRIPT=$(basename "$0")
+
+# script exit codes
+
+E_SUCCESS=0
+E_FAILURE=1
+E_USAGE=2
+E_GLPSOL_NOT_FOUND=3
+E_FILE_NOT_FOUND=4
+E_EXTN_NOT_SUPPORTED=5
+E_OTHER=64
+
+# ---------------------------------
+#  display_help()
+# ---------------------------------
+
+function display_help
+{
+    local example="${1:-short}"
+    local example=$(basename "$example" ".glpk")
+    local extn="filt"
+
+    cat << EOM
+
+             usage: $SCRIPT                     model[.ext]    basic GLPSOL run
+                    $SCRIPT  --                 model[.ext]    basic GLPSOL run (for convenience)
+                    $SCRIPT  -almoxs -defkrwy   model[.ext]    extended run
+                    $SCRIPT  -c                                remove *.$LOG* files and similar after confirmation
+                    $SCRIPT  -H                                display GLPSOL help and filter thru less (takes priority)
+                    $SCRIPT  -h                                display this message and exit (takes priority)
+                    $SCRIPT  -R                                display report interpretation
+       run options:   -a                   implies -lms
+                      -l                   add back LP presolve     --nopresol | --presol
+                      -m                   add back MIP presolve    --nointopt | --intopt
+                      -o                   okay model               --check
+                      -x                   solve linear relaxation  --nomip
+                      -s                   add back scaling         --noscale  | --scale
+   display options:   -d                   diff with the last available capture (implies -k)
+                      -e                   less the console output
+                      -f                   unwrap some output (use with care)
+                      -k                   keep console output (and back up existing file)
+                      -r                   display sensitivity analysis (simplex only)  --ranges
+                      -w                   display solution (includes KKT report)       --output
+                      -y                   dry run, simply print the GLPSOL call
+        extensions: model.glpk             GLPK problem      --glp
+                    model.lp               CPLEX LP problem  --lp
+                    model.mod              MathProg model    --math
+                    model.mps              free MPS problem  --freemps
+           purpose: simplified interface to GLPK GLPSOL command-line solver
+          examples: \$ $SCRIPT   -a  -defkrw  $example.glpk
+                    \$ $SCRIPT  -sx    -fkrw  $example.glpk >| $example.$extn
+         hardcodes: GLPSOL utility             = $GLPSOL
+                    default extension          = .$EXTN
+                    terminal capture extension = .$LOG
+                    diff call                  = $DIFF
+
+EOM
+}
+
+# ---------------------------------
+#  display_glpsol_help()
+# ---------------------------------
+
+function display_glpsol_help
+{
+    glpsol --help | less
+}
+
+# ---------------------------------
+#  display_repint()
+# ---------------------------------
+
+function display_repint
+{
+    echo
+    cat <<EOM
+  Structure of the analysis report
+
+  ROW TABLE
+
+  No.           : one-based ordinal number
+  Row name      : symbolic name if assigned
+
+  St            : status of row in optimal solution:
+
+                    B  : non-active constraint
+                    NL : inequality constraint having its lower right-hand side active
+                    NU : inequality constraint having its upper right-hand side active
+                    NS : active equality constraint
+                    NF : active free row
+
+  Activity      : (primal) value of the auxiliary variable in the optimal solution
+  Lower bound   : lower right-hand side *
+  Upper bound   : upper right-hand side *
+  Marginal      : reduced cost (dual activity) of the auxiliary variable
+                  * nothing means -Inf or +Inf
+  Slack         : (primal) value of the row slack variable
+
+  COLUMN TABLE
+
+  No.           : one-based ordinal number
+  Column name   : symbolic name if assigned
+
+  St            : status of column in optimal solution:
+
+                    B    basic column
+                    NL   non-basic column having its lower bound active
+                    NU   non-basic column having its upper bound active
+                    NS   non-basic fixed column
+                    NF   non-basic free (unbounded) column *
+                    * this case means that the optimal solution is dual degenerate
+
+  Activity      : (primal) value of the structural variable in the optimal solution
+  Lower bound   : lower bound *
+  Upper bound   : upper bound *
+  Marginal        reduced cost (dual activity) of structural variable
+                  * nothing means -Inf or +Inf
+  Obj coef      : objective coefficient of the structural variable
+EOM
+    echo
+}
+
+# ---------------------------------
+#  clean
+# ---------------------------------
+
+function clean
+{
+    local stub="$1"
+
+    local seek="-maxdepth 1 \( -name \"*.$stub\" -o -name \"*.$stub~\" \) -type f"
+    local call="find -P . $seek -print"
+    local glob=$(eval "$call")
+
+    test -z "$glob" && return 0
+
+    echo
+    echo "$glob"
+    echo
+
+    local prompt="      $SCRIPT: hit 'y' to clean en-masse: "
+    read -n 1 -p "$prompt" response     # "-n 1" is read one character and return
+    echo                                # newline required from complete prompt
+    case "$response" in
+        y|Y)
+            rm --force $glob            # CAUTION: omit soft-quotes
+            return
+            ;;
+        *)
+            return 0
+            ;;
+    esac
+}
+
+# ---------------------------------
+#  process long-form options
+# ---------------------------------
+
+case "$1" in
+    --help|--hel|--he|--h|-help|-hel|-he|-h|"-?")
+        shift
+        display_help "$1"
+        exit $E_SUCCESS
+        ;;
+    --HELP|--HEL|--HE|--H|-HELP|-HEL|-HE|-H)
+        shift
+        display_glpsol_help
+        exit
+        ;;
+    --Report|--Repor|--Repo|--Rep|--Re|--R|-Report|-Repor|-Repo|-Rep|-Re|-R)
+        display_repint
+        exit
+        ;;
+    --clean|-c)                         # '-c' is not supported below
+        clean "term"
+        clean "filt"
+        echo
+        exit
+        ;;
+esac
+
+# ------------------------------
+#  process short-form options
+# ------------------------------
+
+# capture command-line
+
+cline=$(echo $SCRIPT $*)
+
+# set the default flags
+
+usageflag="0"
+storeflag="0"
+rangeflag="0"
+writeflag="0"
+sdiffflag="0"
+dummyflag="0"
+filtaflag="0"
+pagerflag="0"
+
+lppreflag="0"
+mipreflag="0"
+scaleflag="0"
+checkflag="0"
+relaxflag="0"
+
+# process options
+
+while getopts ":-adefhHklmorswxy" option  # CAUTION: the leading : should be correct
+do
+    case "$option" in
+        -)  :                          ;; # this codes for option "--" and do nothing is correct
+        e)  pagerflag="1"              ;;
+        f)  filtaflag="1"              ;;
+        h)  usageflag="1"              ;;
+        H)  usageflag="2"              ;;
+        d)  sdiffflag="1"              ;;
+        k)  storeflag="1"              ;;
+        r)  rangeflag="1"              ;;
+        w)  writeflag="1"              ;;
+        y)  dummyflag="1"              ;;
+
+        a)  lppreflag="1"; mipreflag="1"; scaleflag="1" ;;
+        l)  lppreflag="1"              ;;
+        m)  mipreflag="1"              ;;
+        o)  checkflag="1"              ;;
+        s)  scaleflag="1"              ;;
+        x)  relaxflag="1"              ;;
+
+        *)
+            echo "$SCRIPT: incorrect usage, try --help"
+            exit $E_USAGE
+            ;;
+    esac
+done
+shift $(($OPTIND - 1))
+
+#  the above decrements the argument pointer so it points to next
+#  argument, hence $1 now references the first non-option supplied
+#  on the command-line, in the event that substantive arguments
+#  were given
+
+# process help in multiple options
+
+case "$usageflag" in
+    1)
+        display_help
+        exit $E_SUCCESS
+        ;;
+    2)
+        display_glpsol_help
+        exit $E_SUCCESS
+        ;;
+esac
+
+file="$1"
+
+# rework the flags for some cases
+
+case "$checkflag" in
+    1) sdiffflag="0"                ;;
+esac
+
+case "$dummyflag" in
+    1) sdiffflag="0"; storeflag="0" ;;
+esac
+
+case "$sdiffflag" in
+    1) storeflag="1"                ;;
+esac
+
+# ---------------------------------
+#  lead-up code
+# ---------------------------------
+
+# presume success
+
+exitval=0
+
+# confirm glpsol
+
+test $(which "$GLPSOL") ||
+{
+    echo "$SCRIPT: GLPSOL not found: $GLPSOL"
+    exit $E_GLPSOL_NOT_FOUND
+}
+
+# process filename
+
+extn=${file##*.}                        # grab extension
+
+test "$extn" == "$file" &&              # indicates no extension given
+{
+    extn="$EXTN"
+    file="$file.$extn"
+}
+
+case "$extn" in
+    glpk) fileopt="--glp"      ;;
+    lp)   fileopt="--lp"       ;;
+    mod)  fileopt="--math"     ;;
+    mps)  fileopt="--freemps"  ;;
+    *)
+        echo "$SCRIPT: FATAL: model extension not supported: .$extn"
+        exit $E_EXTN_NOT_SUPPORTED
+        ;;
+esac
+
+stub=$(basename "$file" ".$extn")
+
+# confirm model file
+
+test -f "$file" ||
+{
+    echo "$SCRIPT: FATAL: input file not found: $file"
+    exit $E_FILE_NOT_FOUND
+}
+
+# obtain some run-time details
+
+lines=$(wc --lines "$file" | gawk '{ print $1 }')
+tstamp=$(date "+%Z %z %a %d-%b-%Y %H:%M:%S")
+
+# record internal params
+
+notes=""
+test "$filtaflag" != "0" && notes="$notes filter"
+test "$storeflag" != "0" && notes="$notes keep"
+test "$sdiffflag" != "0" && notes="$notes sdiff"
+
+# ---------------------------------
+#  create GLPSOL call
+# ---------------------------------
+
+REDIRECT="/dev/stdout"                  # location of STDOUT
+REDIRECT="\"$REDIRECT\""                # place in double-quotes
+
+options=""
+
+case "$checkflag" in
+    0) :                                      ;;
+    1) options="$options --check"             ;;
+esac
+
+case "$relaxflag" in
+    0) :                                      ;;
+    1) options="$options --nomip"             ;;
+esac
+
+case "$scaleflag" in
+    0) options="$options --noscale"           ;;
+    1) options="$options --scale"             ;;
+esac
+
+case "$lppreflag" in
+    0) options="$options --nopresol"          ;;
+    1) options="$options --presol"            ;;
+esac
+
+case "$mipreflag" in
+    0) options="$options --nointopt"          ;;
+    1) options="$options --intopt"            ;;
+esac
+
+case "$rangeflag" in
+    0) :                                      ;;
+    1) options="$options --ranges $REDIRECT"  ;;
+esac
+
+case "$writeflag" in
+    0) :                                      ;;
+    1) options="$options --output $REDIRECT"  ;;
+esac
+
+call="$GLPSOL$options $fileopt $file"
+
+# ---------------------------------
+#  call code
+# ---------------------------------
+
+test -f "$stub.$LOG" && mv --force "$stub.$LOG" "$stub.$LOG~"
+
+{                                       # local block used to redirect output
+    echo
+    echo "  time    : $tstamp"
+    echo "  cline   : $cline"
+    echo "  model   : $file"
+    echo "  lines   : $lines"
+    echo "  options :$notes"
+    echo "  call    : $call"
+    echo
+    case "$dummyflag" in
+        0)
+            eval "$call"
+            exitval=$?                  # capture return
+            ;;
+        1)
+            echo "  dry run, GLPSOL call shown above"
+            ;;
+    esac
+    echo
+    echo "  return  : $exitval"
+    echo "  elapsed : $SECONDS"
+    echo
+
+} | sed -e 's/ *$//' >> "$stub.$LOG"    # [1]
+
+# [1] the 'sed' removes trailing space chars
+
+# apply a filter to the 'cat' stream if required --
+# this does not affect the underlying files in any way
+
+tabs=95                                 # new alignment under option '-f'
+
+case "$pagerflag" in
+    0) pager="cat"  ;;                  # piping thru 'cat' alters nothing
+    1) pager="less" ;;
+esac
+
+case "$filtaflag" in
+    0) cat "$stub.$LOG" | $pager                                                                             ;;
+    1) cat "$stub.$LOG" | sed -e 's/ *$//' -e ':a;N;$!ba;s/\n \{20\}/\t/g' | expand --tabs="$tabs" | $pager  ;;    # [2]
+esac
+
+# [2] just ignore the ":a;N;$!ba;" part -- it makes 'sed' abandon its
+# line-oriented ways, otherwise here is the explanation courtesy of
+# Zsolt Botykai at 'stackoverflow.com'
+#
+#  - create a register via :a
+#  - append the current and next line to the register via N
+#  - branch to the created register $!ba but not for the final line because of $!
+#  - finally the substitution operates on the register which is indeed the whole file
+
+# delete files as required
+
+test "$storeflag" == "0" && rm --force "$stub.$LOG"
+
+# ---------------------------------
+#  diff code
+# ---------------------------------
+
+case "$sdiffflag" in
+    1)
+        test -f "$stub.$LOG" -a -f "$stub.$LOG~" &&
+        {
+            echo "  diff    : $stub.$LOG : $stub.$LOG~"
+            echo "  ------------"
+            echo
+            $DIFF "$stub.$LOG" "$stub.$LOG~"
+            echo
+        }
+        ;;
+esac
+
+# ---------------------------------
+#  housekeeping
+# ---------------------------------
+
+exit $exitval
+
+#  $Id: xglpsol 7516 2011-10-12 16:59:53Z robbie $
+#  end of file
+

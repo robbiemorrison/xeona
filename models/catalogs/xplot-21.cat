@@ -1,0 +1,32 @@
+
+# role   = unabated ccgt (submodel)
+# study  = test-24
+# scens  = o
+# cut    = :20
+# lines  = F
+# tall   = T
+# ymax   = 0
+# zero   = T
+
+  entity.teas-ccgt-1.productions                            "CCGT : productions"
+  entity.teas-ccgt-1.fuel-demands                           "CCGT : fuel-demands"
+  entity.teas-ccgt-1.carbon-emissions                       "CCGT : carbon emissions"
+  entity.teas-ccgt-1.capacitys                              "CCGT : capacity"
+  entity.teas-ccgt-1.shutdown-statuss                       "CCGT : shutdown status"
+
+  entity.cx-ambient-air-1.air-temps                         "ambient air : temperature"
+  entity.teas-source-oxid-1.extractions                     "gas well : fuel extraction"
+
+  entity.domain-controller-1.subtotal-greenhouse            "domain-wide ghg cost"
+  entity.cm-oxid-gas-1.spec-combustion-enthalpy             "specific enthalpy"
+  entity.cm-oxid-gas-1.spec-co2-equiv                       "specific CO2e"
+
+##  emacs text editor settings
+##  local variables:
+##    mode: text
+##    make-backup-files: nil
+##    truncate-lines: t
+##    comment-start: "#"
+##    tab-stop-list: (02 12 60)
+##  end:
+

@@ -1,0 +1,221 @@
+
+note
+
+    $Revision: 8118 $
+    $Date: 2011-11-24 13:43:30 +0100 (Thu, 24 Nov 2011) $
+    $Author: robbie $
+    $URL: file:///home/robbie/svn-root/xeona/futz/trunk/xeona1/xeona-xmoks/slice-7.contexts.guard.xem $
+
+  -------------------------------------------- program admin
+
+program.last-run
+
+    process-id                                    <
+    run-kind                                      <
+    used-svn                                      <
+    simulate-time (hh:mm:ss or s)                 <
+    simulate-return                               <
+
+program.data-format
+
+    minimum-svn                                   > 6745
+
+program.run-script-settings
+
+    script-model-status s                         > "okay"
+    script-run-me b                               > 1
+    script-option-exittrip i                      > 1
+    script-option-nodata b                        > 0
+
+program.r-processing
+
+    r-policy i                                    > 31
+    r-title s                                     > "contexts slice"
+    r-plot-list s                                 > "entity.cx-ambient-air-sim-1.wind-speeds"
+
+  --------------------------------------- mandatory entities
+
+entity.time-horizon
+
+    class                                         > TimeHorizon
+
+      the TimeHorizon entity is REQUIRED and the
+      "time-horizon" identifier is MANDATORY
+
+    builtin-remark s                              <
+
+    steps [-] i                                   > 6
+    interval [s] i                                > 3600
+    start-hour [-] i                              > 0
+    start-day [-] i                               > 1
+    leap-year [-] b                               > 0
+
+      the start-hour begins midnight local time and ranges
+      [0,23] and the start-day begins 01-Jan and rangesy [1,365]
+
+      when leap-year is true then 29 February is presumed to
+      exist (although not all entities will support this)
+
+    hemisphere s                                  > "N"
+
+      the hemisphere is {N,S} for north and south
+
+      the modeler should ensuring that timeseries data given
+      elsewhere aligns with the specification given here
+
+      header: b/builtins.h
+
+entity.overseer
+
+    class                                         > Overseer
+
+    builtin-remark s                              <
+
+    captrans-algorithm s                          > "simple"
+    ranked-orig-domains L                         > ""
+
+    total-financial [$] f                         < 0.0
+    total-greenhouse [kg] f                       < 0.0
+    total-nox [kg] f                              < 0.0
+    total-depletion [J] f                         < 0.0
+    total-landuse [m^2] f                         < 0.0
+
+    total-shortrun-financial [$] f                < 0.0
+    total-shortrun-greenhouse [kg] f              < 0.0
+    total-shortrun-nox [kg] f                     < 0.0
+    total-shortrun-depletion [J] f                < 0.0
+    total-shortrun-landuse [m2] f                 < 0.0
+
+      the cost-type totals cover the entire horizon, with
+      first step truncation given by program.last-run.run-kind
+
+    variable-costs-financial [$] F                < 0.0 ..
+    fixed-costs-financial [$] F                   < 0.0 ..
+    embedded-costs-financial [$] F                < 0.0 ..
+    variable-costs-greenhouse [kg] F              < 0.0 ..
+    fixed-costs-greenhouse [kg] F                 < 0.0 ..
+    embedded-costs-greenhouse [kg] F              < 0.0 ..
+    variable-costs-nox [kg] F                     < 0.0 ..
+    fixed-costs-nox [kg] F                        < 0.0 ..
+    embedded-costs-nox [kg] F                     < 0.0 ..
+    variable-costs-depletion [J] F                < 0.0 ..
+    fixed-costs-depletion [J] F                   < 0.0 ..
+    embedded-costs-depletion [J] F                < 0.0 ..
+    variable-costs-landuse [m^2] F                < 0.0 ..
+    fixed-costs-landuse [m^2] F                   < 0.0 ..
+    embedded-costs-landuse [m^2] F                < 0.0 ..
+
+      header: overseer.h
+
+  ------------------------------------------- slice entities
+
+entity.cx-ambient-air-ts-1
+
+    class                                         > CxAmbientAirTs
+
+      ambient air context based on exogenous timeseries
+
+    builtin-remark s                              <
+
+    has-feb-29 [-] b                              > 0
+    is-loopable [-] b                             > 0
+
+      has-feb-29 and is-loopable provide metadata
+
+    wind-speeds [m/s] F                           > 13.0 14.0 ..
+    air-temps [C] F                               > 10.0 11.0 ..
+    temperature-shift [C] f                       > 0.0
+
+      header: e/cxamb01.h
+
+entity.cx-ambient-air-sim-1
+
+    class                                         > CxAmbientAirSim
+
+      an ambient air context with wind speeds sampled from a
+      stateless Rayleigh distribution -- meaning that the
+      prior value does not influence the current value
+
+    mean-wind-speed [m/s] f                       > 10.5
+    constant-air-temp [C] f                       > 15.0
+
+      mean-wind-speed is measured at 10m above ground
+
+      constant-air-temp allows this entity to provide
+      temparature data in line with the 'CxAmbientAir'
+      interface
+
+    wind-speeds [m/s] F                           < 0.0 0.0 ..
+
+      the wind-speeds are duly calculated
+
+    builtin-remark s                              <
+
+      header: e/cxamb01.h
+
+entity.cx-ambient-solar-ts-1
+
+    class                                         > CxAmbientSolarTs
+
+      ambient solar context based on exogenous timeseries
+      which should give sufficient information to calculate
+      total solar irradiation on surfaces of known
+      orientation
+
+    builtin-remark s                              <
+
+    latitude [deg] f                              > 20.0
+    longitude [deg] f                             > 15.0
+    elevation [m] f                               > 50.0
+    year [-] i                                    > 2010
+
+      latitude [-90,+90] and longitude [-180,+180] define
+      location and the timeseries start year is required for
+      sun angle calculations
+
+    has-feb-29 [-] b                              > 0
+    is-loopable [-] b                             > 0
+
+      has-feb-29 and is-loopable provide metadata
+
+    solar-direct [W/m^2] F                        > 500.0 ..
+    solar-diffuse [W/m^2] F                       > 500.0 ..
+    clearness-index [-] F                         > 1.0 ..
+
+      solar-direct and solar-diffuse are the solor
+      irradiation components, time-based to UTC
+
+      if the clearness-index [0,1] is set to unity, the
+      direct and diffuse values should include the effects of
+      cloudiness
+
+    header: e/cxamb02.h
+
+entity.cx-commercial-fix-1
+
+    class                                         > CxCommercialFix
+
+      commercial context using fixed data
+
+    commercial-interest-rate [-/y] f              > 0.2
+
+    builtin-remark s                              <
+
+      header: e/cxecon01.h
+
+  ----------------------------------------------------- tail
+
+note
+
+    $Id: slice-7.contexts.guard.xem 8118 2011-11-24 12:43:30Z robbie $
+
+note
+
+    useful emacs text editor settings
+    local variables:
+      tab-stop-list: (04 50 52)
+      truncate-lines: t
+    end:
+
+model-end
+

@@ -1,0 +1,40 @@
+
+# role   = abated ccgt (submodel)
+# study  = test-27
+# scens  = o
+# cut    = :20
+# lines  = F
+# tall   = T
+# ymax   = 0
+# zero   = T
+
+  entity.teas-ccgt-capture-2.productions                    "abated CCGT : productions"
+  entity.teas-ccgt-capture-2.fuel-demands                    "abated CCGT : fuel demands"
+  entity.teas-ccgt-capture-2.carbon-emissions               "abated CCGT : carbon emissions"
+  entity.teas-ccgt-capture-2.carbon-captures                "abated CCGT : carbon capture"
+  entity.teas-ccgt-capture-2.capacitys                      "abated CCGT : capacity"
+  entity.teas-ccgt-capture-2.shutdown-statuss               "abated CCGT : shutdown status"
+
+  entity.cx-ambient-air-tmy-1.air-temps                     "ambient air : temperature"
+  entity.teas-source-oxid-3.extractions                     "gas well : fuel extraction"
+
+  entity.teas-ccs-geological-4.burials                      "CCS facility : burials"
+  entity.teas-ccs-geological-4.electricity-demands          "CCS facility : electricity demand"
+  entity.teas-ccs-geological-4.annual-leakage-contribution  "CCS facility : annual leakage"
+
+  entity.domain-controller-1.subtotal-greenhouse            "domain-wide ghg cost"
+  entity.cm-oxid-gas-2.spec-combustion-enthalpy             "specific enthalpy"
+  entity.cm-oxid-gas-2.spec-co2-equiv                       "specific CO2e"
+
+  entity.time-horizon.steps                                 "horizion steps"
+  entity.time-horizon.interval                              "horizion interval"
+
+##  emacs text editor settings
+##  local variables:
+##    mode: text
+##    make-backup-files: nil
+##    truncate-lines: t
+##    comment-start: "#"
+##    tab-stop-list: (02 12 60)
+##  end:
+

@@ -1,0 +1,143 @@
+--- poc.008.guard.xem	2012-04-07 18:35:26.568409879 +0200
++++ sen.06.xem	2012-04-07 18:35:46.518358951 +0200
+@@ -33,26 +33,26 @@
+     script-option-jumpy b                         > 0
+ 
+ program.study-description
+ 
+     study-name s                                  > "phd"
+-    scenario-name s                               > "reference energy system"
++    scenario-name s                               > "nicad storage removed"
+     scenario-author s                             > "robbie"
+-    scenario-leta s (+,a-z)                       > "+"
++    scenario-leta s (+,a-z)                       > "f"
+ 
+ program.r-processing
+ 
+     r-policy i                                    > 31
+-    r-title s                                     > "mainline model"
++    r-title s                                     > "scenario f"
+     r-plot-list s                                 > ""
+     r-highlight-output s                          > ""
+ 
+ program.post-processing
+ 
+     summarize-list s (key flows)                  > "entity.teas-ccgt-capture-a07.productions entity.teas-ccgt-capture-a08.productions entity.teas-windfarm-a09.potential-productions entity.teas-windfarm-a09.actual-productions entity.teas-windfarm-e02.potential-productions entity.teas-windfarm-e02.actual-productions entity.teas-hydro-scheme-a10.potential-productions entity.teas-hydro-scheme-a10.actual-productions entity.teas-load-all-elec-a11.loads entity.asop-inelastic-ts-b01.demands entity.gate-stated-tariff-elec-a01.quantitys entity.gate-stated-tariff-elec-a02.quantitys entity.teas-source-all-oxidgas-d01.extractions entity.teas-ccgt-capture-a07.carbon-captures entity.teas-ccgt-capture-a08.carbon-captures entity.teas-ccs-geological-c01.burials"
+   # summarize-list s (overall financial costs)    > "entity.overseer.variable-costs-financial entity.overseer.fixed-costs-financial entity.overseer.embedded-costs-financial entity.domain-controller-a.variable-costs-financial entity.domain-controller-b.variable-costs-financial entity.domain-controller-c.variable-costs-financial entity.domain-controller-d.variable-costs-financial entity.domain-controller-e.variable-costs-financial entity.domain-controller-f.variable-costs-financial"
+-    report-list s                                 > "entity.overseer.total-shortrun-financial entity.overseer.total-shortrun-greenhouse entity.teas-ccs-geological-c01.burials entity.teas-building-elec-f02.demands entity.teas-windfarm-a09.spill entity.teas-windfarm-e02.spill entity.teas-hydro-scheme-a10.reservoir-storages entity.teas-load-all-elec-a11.loads entity.gate-stated-tariff-elec-a01.quantitys entity.teas-source-all-oxidgas-d01.extractions entity.teas-pv-installation-f01.actual-productions entity.teas-simple-storage-elec-f03.closing-inventorys entity.teas-building-elec-f02.hvac-dutys entity.cm-natural-gas-02.spec-combustion-enthalpy entity.teas-building-elec-f02.floor-performance"
++    report-list s                                 > "entity.overseer.total-shortrun-financial entity.overseer.total-shortrun-greenhouse entity.teas-ccs-geological-c01.burials entity.teas-building-elec-f02.demands entity.teas-windfarm-e02.spill entity.teas-hydro-scheme-a10.reservoir-storages entity.teas-load-all-elec-a11.loads entity.gate-stated-tariff-elec-a01.quantitys entity.teas-source-all-oxidgas-d01.extractions entity.teas-pv-installation-f01.actual-productions entity.teas-simple-storage-elec-f03.closing-inventorys entity.teas-building-elec-f02.hvac-dutys entity.cm-natural-gas-02.spec-combustion-enthalpy entity.teas-building-elec-f02.floor-performance"
+ 
+  --------------------------------------- model documentation
+ 
+       refer the typeset description elsewhere
+ 
+@@ -3355,16 +3355,16 @@
+     ranked-selgates L                             > ""
+ 
+       the ranked-selgates (bridging the right side) must be
+       null, one, or listed in DESCENDING priority
+ 
+-    asset-operators L                             > "asop-internal-costs-f01 asop-occupant-param-f02 asop-admin-stated-f03 asop-inelastic-param-f04"
++    asset-operators L                             > "asop-internal-costs-f01 asop-occupant-param-f02 asop-inelastic-param-f04"
+ 
+       the asset-operators may be null, individual, or listed
+       in no particular order
+ 
+-    demand-junctions L                            > "junc-demand-2-split-elec-f01 junc-demand-2-sym-elec-f02"
++    demand-junctions L                            > "junc-demand-2-split-elec-f01"
+ 
+       the demand-junctions, which split and join demand, may
+       be null, individual, or listed in no particular order
+ 
+     variable-costs-financial [$] F                < 0.0 ..
+@@ -3391,11 +3391,11 @@
+       basic asset operator with a null control objective and
+       with internal cost formation
+ 
+     builtin-remark s                              <
+ 
+-    technical-assets L                            > "teas-pv-installation-f01 teas-simple-storage-elec-f03"
++    technical-assets L                            > "teas-pv-installation-f01"
+ 
+       the order of the technical-assets is not significant
+ 
+     standing-cost-financial [$/s] f               > 0.0
+     standing-cost-greenhouse [kg/s] f             > 0.0
+@@ -3510,11 +3510,11 @@
+ 
+       junction-commodity defines the underlying commodity
+ 
+     header: b/junc01.h
+ 
+-entity.junc-demand-2-sym-elec-f02
++# entity.junc-demand-2-sym-elec-f02
+ 
+       demand bus for NiCad storage
+ 
+     class                                         > JuncDemand2Sym:Elec
+ 
+@@ -3533,11 +3533,11 @@
+ 
+       junction-commodity defines the underlying commodity
+ 
+     header: b/junc03.h
+ 
+-entity.teas-simple-storage-elec-f03
++# entity.teas-simple-storage-elec-f03
+ 
+       experimental 40GJ NiCad bank, also very expensive
+ 
+     class                                         > TeasSimpleStorage:Elec
+ 
+@@ -3617,11 +3617,11 @@
+       DCF annuity method over the economic life of the entity
+       in question
+ 
+     header: b/teas10.h
+ 
+-entity.asop-admin-stated-f03
++# entity.asop-admin-stated-f03
+ 
+       rule-based administrator
+ 
+       the valve opens once every 48 periods
+ 
+@@ -3653,11 +3653,11 @@
+     variable-costs-financial [$] F                < 0.0 ..
+     fixed-costs-financial [$] F                   < 0.0 ..
+ 
+     header: b/asop05.h
+ 
+-entity.teas-flow-inhibitor-elec-f04
++# entity.teas-flow-inhibitor-elec-f04
+ 
+       valve (in this case) controlling the storage discharge
+ 
+     class                                         > TeasFlowInhibitor:Elec
+ 
+@@ -3752,11 +3752,11 @@
+ 
+       designed to be paired with AsopOccupant
+ 
+     builtin-remark s                              <
+ 
+-    socket-1 l                                    > "junc-demand-2-sym-elec-f02.sock-1"
++    socket-1 l                                    > "junc-demand-2-split-elec-f01.sock-1"
+ 
+       socket-1 is my supplier
+ 
+     cable-electricity-commodity l                 > "cm-electricity-05"
+ 
+@@ -3864,11 +3864,11 @@
+ 
+       designed to be paired with AsopOccupant
+ 
+     builtin-remark s                              <
+ 
+-    socket-1 l                                    > "junc-demand-2-sym-elec-f02.sock-1"
++    socket-1 l                                    > "junc-demand-2-split-elec-f01.sock-1"
+ 
+       socket-1 is my supplier
+ 
+     cable-electricity-commodity l                 > "cm-electricity-05"
+ 

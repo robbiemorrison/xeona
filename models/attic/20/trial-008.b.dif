@@ -1,0 +1,37 @@
+--- poc.008.guard.xem	2012-04-03 17:35:31.034723638 +0200
++++ sen.02.xem	2012-04-03 17:36:03.475349608 +0200
+@@ -33,18 +33,18 @@
+     script-option-jumpy b                         > 0
+ 
+ program.study-description
+ 
+     study-name s                                  > "phd"
+-    scenario-name s                               > "reference energy system"
++    scenario-name s                               > "far-from-demand ranked-orig-domains"
+     scenario-author s                             > "robbie"
+-    scenario-leta s (+,a-z)                       > "+"
++    scenario-leta s (+,a-z)                       > "b"
+ 
+ program.r-processing
+ 
+     r-policy i                                    > 31
+-    r-title s                                     > "mainline model"
++    r-title s                                     > "scenario b"
+     r-plot-list s                                 > ""
+     r-highlight-output s                          > ""
+ 
+ program.post-processing
+ 
+@@ -117,11 +117,11 @@
+ 
+       captrans-algorithm takes "fixed" | "simple" | "hop-relit"
+       but only "simple" is currently implemented (this call
+       contains experimental macro-controlled hop-relit code)
+ 
+-    ranked-orig-domains L (close-to-demand)       > "domain-controller-f domain-controller-e domain-controller-a domain-controller-d"
++    ranked-orig-domains L (far-from-demand)       > "domain-controller-d domain-controller-a domain-controller-e domain-controller-f"
+ 
+       the originating domain controllers must be given in
+       order of DESCENDING priority, any unannounced domains
+       will be discovered naturally during the various
+       traversals

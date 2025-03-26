@@ -1,0 +1,11 @@
+     0  1393   +   "reference energy system"                          8760   +9.734e+09 +2.920e+09 +0.000e+00 +4.608e+16 +0.000e+00    trial-008.+.xem
+     0  2259   a   "indoor temp now 17C was 21C"                      8760   +9.732e+09 +2.862e+09 +0.000e+00 +4.492e+16 +0.000e+00    trial-008.a.xem
+     0  2342   b   "far-from-demand ranked-orig-domains"              8760   +9.734e+09 +2.921e+09 +0.000e+00 +4.609e+16 +0.000e+00    trial-008.b.xem
+     0  1675   c   "ambient air 2C warmer"                            8760   +9.733e+09 +2.893e+09 +0.000e+00 +4.554e+16 +0.000e+00    trial-008.c.xem
+     0  1412   d   "uprated building performance"                     8760   +9.748e+09 +2.799e+09 +0.000e+00 +4.366e+16 +0.000e+00    trial-008.d.xem
+     0  2494   e   "carbon capture added"                             8760   +9.925e+09 +1.424e+09 +0.000e+00 +6.837e+16 +0.000e+00    trial-008.e.xem
+     0  2245   f   "nicad storage removed"                            8760   +9.730e+09 +2.920e+09 +0.000e+00 +4.608e+16 +0.000e+00    trial-008.f.xem
+     0  1343   g   "large HV windfarm removed"                        8760   +9.733e+09 +2.923e+09 +0.000e+00 +4.614e+16 +0.000e+00    trial-008.g.xem
+     0  1586   h   "urban domain under 'fin' was 'ghg'"               8760   +9.734e+09 +2.920e+09 +0.000e+00 +4.608e+16 +0.000e+00    trial-008.h.xem
+     0  1820   i   "zero emissions smelter (experimental)"            8760   +9.734e+09 +2.195e+09 +0.000e+00 +4.608e+16 +0.000e+00    trial-008.i.xem
+     0  1809   j   "reduced inflows (dry year)"                       8760   +9.739e+09 +3.219e+09 +0.000e+00 +5.204e+16 +0.000e+00    trial-008.j.xem

@@ -1,0 +1,23 @@
+
+#  file-purpose     : for use by 'xmok' utility
+#  file-initiator   : Robbie Morrison <robbie@actrix.co.nz>
+#  file-create-date : Tue 07-Apr-2009 07:48 UTC
+#  file-status      : ongoing
+#  file-keywords    : xeona
+
+#  $Revision: 2388 $
+#  $Date: 2009-04-16 15:13:07 +0200 (Thu, 16 Apr 2009) $
+#  $Author: robbie $
+#  $URL: file:///home/robbie/svn-root/xeona/futz/trunk/xeona1/xeona-xmoks/xaggreg $
+
+#  'AGGRET' is used by the 'xmok' utility to determine
+#  whether the aggregate return (that is, the sum of
+#  the returns from the individual binary calls) is
+#  acceptable or not.  This value should be updated as
+#  required.
+
+AGGRET=0            # was previously 11
+
+#  $Id: xaggreg 2388 2009-04-16 13:13:07Z robbie $
+#  end of file
+

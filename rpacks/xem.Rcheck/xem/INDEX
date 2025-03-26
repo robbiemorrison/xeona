@@ -1,0 +1,12 @@
+xem-package             Support functions for the xeona energy systems
+                        modeling environment
+xem.cleanExportFiles    Clean up generated files
+xem.consts              Obtain list holding useful consts
+xem.exportYesNo         Confirm export.
+xem.generateExportName
+                        Generate an export name
+xem.grab                Obtain xeona model field data
+xem.keepOpen            Prevent Rscript from completing
+xem.plot                Create standard xeona plot
+xem.processCutArg       Process a cut argument
+xem.xplot               Create and export standard xeona plot

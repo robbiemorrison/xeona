@@ -1,0 +1,10 @@
+* install options are ' --no-html'
+
+* installing *source* package 'xem' ...
+** R
+** preparing package for lazy loading
+Loading Tcl/Tk interface ... done
+** help
+*** installing help indices
+** building package indices ...
+* DONE (xem)

@@ -1,0 +1,57 @@
+digraph "getting started guide example" {
+    // DOT file generated from: submodel.15.xem
+    // preamble
+    node [shape = box]
+    node [height = 0.3]
+    node [color = slategray]
+    node [fontname = "DejaVu Sans"]
+    node [fontcolor = darkslategray]
+    node [fontsize = 8]
+    edge [color = orange]
+    edge [fontname = "DejaVu Sans"]
+    edge [fontcolor = darkslategray]
+    edge [fontsize = 8]
+    // layline (the left-side)
+    {
+        // preamble
+        node [shape = plaintext]
+        edge [style = invis]
+        // labels
+        overseer    [label = "system coordination"]
+        domains     [label = "domains"]
+        operators   [label = "operators"]
+        gates       [label = "gateways"]
+        assets      [label = "assets"]
+        commodities [label = "commodities"]
+        contexts    [label = "contexts"]
+        // chain
+        overseer -> domains -> operators -> gates -> assets -> commodities -> contexts
+    }
+    // rank sets
+    {rank = same; overseer    01}
+    {rank = same; domains     02}
+    {rank = same; operators   03 05}
+    {rank = same; gates}
+    {rank = same; assets      04 06}
+    {rank = same; commodities 07}
+    {rank = same; contexts    08}
+    // node details
+    01 [label = "01 &#8226; overseer"]
+    02 [label = "02 &#8226; domain-controller-1"]
+    03 [label = "03 &#8226; asop-inelastic-ts-1"]
+    04 [label = "04 &#8226; teas-load-elec-1"]
+    05 [label = "05 &#8226; asop-basic-1"]
+    06 [label = "06 &#8226; teas-windfarm-1"]
+    07 [label = "07 &#8226; cm-elec-1"]
+    08 [label = "08 &#8226; cx-ambient-air-sim-1"]
+    // edge details (any leading space is for aesthetics)
+    01 -> 02 [label = " 01", color = coral3]
+    02 -> 05 [label = " 02", color = orange]
+    02 -> 03 [label = " 02", color = orange]
+    03 -> 04 [label = " 03", color = gold]
+    04 -> 06 [label = " 04", color = steelblue3]
+    04 -> 07 [label = " 05", color = cadetblue3]
+    05 -> 06 [label = " 06", color = gold]
+    06 -> 07 [label = " 07", color = cadetblue3]
+    06 -> 08 [label = " 08", color = olivedrab3]
+}

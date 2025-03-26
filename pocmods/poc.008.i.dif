@@ -1,0 +1,39 @@
+--- poc.008.guard.xem	2012-04-07 18:35:26.568409879 +0200
++++ sen.09.xem	2012-04-07 18:35:46.548358405 +0200
+@@ -33,18 +33,18 @@
+     script-option-jumpy b                         > 0
+ 
+ program.study-description
+ 
+     study-name s                                  > "phd"
+-    scenario-name s                               > "reference energy system"
++    scenario-name s                               > "zero emissions smelter (experimental)"
+     scenario-author s                             > "robbie"
+-    scenario-leta s (+,a-z)                       > "+"
++    scenario-leta s (+,a-z)                       > "i"
+ 
+ program.r-processing
+ 
+     r-policy i                                    > 31
+-    r-title s                                     > "mainline model"
++    r-title s                                     > "scenario i"
+     r-plot-list s                                 > ""
+     r-highlight-output s                          > ""
+ 
+ program.post-processing
+ 
+@@ -2091,11 +2091,13 @@
+ 
+       the embedded-costs-financial are calculated using the
+       DCF annuity method over the economic life of the entity
+       in question
+ 
+-    duty-specific-cost-greenhouse [kg/J] f        > 39.0e-09
++    ** suppress greenhouse costs as this scenario
++
++    duty-specific-cost-greenhouse [kg/J] f        > 0.0
+     size-specific-cost-greenhouse [kg/W] f        > 0.0
+     standing-cost-greenhouse [kg/s] f             > 0.0
+     duty-specific-cost-nox [kg/J] f               > 0.0
+     size-specific-cost-nox [kg/J/s] f             > 0.0
+     standing-cost-nox [kg/s] f                    > 0.0

@@ -1,0 +1,230 @@
+
+#  file-purpose     : display PNG images associated with the given submodel or pocmod
+#  file-initiator   : Robbie Morrison <robbie@actrix.co.nz>
+#  file-create-date : Tue 15-Feb-2011 11:42 UTC
+#  file-status      : working
+#  file-keywords    : xeona
+
+#  $Revision: 5909 $
+#  $Date: 2011-02-15 12:48:32 +0100 (Tue, 15 Feb 2011) $
+#  $Author: robbie $
+#  $URL: file:///home/robbie/svn-root/xeona/futz/trunk/scripts/xpng $
+
+# ---------------------------------
+#  settings
+# ---------------------------------
+
+PNGUTIL="eog"                           # default utility to display PNG images
+
+# ---------------------------------
+#  preamble
+# ---------------------------------
+
+TWOSTUB="test"                          # a submodel with two digits
+THREESTUB="test"                        # a pocmod with three digits # TOFIX: 15-Feb-2011: to confirm
+
+SCRIPT=$(basename "$0")
+
+E_SUCCESS=0
+E_FAIL=1
+E_USAGE=2
+E_BAD_VERSION_FORMAT=64
+E_MISSING_SHOW_UTILITY=65
+E_NO_IMAGE_FILE=66
+E_EMPTY_IMAGE_FILE=67
+
+# ---------------------------------
+#  get_stub()
+# ---------------------------------
+
+stub=""
+function get_stub
+{
+    local input="$1"                    # should be either 00 or 000
+
+    # integrity checks
+    if [ -z "$input" ]
+    then
+        echo "$SCRIPT: FATAL: version format omitted (try --help for usage)"
+        exit $E_USAGE
+    fi
+    local dummy
+    printf -v dummy "%d" "$input" 2>/dev/null  # effectively confirms 'input' is an integer [1]
+    if [ $? -ne 0 ]                            # non-zero exit status from 'printf'
+    then
+        echo "$SCRIPT: FATAL: incorrect version format (not integral or zero-padded integral): $input"
+        exit $E_BAD_VERSION_FORMAT
+    fi
+
+    # action
+    case ${#input} in
+        0)                         # should have been captured above
+            echo "$SCRIPT: FATAL: ** coding error"
+            exit $E_FAIL
+            ;;
+        1)
+            echo "$SCRIPT: FATAL: incorrect version format (zero padding omitted?): $input"
+            exit $E_BAD_VERSION_FORMAT
+            ;;
+        2)
+            stub="$TWOSTUB-$input"
+            ;;
+        3)
+            stub="$THREESTUB-$input"
+            ;;
+        *)
+            echo "$SCRIPT: FATAL: incorrect version format (too many digits): $input"
+            exit $E_BAD_VERSION_FORMAT
+            ;;
+    esac
+    local pwd=$(pwd -P)
+    echo "$SCRIPT: sdir: $pwd"
+    echo "$SCRIPT: stub: $stub"
+}
+
+# ---------------------------------
+#  show_all()
+# ---------------------------------
+
+function show_all
+{
+    local number="$1"
+
+    local PNGALL="gthumb"               # 'eog' cannot be used here
+    local PNGALL="$PNGALL --fullscreen"
+
+    get_stub "$number"
+
+    local glob="$stub.*.png"
+    local hits=$(find -P . -name "$glob" -print)
+    if [ -z "$hits" ]
+    then
+        echo "$SCRIPT: FATAL: no potential files: $glob"
+        exit $E_NO_IMAGE_FILE
+    fi
+
+    local ends="summary.a.png in.a.png out.a.png plotlist.a.png breadplot.a.png viz.png"
+    local files=""
+    for end in $ends
+    do
+        files="$files $stub.$end"
+    done
+
+    local call="$PNGALL$files"
+    echo "$SCRIPT: call: $call &"
+    eval "$call &"
+}
+
+# ---------------------------------
+#  show_call()
+# ---------------------------------
+
+function show_call
+{
+    local number="$1"
+    local utility="$2"
+    local extension="$3"
+    local options="$4"
+
+    get_stub "$number"                  # confirms 'number', creates 'stub'
+
+    # integrity checks
+    if [ ! $(which "$utility") ]
+    then
+        echo "$SCRIPT: FATAL: show utility not found: $utility"
+        exit $E_MISSING_SHOW_UTILITY
+    fi
+
+    local image="$stub.$extension"      # create filename
+
+    # integrity checks 2
+    if [ ! -f "$image" ]
+    then
+        echo "$SCRIPT: FATAL: image file not found: $image"
+        exit $E_NO_IMAGE_FILE
+    fi
+    if [ ! -s "$image" ]
+    then
+        echo "$SCRIPT: FATAL: image file is empty (zero-bytes): $image"
+        exit $E_EMPTY_IMAGE_FILE
+    fi
+
+    # active code
+    test -n "$options" && utility="$utility $options"
+    call="$utility $image"
+    echo "$SCRIPT: call: $call &"
+    # eval "$call &"                    # 'eog' does not like this, could be made conditional
+    $call &
+}
+
+# ---------------------------------
+#  display_help()
+# ---------------------------------
+
+function display_help
+{
+    echo
+    echo "       usage: $SCRIPT  --all    <00>   display all (often gray background)"
+    echo "              $SCRIPT  --bread  <00>   display breadboard plot"
+    echo "              $SCRIPT  --list   <00>   display plot list"
+    echo "              $SCRIPT  --viz    <00>   display graphviz plot"
+    echo "              $SCRIPT  --help          show this message and exit"
+    echo "     purpose: display a selection of PNG images for a given submodel or pocmod"
+    echo
+}
+
+# ---------------------------------
+#  command-line processing
+# ---------------------------------
+
+# transparent background display (under 'hinau' configurations)
+#
+#    display = checkered
+#    eog     = white
+#    gthumb  = grey
+
+case "$1" in
+    --help|--hel|--he|--h|-help|-hel|-he|-h|"-?")
+        display_help
+        exit $E_SUCCESS
+        ;;
+    --viz|-v)
+        shift
+        show_call "$1" "$PNGUTIL" "viz.png"
+        ;;
+    --bread|-b)
+        shift
+        show_call "$1" "$PNGUTIL" "breadplot.a.png"    # note transparent background
+        ;;
+     --list|-l)
+        shift
+        show_call "$1" "$PNGUTIL" "plotlist.a.png"     # note transparent background
+        ;;
+    --all|-a)
+        shift
+        show_all "$1"                                  # PNG viewer is hard-coded
+        ;;
+
+     "")
+        echo "$SCRIPT: must supply two arguments (or try --help)"
+        exit $E_USAGE
+        ;;
+    *)
+        echo "$SCRIPT: incorrect usage (try --help): $*"
+        exit $E_USAGE
+        ;;
+esac
+
+# ---------------------------------
+#  housekeeping
+# ---------------------------------
+
+# nothing much to do
+
+ret=$?
+echo "$SCRIPT: returning: $ret"
+
+#  $Id: xpng 5909 2011-02-15 11:48:32Z robbie $
+#  end of file
+
+

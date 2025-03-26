@@ -1,0 +1,21 @@
+
+# role   = demand bidder
+# study  = trial-008
+# scens  = *
+# cut    = :
+# lines  = F
+# tall   = T
+# ymax   = 0
+# zero   = T
+
+  'entity.teas-load-all-elec-a11.loads'                     "demand bidder : a11 : loads"
+
+##  emacs text editor settings
+##  local variables:
+##    mode: text
+##    make-backup-files: nil
+##    truncate-lines: t
+##    comment-start: "#"
+##    tab-stop-list: (02 12 60)
+##  end:
+

@@ -1,0 +1,193 @@
+#! /bin/bash
+
+#  file-purpose     : propagate files from the latest source directory
+#  file-initiator   : Robbie Morrison <robbie@actrix.co.nz>
+#  file-create-date : Tue 02-Oct-2007 09:30 UTC
+#  file-status      : working
+#  file-keywords    : xeona
+
+#  $Revision: 2332 $
+#  $Date: 2009-04-07 18:01:09 +0200 (Tue, 07 Apr 2009) $
+#  $Author: robbie $
+#  $URL: file:///home/robbie/svn-root/xeona/futz/trunk/scripts/sourceprop $
+
+PROPLIST="actor data factory plant"     # modify as needed, see also: jede DIRLIST
+SOURCE="source"
+
+FILELIST="$*"                           # from command-line
+
+SCRIPT=$(basename "$0")
+
+E_SUCCESS=0
+E_FAIL=1
+E_USER_REJECT=2
+E_WRONG_WORKING_DIR=101
+E_VALIDATION_FAIL=102
+
+# ---------------------------------
+#  display_help()
+# ---------------------------------
+
+function display_help
+{
+echo
+echo "       usage: $SCRIPT  <filelist>"
+echo "              $SCRIPT  --help"
+echo "     purpose: propagate files from source dir using unix (not svn) copy"
+echo "  motivation: developed to transfer satellite code to main line code"
+echo "        note: required a clean pass AND user confirmation"
+echo
+}
+
+# ---------------------------------
+#  screen command-line
+# ---------------------------------
+
+case "$1" in
+    --help|--hel|--he|--h|-help|-hel|-he|-h|"-?")
+        display_help
+        exit $E_SUCCESS
+        ;;
+esac
+
+# ---------------------------------
+#  report()
+# ---------------------------------
+
+function report
+{
+    local tab=-30                       # the "-" means left justify
+    case "$#" in                        # argument count
+        0)  printf "\n"                                   ;;
+        1)  printf "$SCRIPT: %s\n" "$1"                   ;;
+        2)  printf "$SCRIPT: %${tab}s : %s\n" "$1" "$2"   ;;
+        *)
+            report "CODING ERROR" "more than two arguments given for report()"
+            exit $E_FAIL
+            ;;
+    esac
+    return 0
+}
+
+# ---------------------------------
+#  user_confirm()
+# ---------------------------------
+
+function user_confirm
+{
+    response="n"
+    while [ "$response" != "y" ]
+      do
+      echo -n "  $SCRIPT: enter 'y' to continue or 'q' to quit script: "
+      read response
+      case "$response" in
+          q)
+              report
+              report "quiting on request"
+              report
+              exit $E_USER_REJECT
+              ;;
+      esac
+    done
+    report
+    return 0
+}
+
+# ---------------------------------
+#  latest_dir()
+# ---------------------------------
+
+function latest_dir
+{
+    # the 'find' utility is used because 'ls' cannot
+    # readily distinguish between directories and files
+    #
+    # format %P has command-line path removed
+
+    local stub="$1"
+    local all=""
+    dir=""                              # non-local scope
+    all=($(find .. -maxdepth 1 -name "${stub}*" -type d -printf '%P\n' | sort --reverse))
+    dir=${all[0]}                       # grab first element of duly sorted list
+}
+
+# ---------------------------------
+#  process()
+# ---------------------------------
+
+function process
+{
+    local type="$1"                     # "run" or otherwise
+    local okay=0                        # zero indicates true
+
+    for file in $FILELIST               # CAUTION: omit soft-quotes for 'FILELIST'
+      do
+      if [ ! -f "$file" ]
+          then
+          report "source file not found: $file"
+          okay=1
+          continue                      # FILELIST loop again
+      fi
+      for dire in $PROPLIST             # CAUTION: omit soft-quotes for 'PROPLIST'
+        do
+        latest_dir "$dire"              # sets 'dir'
+        if [ ! -f "../$dir/$file" ]
+            then
+            report "target file not found: ../$dir/$file"
+            okay=1
+            continue                    # PROPLIST loop again
+        fi
+        case "$type" in                 # select action type
+            run)
+                echo "cp --force $file ../$dir"
+                cp --force "$file" "../$dir"
+                ;;
+            *)
+                printf "will unix copy    %-12s  to  %s\n" "$file" "../$dir"
+                ;;
+        esac
+      done
+    done
+    return $okay                        # non-zero is fail
+}
+
+# ---------------------------------
+#  main code
+# ---------------------------------
+
+# check source directory first
+
+latest_dir "$SOURCE"                    # sets 'dir'
+if [ $(basename "$PWD") != "$dir" ]
+    then
+    report "wrong working dir: $PWD, should be in: $dir"
+    exit $E_WRONG_WORKING_DIR
+fi
+report
+
+# process files in two passes: validation and action
+
+process "dry"                           # validation pass
+ret=$?                                  # grab return
+if [ $ret -eq 0 ]
+    then
+    report
+    user_confirm                        # seek user confirmation
+    process "run"                       # action pass
+    report
+else
+    report
+    report "abandoning propagation, no files were modified"
+    report
+    exit $E_VALIDATION_FAIL
+fi
+
+# ---------------------------------
+#  housekeeping
+# ---------------------------------
+
+exit $E_SUCCESS
+
+#  $Id: sourceprop 2332 2009-04-07 16:01:09Z robbie $
+#  end of file
+
