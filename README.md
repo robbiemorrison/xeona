@@ -22,7 +22,7 @@ The source code, documentation, and development data are deposited here for hist
 
 <figure style="margin-top: 4.0ex; margin-bottom: 2.0ex; text-align: center">
   <img src="img/ecos-2005-xeona-three-layer-21-for-egy-paper.internal.png" width="100%" style="float: left; padding=10%"">
-  <p style="margin-top: 0.0ex">&nbsp;</p>
+  <!-- <p style="margin-top: 0.0ex">&nbsp;</p> -->
   <!-- <figcaption><b>Figure&nbsp;1</b>: Key components divided into three realms</figcaption> -->
 </figure>
 
@@ -41,7 +41,7 @@ The system itself did not look ahead but the agents can&nbsp;&mdash; just as in 
 
 <figure style="margin-top: 4.0ex; margin-bottom: 2.0ex; text-align: center">
   <img src="img/xem-key.crop.png" width="80%">
-  <p style="margin-top: 0.0ex">&nbsp;</p>
+  <!-- <p style="margin-top: 0.0ex">&nbsp;</p> -->
   <!-- <figcaption><b>Figure&nbsp;2</b>: Some design features shown schematically</figcaption> -->
 </figure>
 
