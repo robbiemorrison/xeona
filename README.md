@@ -18,7 +18,7 @@ The source code, documentation, and development data are deposited here as an hi
 
 *xeona* represents one of the earlier attempts to combine **agent&#8209;based modeling** with classical optimization&#8209;based **energy system modeling**.
 
-*xeona* relies on object&#8209;oriented design and analysis (OODA) and was necessarily written from the ground&nbsp;up in a high&#8209;performance&#8209;general purpose programming language.
+*xeona* relies on object&#8209;oriented design and analysis (OODA) and was necessarily written from the ground&nbsp;up in a high&#8209;performance general&#8209;purpose programming language.
 
 <figure style="margin-top: 4.0ex; margin-bottom: 2.0ex; text-align: center">
   <img src="img/ecos-2005-xeona-three-layer-21-for-egy-paper.internal.png" width="100%" style="float: left; padding=10%"">
