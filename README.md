@@ -23,10 +23,10 @@ The source code, documentation, and development data are deposited here for hist
 <figure style="margin-top: 4.0ex; margin-bottom: 2.0ex; text-align: center">
   <img src="img/ecos-2005-xeona-three-layer-21-for-egy-paper.internal.png" width="100%" style="float: left; padding=10%"">
   <p style="margin-top: 0.0ex">&nbsp;</p>
-  <figcaption><b>Figure&nbsp;1</b>: Key components divided into three realms</figcaption>
+  <!-- <figcaption><b>Figure&nbsp;1</b>: Key components divided into three realms</figcaption> -->
 </figure>
 
-<br>
+**Figure&nbsp;1**: Key components divided into three realms
 
 *xeona* offers a&nbsp;clear separation of responsibilities between technical characterizations, operator decisioning, and market&#8209;based dispatch.  Figure&nbsp;1 shows the general arrangements.  The design of *xeona* includes the following features:
 
@@ -42,10 +42,10 @@ The system itself did not look ahead but the agents can&nbsp;&mdash; just as in 
 <figure style="margin-top: 4.0ex; margin-bottom: 2.0ex; text-align: center">
   <img src="img/xem-key.crop.png" width="80%">
   <p style="margin-top: 0.0ex">&nbsp;</p>
-  <figcaption><b>Figure&nbsp;2</b>: Some design features shown schematically</figcaption>
+  <!-- <figcaption><b>Figure&nbsp;2</b>: Some design features shown schematically</figcaption> -->
 </figure>
 
-<br>
+**Figure&nbsp;2**: Some design features shown schematically
 
 The system is divided into commitment domains and *xeona* provides a novel way of traversing the system at each time&nbsp;step, capacitating and solving the system incrementally until a complete solution is realized.  Figure&nbsp;2 shows two commitment domains separated by a gateway entity. The diagram also depicts the&nbsp;plug metaphor that wires the system and defines notional demand flow.
 
