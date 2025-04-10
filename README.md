@@ -31,10 +31,10 @@ The source code, documentation, and development data are deposited here as an hi
 *xeona* offers a&nbsp;clear separation of responsibilities between technical characterizations, operator decisioning, and market&#8209;based dispatch.  Figure&nbsp;1 shows the general arrangements.  The design of *xeona* includes the following features:
 
 - high&#8209;resolution technical modeling
-- physical network effects
+- network saturation effects
 - agent&#8209;based decisioning
 - contractual relationships (considered structural)
-- simplified locational marginal pricing (*aka* nodal pricing)
+- simplified [locational marginal pricing](https://en.wikipedia.org/wiki/Electricity_market#Bid-based,_security-constrained,_economic_dispatch_with_nodal_prices) (*aka* nodal pricing)
 - structural change via exogenous scenarios
 
 The system itself did not look ahead but the agents can&nbsp;&mdash; just as in real life.
