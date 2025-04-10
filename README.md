@@ -12,7 +12,7 @@
 
 *xeona* was completed in 2014, at which point active development ceased.
 
-The source code, documentation, and development data are deposited here for historical record.
+The source code, documentation, and development data are deposited here as an historical record.
 
 ## Overview
 
