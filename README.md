@@ -26,6 +26,8 @@ The source code, documentation, and development data are deposited here for hist
   <figcaption><b>Figure&nbsp;1</b>: Key components divided into three realms</figcaption>
 </figure>
 
+<br>
+
 *xeona* offers a&nbsp;clear separation of responsibilities between technical characterizations, operator decisioning, and market&#8209;based dispatch.  Figure&nbsp;1 shows the general arrangements.  The design of *xeona* includes the following features:
 
 - high&#8209;resolution technical modeling
@@ -42,6 +44,8 @@ The system itself did not look ahead but the agents can&nbsp;&mdash; just as in 
   <p style="margin-top: 0.0ex">&nbsp;</p>
   <figcaption><b>Figure&nbsp;2</b>: Some design features shown schematically</figcaption>
 </figure>
+
+<br>
 
 The system is divided into commitment domains and *xeona* provides a novel way of traversing the system at each time&nbsp;step, capacitating and solving the system incrementally until a complete solution is realized.  Figure&nbsp;2 shows two commitment domains separated by a gateway entity. The diagram also depicts the&nbsp;plug metaphor that wires the system and defines notional demand flow.
 
