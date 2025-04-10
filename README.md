@@ -4,7 +4,7 @@
   license   : this work is licensed under a Creative Commons Attribution 4.0 International License
 -->
 
-<img src="img/xeona-logo.png" width="12%" style="float: right">
+<img src="img/xeona-logo.png" width="15%" style="float: right">
 
 # *xeona*
 
