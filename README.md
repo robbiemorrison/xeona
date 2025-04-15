@@ -8,7 +8,7 @@
 
 # *xeona*
 
-*xeona* is a **modeling environment** for energy systems that supports **multi&#8209;party operations**, least&#8209;cost **market clearing**, and capacitated **network effects** endogenously &nbsp;&mdash; plus **structural change** exogenously through **scenarios**.
+*xeona* is an **environment** for modeling **energy systems** that supports **multi&#8209;party operations**, least&#8209;cost **market clearing**, and capacitated **network effects** endogenously &nbsp;&mdash; plus **structural change** exogenously through user&#8209;defined **scenarios**.
 
 *xeona* was completed in 2014, at which point active development ceased.
 
@@ -28,10 +28,10 @@ The source code, documentation, and development data are deposited here as an hi
 
 **Figure&nbsp;1**: Key components divided into three realms
 
-*xeona* offers a&nbsp;clear separation of responsibilities between technical characterizations, operator decisioning, and market&#8209;based dispatch.  Figure&nbsp;1 shows the general arrangements.  The design of *xeona* includes the following features:
+*xeona* offers a&nbsp;clear separation of responsibilities between technical characterizations, operator decisioning, and market&#8209;based dispatch.  Figure&nbsp;1 shows the general arrangements.  The implementation of *xeona* includes the following features:
 
 - high&#8209;resolution technical modeling
-- network saturation effects
+- ability to capture network saturation effects
 - agent&#8209;based decisioning
 - contractual relationships (considered structural)
 - simplified [locational marginal pricing](https://en.wikipedia.org/wiki/Electricity_market#Bid-based,_security-constrained,_economic_dispatch_with_nodal_prices) (*aka* nodal pricing)
@@ -47,7 +47,7 @@ The system itself did not look ahead but the agents can&nbsp;&mdash; just as in 
 
 **Figure&nbsp;2**: Some design features shown schematically
 
-The system is divided into commitment domains and *xeona* provides a novel way of traversing the system at each time&nbsp;step, capacitating and solving the system incrementally until a complete solution is realized.  Figure&nbsp;2 shows two commitment domains separated by a gateway entity. The diagram also depicts the&nbsp;plug metaphor that wires the system and defines notional demand flow.
+*xeona* supports the concept of distributed autonomy and the system is thus divided into commitment domains separated by gateway entities&nbsp;&mdash; as indicated in figure&nbsp;2.  The so&#8209;called CTA algorithm embedded in *xeona* then provides a novel way to traverse the system at each time&nbsp;step, incrementally capacitating and solving the domains and gateways whenever feasible until a complete solution is realized. Figure&nbsp;2 also shows the&nbsp;plug metaphor that is used to wire the system and define notional demand flow in the process.
 
 *xeona* was designed to study [sector&#8209;coupling](https://en.wikipedia.org/wiki/sector_coupling) specifically and system integration under distributed decision-making more generally&nbsp;&mdash; both emerging topics when the software was conceived.
 
@@ -55,13 +55,13 @@ The system is divided into commitment domains and *xeona* provides a novel way o
 
 *xeona* was written as production software.
 
-*xeona* was implemented using 58&thinsp;000 source lines of C++ with ancillary processing and visualization coded in R and bash.
+*xeona* was implemented using 58&thinsp;000 source lines of C++ with ancillary processing and visualization coded in R and bash.  The main code is located in the `xeona1` directory tree.
 
 The source code is licensed under the GNU&nbsp;GPLv3+ license and the documentation and data are under the Creative Commons CC&#8209;BY&#8209;4.0 licenses.
 
 ## Publications
 
-Directly related publications:
+Related publications:
 
 - Morrison, Robbie, Tobias Wittmann, Jan Heise, and Thomas Bruckner (2005).  In Kjelstrup, Signe, Johan&nbsp;E Hustad *et&nbsp;al* (editors).  [*Chapter: Policy-oriented energy system modeling with 'xeona'*](https://www2.wifa.uni-leipzig.de/fileadmin/user_upload/iirm-tm/energiemanagement/publikationen/Conference_Proceedings/2005_PolicyOrientedEXeona.pdf).  Trondheim, Norway: Tapir Academic Press.  pp 659–668.  ISBN 82-519-2041-8.  Conference held Norwegian University of Science and Technology (NTNU) on <nowrap>20–22 June</nowrap> 2005.
 
@@ -75,7 +75,7 @@ Directly related publications:
 
 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width: 0" src="https://i.creativecommons.org/l/by/4.0/88x31.png"/></a><br/>Copyright (c) Robbie Morrison<br/>This file is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
 
-Text last modified <nowrap>10 April 2025</nowrap>.
+Text last modified <nowrap>15 April 2025</nowrap>.
 
 &#9634;
 
