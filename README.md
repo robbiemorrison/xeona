@@ -8,7 +8,7 @@
 
 # *xeona*
 
-*xeona* is an **environment** for modeling **energy systems** that supports **multi&#8209;party operations**, least&#8209;cost **market clearing**, and capacitated **network effects** endogenously &nbsp;&mdash; plus **structural change** exogenously through user&#8209;defined **scenarios**.
+*xeona* is an **environment** for modeling **energy systems** that provides endogenous support for **multi&#8209;party operations**, least&#8209;cost **market clearing**, simplified **AC&nbsp;power&#8209;flow**, and capacitated **network effects**&nbsp;&mdash; plus exogenous **structural change** through user&#8209;defined **scenarios**.
 
 *xeona* was completed in 2014, at which point active development ceased.
 
@@ -16,7 +16,7 @@ The source code, documentation, and development data are deposited here as an hi
 
 ## Overview
 
-*xeona* represents one of the earlier attempts to combine **agent&#8209;based modeling** with classical optimization&#8209;based **energy system modeling**.
+*xeona* represents one of the earlier attempts to combine **agent&#8209;based modeling** with classical optimization&#8209;informed **energy system modeling**.
 
 *xeona* relies on object&#8209;oriented design and analysis (OODA) and was necessarily written from the ground&nbsp;up in a high&#8209;performance general&#8209;purpose programming language.
 
@@ -31,11 +31,12 @@ The source code, documentation, and development data are deposited here as an hi
 *xeona* offers a&nbsp;clear separation of responsibilities between technical characterizations, operator decisioning, and market&#8209;based dispatch.  Figure&nbsp;1 shows the general arrangements.  The implementation of *xeona* includes the following features:
 
 - high&#8209;resolution technical modeling
+- linear AC&nbsp;power&#8209;flow (with phase angles)
 - ability to capture network saturation effects
 - agent&#8209;based decisioning
 - contractual relationships (considered structural)
 - simplified [locational marginal pricing](https://en.wikipedia.org/wiki/Electricity_market#Bid-based,_security-constrained,_economic_dispatch_with_nodal_prices) (*aka* nodal pricing)
-- structural change via exogenous scenarios
+- structural change by means of exogenous scenarios
 
 The system itself did not look ahead but the agents can&nbsp;&mdash; just as in real life.
 
@@ -75,7 +76,7 @@ Related publications:
 
 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width: 0" src="https://i.creativecommons.org/l/by/4.0/88x31.png"/></a><br/>Copyright (c) Robbie Morrison<br/>This file is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
 
-Text last modified <nowrap>15 April 2025</nowrap>.
+Text last modified <nowrap>23 April 2025</nowrap>.
 
 &#9634;
 
