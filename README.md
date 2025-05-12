@@ -37,7 +37,7 @@ The source code, documentation, and development data are deposited here as an hi
 - contractual relationships (considered structural)
 - simplified [locational marginal pricing](https://en.wikipedia.org/wiki/Electricity_market#Bid-based,_security-constrained,_economic_dispatch_with_nodal_prices) (*aka* nodal pricing)
 - structural change by means of exogenous scenarios
-- solver&#8209;agnostic interface (shares functionality with Linopy and similar)
+- solver&#8209;agnostic interface (shares some functionality with Linopy)
 
 The system itself did not look ahead but the agents can&nbsp;&mdash; just as in real life.
 
